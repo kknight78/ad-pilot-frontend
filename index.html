@@ -162,7 +162,6 @@
     <script>
         const SPREADSHEET_ID = '1kgSVMgpWVSFeAAz4M2LpNmIbuhaJKds9gnbsvLdP-t4';
         const SHEET_NAME = 'Feed';
-        const API_KEY = 'YOUR_API_KEY_HERE'; // You'll need to add this
         
         const form = document.getElementById('adForm');
         const submitBtn = document.getElementById('submitBtn');
@@ -238,6 +237,7 @@
             const vin3 = document.getElementById('vin3').value;
             const theme = document.getElementById('theme').value;
             const email = document.getElementById('email').value;
+            const template_id = "TEMP_001";
 
 
             // Show loading state
@@ -258,7 +258,8 @@
         body: JSON.stringify({
             vins: [vin1, vin2, vin3],
             theme: theme,
-            email: email
+            email: email,
+            template_id: template_id
         })
     });
 
@@ -293,4 +294,5 @@
         });
     </script>
 </body>
+
 </html>
