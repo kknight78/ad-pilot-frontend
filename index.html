@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <title>TikTok Ad Generator - Demo</title>
@@ -101,6 +101,11 @@
             padding: 20px;
             color: #666;
         }
+        .avatar-preview {
+            display: inline-block;
+            margin-left: 10px;
+            font-size: 24px;
+        }
     </style>
 </head>
 <body>
@@ -109,45 +114,44 @@
         <p class="subtitle">Generate a video ad for your cars in ~10 minutes</p>
         
         <div class="info">
-            ℹ️ Select 3 vehicles from your inventory and choose a theme. The system will create a professional TikTok ad automatically!
+            ℹ️ Select 3 vehicles from your inventory, choose a spokesperson and theme. The system will create a professional TikTok ad automatically!
         </div>
-
 
         <div id="loadingInventory" class="loading-inventory">
             Loading inventory... ⏳
         </div>
 
-
         <form id="adForm" style="display: none;">
+            <label for="avatar">Spokesperson:</label>
+            <select id="avatar" required>
+                <option value="229bfc03d4d24d5ab7a5c71ce4b10d4b">🎭 Awesome Shad (Professional)</option>
+                <option value="f9bb73f75160463ea82fe93f71592fce">😌 Calm Gary Knight (Trustworthy)</option>
+                <option value="76c34a2c8aa844a082fe01db906aa395">💃 Sexy Kelly, not Kelly (Owner)</option>
+            </select>
+
             <label for="vin1">Vehicle 1:</label>
             <select id="vin1" required>
                 <option value="">Select a vehicle...</option>
             </select>
-
 
             <label for="vin2">Vehicle 2:</label>
             <select id="vin2" required>
                 <option value="">Select a vehicle...</option>
             </select>
 
-
             <label for="vin3">Vehicle 3:</label>
             <select id="vin3" required>
                 <option value="">Select a vehicle...</option>
             </select>
 
-
             <label for="email">Your Email (for video link):</label>
             <input type="email" id="email" placeholder="you@example.com" required>
-
 
             <label for="theme">Ad Theme:</label>
             <input type="text" id="theme" placeholder="e.g., 'colts football', 'holiday special', 'weekend deals'" required>
 
-
             <button type="submit" id="submitBtn">Generate Video Ad 🎬</button>
         </form>
-
 
         <div id="status" class="status"></div>
         
@@ -157,7 +161,6 @@
             <p><a id="downloadLink" href="" download="tiktok-ad.mp4">Download Video</a></p>
         </div>
     </div>
-
 
     <script>
         const SPREADSHEET_ID = '1kgSVMgpWVSFeAAz4M2LpNmIbuhaJKds9gnbsvLdP-t4';
@@ -171,49 +174,38 @@
         const downloadLink = document.getElementById('downloadLink');
         const loadingInventory = document.getElementById('loadingInventory');
 
-
         // Fetch inventory from Google Sheets
         async function loadInventory() {
             try {
-                // Note: For production, you'll need to use the Google Sheets API properly
-                // For now, we'll use a public CSV export or you can set up an API endpoint
-                
-                // Using public CSV export (if sheet is published)
                 const csvUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
                 
                 const response = await fetch(csvUrl);
                 const csvText = await response.text();
                 
-                // Parse CSV
                 const rows = csvText.split('\n').map(row => {
-                    // Simple CSV parsing (handles quoted fields)
                     const matches = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
                     return matches ? matches.map(field => field.replace(/^"|"$/g, '')) : [];
                 });
                 
-                // Skip header row
                 const dataRows = rows.slice(1).filter(row => row.length > 2);
                 
-                // Populate dropdowns
                 const vin1Select = document.getElementById('vin1');
                 const vin2Select = document.getElementById('vin2');
                 const vin3Select = document.getElementById('vin3');
                 
                 dataRows.forEach(row => {
-                    const vin = row[0];  // vehicle_id column
-                    const title = row[2]; // title column
+                    const vin = row[0];
+                    const title = row[2];
                     
                     if (vin && title) {
                         const optionText = `${vin} - ${title}`;
                         
-                        // Add to all three dropdowns
                         vin1Select.add(new Option(optionText, vin));
                         vin2Select.add(new Option(optionText, vin));
                         vin3Select.add(new Option(optionText, vin));
                     }
                 });
                 
-                // Hide loading, show form
                 loadingInventory.style.display = 'none';
                 form.style.display = 'block';
                 
@@ -223,15 +215,12 @@
             }
         }
 
-
-        // Load inventory when page loads
         loadInventory();
-
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Get form values
+            const avatar = document.getElementById('avatar').value;
             const vin1 = document.getElementById('vin1').value;
             const vin2 = document.getElementById('vin2').value;
             const vin3 = document.getElementById('vin3').value;
@@ -239,60 +228,49 @@
             const email = document.getElementById('email').value;
             const template_id = "TEMP_001";
 
-
-            // Show loading state
             submitBtn.disabled = true;
             submitBtn.textContent = 'Generating... ⏳';
             status.className = 'status loading';
             status.textContent = '🎬 Creating your video ad... This will take about 10 minutes. Please wait!';
             videoContainer.style.display = 'none';
 
-
             try {
-    // Call the webhook
-    const response = await fetch('https://corsproxy.io/?https://kelly-ads.app.n8n.cloud/webhook/ad-pilot-draft', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            vins: [vin1, vin2, vin3],
-            theme: theme,
-            email: email,
-            template_id: template_id
-        })
-    });
+                const response = await fetch('https://corsproxy.io/?https://kelly-ads.app.n8n.cloud/webhook/ad-pilot-draft', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        vins: [vin1, vin2, vin3],
+                        theme: theme,
+                        email: email,
+                        template_id: template_id,
+                        avatar_id: avatar
+                    })
+                });
 
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}`);
+                }
 
-    if (!response.ok) {
-        throw new Error(`Server returned ${response.status}`);
-    }
+                const result = await response.json();
+                
+                console.log('Response:', result);
 
-
-    const result = await response.json();
-    
-    console.log('Response:', result); // Debug
-
-
-    // Show success for any valid response
-    status.className = 'status success';
-    status.textContent = result.message || '✅ Video generation started! You\'ll receive an email with your video in about 10 minutes.';
-    
-    // Reset form
-    form.reset();
-    
-} catch (error) {
-    console.error('Error:', error);
-    status.className = 'status error';
-    status.textContent = '❌ Error: ' + error.message + '. Please try again.';
-} finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Generate Video Ad 🎬';
-}
-
-
+                status.className = 'status success';
+                status.textContent = result.message || '✅ Video generation started! You\'ll receive an email with your video in about 10 minutes.';
+                
+                form.reset();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                status.className = 'status error';
+                status.textContent = '❌ Error: ' + error.message + '. Please try again.';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Generate Video Ad 🎬';
+            }
         });
     </script>
 </body>
-
 </html>
