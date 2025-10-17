@@ -139,9 +139,9 @@
                 <label for="avatar">Spokesperson:</label>
                 <select id="avatar" required>
                     <option value="">-- Select Spokesperson --</option>
-                    <option value="229bfc03d4d24d5ab7a5c71ce4b10d4b|bWI0w7QVOZiBvlJQahML|#89be5a">🎭 Awesome Shad</option>
-                    <option value="f9bb73f75160463ea82fe93f71592fce|JE6R2ws7TPZ21FyKshpS|#7fc741">😌 Calm Gary Knight</option>
-                    <option value="5b9c75a2f13e4d60b09bcfdafa7339dd|eezuv0zKVdVTS0jHdxFa|#71a565">💃 Sexy Kelly, not Kelly</option>
+                    <option value="229bfc03d4d24d5ab7a5c71ce4b10d4b|bWI0w7QVOZiBvlJQahML|#89be5a|22">🎭 Awesome Shad</option>
+                    <option value="f9bb73f75160463ea82fe93f71592fce|JE6R2ws7TPZ21FyKshpS|#7fc741|29">😌 Calm Gary Knight</option>
+                    <option value="5b9c75a2f13e4d60b09bcfdafa7339dd|eezuv0zKVdVTS0jHdxFa|#6da264|8">💃 Sexy Kelly, not Kelly</option>
                 </select>
             </div>
             
@@ -245,12 +245,13 @@
             
             // Parse avatar selection (format: "avatar_id|voice_id|chromakey_color")
             const avatarValue = document.getElementById('avatar').value;
-            const [avatar_id, voice_id, chromakey_color] = avatarValue.split('|');
+            const [avatar_id, voice_id, chromakey_color, chromakey_sensitivity] = avatarValue.split('|');
             
             const payload = {
                 avatar_id: avatar_id,
                 voice_id: voice_id,
                 chromakey_color: chromakey_color,
+                chromakey_sensitivity: chromakey_sensitivity,
                 vins: [
                     document.getElementById('vehicle1').value,
                     document.getElementById('vehicle2').value,
@@ -314,4 +315,5 @@
     </script>
 </body>
 </html>
+
 
