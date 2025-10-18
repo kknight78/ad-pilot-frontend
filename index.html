@@ -129,6 +129,11 @@
             border-color: #667eea;
         }
         
+        .add-vehicle:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
         button[type="submit"] {
             width: 100%;
             padding: 16px;
@@ -148,6 +153,11 @@
         
         button[type="submit"]:active {
             transform: translateY(0);
+        }
+        
+        button[type="submit"]:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         
         .status {
@@ -217,23 +227,26 @@
                     <div class="vehicle-group" data-vehicle-num="1">
                         <button type="button" class="remove-vehicle" onclick="removeVehicle(1)">−</button>
                         <select name="vehicle1" required>
-                            <option value="">Select a vehicle...</option>
+                            <option value="">Loading vehicles...</option>
                         </select>
                     </div>
                 </div>
-                <button type="button" class="add-vehicle" onclick="addVehicle()">+ Add Vehicle</button>
+                <button type="button" class="add-vehicle" id="addVehicleBtn" onclick="addVehicle()" disabled>+ Add Vehicle</button>
             </div>
             
-            <button type="submit">Generate Ad</button>
+            <button type="submit" id="submitBtn" disabled>Generate Ad</button>
         </form>
         
         <div id="status" class="status"></div>
     </div>
 
     <script>
+        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1kgSVMgpWVSFeAAz4M2LpNmIbuhaJKds9gnbsvLdP-t4/gviz/tq?tqx=out:json&sheet=Feed';
+        const WEBHOOK_URL = 'https://corsproxy.io/?https://kelly-ads.app.n8n.cloud/webhook/ad-pilot-draft';
+        const MAX_CARS = 5;
+        
         let vehicleCount = 1;
         let inventory = [];
-        const MAX_VEHICLES = 5;
 
         // Template descriptions
         const templateInfo = {
@@ -241,15 +254,43 @@
             'TEMP_002': 'Wacky animated theme hook in Garbage Pail Kids style + car showcase. Maximum scroll-stopping power. Best for: TikTok, Instagram Reels.'
         };
 
-        // Load inventory
+        // Load inventory from Google Sheets
         async function loadInventory() {
             try {
-                const response = await fetch('https://kelly-ads.app.n8n.cloud/webhook/inventory-list');
-                inventory = await response.json();
+                const response = await fetch(SHEET_URL);
+                const text = await response.text();
+                
+                // Parse Google Sheets JSON (remove the prefix)
+                const jsonString = text.substring(47).slice(0, -2);
+                const data = JSON.parse(jsonString);
+                
+                // Extract rows
+                const rows = data.table.rows;
+                inventory = rows.map(row => {
+                    const cells = row.c;
+                    return {
+                        vin: cells[0]?.v || '',
+                        year: cells[1]?.v || '',
+                        make: cells[2]?.v || '',
+                        model: cells[3]?.v || '',
+                        internetPrice: cells[4]?.v || 0,
+                        stockNumber: cells[5]?.v || '',
+                        mileage: cells[6]?.v || 0,
+                        bodyStyle: cells[7]?.v || '',
+                        images: cells[8]?.v ? cells[8].v.split(',') : []
+                    };
+                }).filter(v => v.vin); // Only include rows with VIN
+                
+                console.log(`Loaded ${inventory.length} vehicles`);
                 populateVehicleDropdowns();
+                
+                // Enable form elements
+                document.getElementById('addVehicleBtn').disabled = false;
+                document.getElementById('submitBtn').disabled = false;
+                
             } catch (error) {
                 console.error('Error loading inventory:', error);
-                showStatus('Error loading vehicle inventory', 'error');
+                showStatus('Error loading vehicle inventory. Please refresh the page.', 'error');
             }
         }
 
@@ -275,19 +316,19 @@
                 }
                 
                 // Adjust max vehicles based on template
-                const addButton = document.querySelector('.add-vehicle');
-                if (template === 'TEMP_001') {
-                    // TEMP_001 allows max 3 vehicles
-                    addButton.textContent = '+ Add Vehicle (max 3)';
-                } else {
-                    // TEMP_002 allows max 5 vehicles
-                    addButton.textContent = '+ Add Vehicle (max 5)';
-                }
+                updateAddButtonText();
             } else {
                 templateInfoDiv.classList.add('hidden');
                 themeGroup.classList.add('hidden');
             }
         });
+
+        function updateAddButtonText() {
+            const template = document.getElementById('template').value;
+            const addButton = document.getElementById('addVehicleBtn');
+            const maxVehicles = template === 'TEMP_001' ? 3 : 5;
+            addButton.textContent = `+ Add Vehicle (max ${maxVehicles})`;
+        }
 
         function populateVehicleDropdowns() {
             const selects = document.querySelectorAll('[name^="vehicle"]');
@@ -315,7 +356,7 @@
 
         function addVehicle() {
             const template = document.getElementById('template').value;
-            const maxVehicles = template === 'TEMP_001' ? 3 : 5;
+            const maxVehicles = template === 'TEMP_001' ? 3 : MAX_CARS;
             
             if (vehicleCount >= maxVehicles) {
                 showStatus(`Maximum ${maxVehicles} vehicles allowed for this template`, 'error');
@@ -366,6 +407,12 @@
             const template = formData.get('template');
             const theme = formData.get('theme');
             
+            // Validate template selection
+            if (!template) {
+                showStatus('Please select a template', 'error');
+                return;
+            }
+            
             // Validate theme for TEMP_002
             if (template === 'TEMP_002' && !theme) {
                 showStatus('Theme is required for Animated Theme Showcase template', 'error');
@@ -378,16 +425,25 @@
                 if (vin) vehicles.push(vin);
             }
             
+            if (vehicles.length === 0) {
+                showStatus('Please select at least one vehicle', 'error');
+                return;
+            }
+            
             const payload = {
                 template: template,
                 theme: theme || null,
                 vehicles: vehicles
             };
             
-            showStatus('Generating your ad... This will take 3-4 minutes.', 'loading');
+            console.log('Submitting payload:', payload);
+            showStatus('Generating your ad... This will take 3-4 minutes. ⏱️', 'loading');
+            
+            // Disable submit button
+            document.getElementById('submitBtn').disabled = true;
             
             try {
-                const response = await fetch('https://kelly-ads.app.n8n.cloud/webhook/ad-pilot-draft', {
+                const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -398,12 +454,19 @@
                 const result = await response.json();
                 
                 if (response.ok) {
-                    showStatus(`Success! Your ad is being generated. Check back in a few minutes.`, 'success');
+                    showStatus(`Success! Your ad is being generated. Check back in a few minutes. 🎬`, 'success');
+                    // Re-enable submit after 5 seconds
+                    setTimeout(() => {
+                        document.getElementById('submitBtn').disabled = false;
+                    }, 5000);
                 } else {
                     showStatus(`Error: ${result.message || 'Something went wrong'}`, 'error');
+                    document.getElementById('submitBtn').disabled = false;
                 }
             } catch (error) {
+                console.error('Submission error:', error);
                 showStatus(`Error: ${error.message}`, 'error');
+                document.getElementById('submitBtn').disabled = false;
             }
         });
 
@@ -420,7 +483,7 @@
             }
         }
 
-        // Initialize
+        // Initialize on page load
         loadInventory();
     </script>
 </body>
