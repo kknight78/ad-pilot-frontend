@@ -59,6 +59,7 @@
         }
         
         input[type="text"],
+        input[type="email"],
         select {
             width: 100%;
             padding: 12px;
@@ -69,6 +70,7 @@
         }
         
         input[type="text"]:focus,
+        input[type="email"]:focus,
         select:focus {
             outline: none;
             border-color: #667eea;
@@ -224,8 +226,10 @@
                     Avatar Presenter
                 </label>
                 <select id="avatar" name="avatar" required>
-                    <option value="shadvatar">Shad (Default Male)</option>
-                    <!-- Add more avatars here as they become available -->
+                    <option value="">Select avatar...</option>
+                    <option value="229bfc03d4d24d5ab7a5c71ce4b10d4b|bWI0w7QVOZiBvlJQahML|#89be5a|22">🎭 Awesome Shad</option>
+                    <option value="f9bb73f75160463ea82fe93f71592fce|JE6R2ws7TPZ21FyKshpS|#7fc741|29">😌 Calm Gary Knight</option>
+                    <option value="5b9c75a2f13e4d60b09bcfdafa7339dd|eezuv0zKVdVTS0jHdxFa|#6da264|8">💃 Sexy Kelly, not Kelly</option>
                 </select>
             </div>
             
@@ -243,6 +247,15 @@
                     </div>
                 </div>
                 <button type="button" class="add-vehicle" id="addVehicleBtn" onclick="addVehicle()" disabled>+ Add Vehicle</button>
+            </div>
+
+            <!-- Email -->
+            <div class="form-group">
+                <label for="email">
+                    Email Address
+                    <span class="label-description">For delivery and whitelist verification</span>
+                </label>
+                <input type="email" id="email" name="email" placeholder="your@email.com" required>
             </div>
             
             <button type="submit" id="submitBtn" disabled>Generate Ad</button>
@@ -417,7 +430,8 @@
             const formData = new FormData(e.target);
             const template = formData.get('template');
             const theme = formData.get('theme');
-            const avatar = formData.get('avatar');
+            const avatarValue = formData.get('avatar');
+            const email = formData.get('email');
             
             // Validate template selection
             if (!template) {
@@ -430,6 +444,9 @@
                 showStatus('Theme is required for Animated Theme Showcase template', 'error');
                 return;
             }
+            
+            // Parse avatar (format: avatar_id|voice_id|chromakey_color|chromakey_sensitivity)
+            const [avatar_id, voice_id, chromakey_color, chromakey_sensitivity] = avatarValue.split('|');
             
             const vehicles = [];
             for (let i = 1; i <= vehicleCount; i++) {
@@ -445,7 +462,11 @@
             const payload = {
                 template: template,
                 theme: theme || null,
-                avatar: avatar,
+                avatar_id: avatar_id,
+                voice_id: voice_id,
+                chromakey_color: chromakey_color,
+                chromakey_sensitivity: chromakey_sensitivity,
+                email: email,
                 vehicles: vehicles
             };
             
@@ -467,7 +488,7 @@
                 const result = await response.json();
                 
                 if (response.ok) {
-                    showStatus(`Success! Your ad is being generated. Check back in a few minutes. 🎬`, 'success');
+                    showStatus(`Success! Your ad is being generated. Check your email in a few minutes. 🎬`, 'success');
                     // Re-enable submit after 5 seconds
                     setTimeout(() => {
                         document.getElementById('submitBtn').disabled = false;
