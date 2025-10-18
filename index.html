@@ -214,7 +214,15 @@
                     model: row.c[3]?.v || '',
                     price: row.c[4]?.v || '',
                     mileage: row.c[5]?.v || ''
-                })).filter(v => v.vin);
+                }))
+                .filter(v => {
+                    // Filter out empty rows, header rows, and template rows
+                    return v.vin && 
+                           v.vin.length > 5 && // VINs are usually 17 characters
+                           !v.vin.includes('$') && // No template variables
+                           !v.vin.toLowerCase().includes('vin') && // Not a header
+                           v.year && !isNaN(v.year); // Has valid year
+                });
                 
                 populateDropdowns(vehicles);
             } catch (error) {
@@ -315,5 +323,6 @@
     </script>
 </body>
 </html>
+
 
 
