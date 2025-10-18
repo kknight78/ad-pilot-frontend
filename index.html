@@ -217,6 +217,17 @@
                 </label>
                 <input type="text" id="theme" name="theme" placeholder="Enter your theme">
             </div>
+
+            <!-- Avatar Selection -->
+            <div class="form-group">
+                <label for="avatar">
+                    Avatar Presenter
+                </label>
+                <select id="avatar" name="avatar" required>
+                    <option value="shadvatar">Shad (Default Male)</option>
+                    <!-- Add more avatars here as they become available -->
+                </select>
+            </div>
             
             <!-- Vehicle Selection -->
             <div class="form-group">
@@ -406,6 +417,7 @@
             const formData = new FormData(e.target);
             const template = formData.get('template');
             const theme = formData.get('theme');
+            const avatar = formData.get('avatar');
             
             // Validate template selection
             if (!template) {
@@ -433,6 +445,7 @@
             const payload = {
                 template: template,
                 theme: theme || null,
+                avatar: avatar,
                 vehicles: vehicles
             };
             
