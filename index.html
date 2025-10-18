@@ -216,14 +216,14 @@
                     mileage: row.c[5]?.v || ''
                 }))
                 .filter(v => {
-                    // Filter out empty rows, header rows, and template rows
+                    // Filter out only template/invalid rows
                     return v.vin && 
-                           v.vin.length > 5 && // VINs are usually 17 characters
-                           !v.vin.includes('$') && // No template variables
-                           !v.vin.toLowerCase().includes('vin') && // Not a header
-                           v.year && !isNaN(v.year); // Has valid year
+                           !v.vin.includes('$') && // No template variables like "$make"
+                           !v.vin.toLowerCase().includes('title') && // Not "vin title description"
+                           v.make && v.make !== '$make'; // Has real make data
                 });
                 
+                console.log('Loaded vehicles:', vehicles.length); // Debug
                 populateDropdowns(vehicles);
             } catch (error) {
                 console.error('Error loading vehicles:', error);
@@ -323,6 +323,7 @@
     </script>
 </body>
 </html>
+
 
 
 
