@@ -92,6 +92,45 @@
             transform: none;
         }
         
+        .add-car-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            padding: 10px;
+            font-size: 16px;
+            margin-top: -10px;
+        }
+        
+        .add-car-btn:hover {
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .vehicle-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .vehicle-item {
+            position: relative;
+        }
+        
+        .remove-car-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+        
         .loading {
             display: none;
             text-align: center;
@@ -146,24 +185,9 @@
             </div>
             
             <div>
-                <label for="vehicle1">Vehicle 1:</label>
-                <select id="vehicle1" required>
-                    <option value="">-- Loading vehicles... --</option>
-                </select>
-            </div>
-            
-            <div>
-                <label for="vehicle2">Vehicle 2:</label>
-                <select id="vehicle2" required>
-                    <option value="">-- Loading vehicles... --</option>
-                </select>
-            </div>
-            
-            <div>
-                <label for="vehicle3">Vehicle 3:</label>
-                <select id="vehicle3" required>
-                    <option value="">-- Loading vehicles... --</option>
-                </select>
+                <label>Vehicles:</label>
+                <div id="vehicleContainer" class="vehicle-group"></div>
+                <button type="button" class="add-car-btn" id="addCarBtn">+ Add Car</button>
             </div>
             
             <div>
@@ -199,6 +223,10 @@
     <script>
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1kgSVMgpWVSFeAAz4M2LpNmIbuhaJKds9gnbsvLdP-t4/gviz/tq?tqx=out:json&sheet=Feed';
         const WEBHOOK_URL = 'https://corsproxy.io/?https://kelly-ads.app.n8n.cloud/webhook/ad-pilot-draft';
+        const MAX_CARS = 5;
+        
+        let allVehicles = [];
+        let vehicleCount = 0;
         
         // Load vehicles from Google Sheets
         async function loadVehicles() {
@@ -207,7 +235,7 @@
                 const text = await response.text();
                 const json = JSON.parse(text.substring(47).slice(0, -2));
                 
-                const vehicles = json.table.rows.map(row => ({
+                allVehicles = json.table.rows.map(row => ({
                     vin: row.c[0]?.v || '',
                     year: row.c[1]?.v || '',
                     make: row.c[2]?.v || '',
@@ -216,58 +244,158 @@
                     mileage: row.c[5]?.v || ''
                 }))
                 .filter(v => {
-                    // Filter out only template/invalid rows
                     return v.vin && 
-                           !v.vin.includes('$') && // No template variables like "$make"
-                           !v.vin.toLowerCase().includes('title') && // Not "vin title description"
-                           v.make && v.make !== '$make'; // Has real make data
+                           v.vin.length > 5 &&
+                           !v.vin.includes('$') &&
+                           !v.vin.toLowerCase().includes('vin') &&
+                           v.year && !isNaN(v.year);
                 });
                 
-                console.log('Loaded vehicles:', vehicles.length); // Debug
-                populateDropdowns(vehicles);
+                // Add first vehicle dropdown
+                addVehicleDropdown();
+                
             } catch (error) {
                 console.error('Error loading vehicles:', error);
                 alert('Failed to load vehicles. Please refresh the page.');
             }
         }
         
-        function populateDropdowns(vehicles) {
-            const dropdowns = ['vehicle1', 'vehicle2', 'vehicle3'];
+        function getSelectedVINs() {
+            const selects = document.querySelectorAll('.vehicle-select');
+            return Array.from(selects).map(s => s.value).filter(v => v);
+        }
+        
+        function addVehicleDropdown() {
+            if (vehicleCount >= MAX_CARS) return;
             
-            dropdowns.forEach(id => {
-                const select = document.getElementById(id);
-                select.innerHTML = '<option value="">-- Select Vehicle --</option>';
-                
-                vehicles.forEach(v => {
+            vehicleCount++;
+            const container = document.getElementById('vehicleContainer');
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = 'vehicle-item';
+            wrapper.dataset.vehicleNum = vehicleCount;
+            
+            const select = document.createElement('select');
+            select.className = 'vehicle-select';
+            select.required = true;
+            select.dataset.vehicleNum = vehicleCount;
+            
+            // Add placeholder option
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = `-- Select Vehicle ${vehicleCount} --`;
+            select.appendChild(placeholder);
+            
+            // Add vehicle options (excluding already selected)
+            const selectedVINs = getSelectedVINs();
+            allVehicles.forEach(v => {
+                if (!selectedVINs.includes(v.vin)) {
                     const option = document.createElement('option');
                     option.value = v.vin;
                     option.textContent = `${v.year} ${v.make} ${v.model} - $${v.price}`;
                     select.appendChild(option);
+                }
+            });
+            
+            // Update other dropdowns when this one changes
+            select.addEventListener('change', updateAllDropdowns);
+            
+            wrapper.appendChild(select);
+            
+            // Add remove button (except for first vehicle)
+            if (vehicleCount > 1) {
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'remove-car-btn';
+                removeBtn.textContent = '×';
+                removeBtn.onclick = () => removeVehicleDropdown(wrapper);
+                wrapper.appendChild(removeBtn);
+            }
+            
+            container.appendChild(wrapper);
+            
+            // Update button visibility
+            updateAddButtonVisibility();
+        }
+        
+        function removeVehicleDropdown(wrapper) {
+            wrapper.remove();
+            vehicleCount--;
+            
+            // Renumber remaining vehicles
+            const items = document.querySelectorAll('.vehicle-item');
+            items.forEach((item, index) => {
+                const num = index + 1;
+                item.dataset.vehicleNum = num;
+                const select = item.querySelector('select');
+                select.dataset.vehicleNum = num;
+                const placeholder = select.querySelector('option[value=""]');
+                if (placeholder) {
+                    placeholder.textContent = `-- Select Vehicle ${num} --`;
+                }
+            });
+            
+            vehicleCount = items.length;
+            updateAllDropdowns();
+            updateAddButtonVisibility();
+        }
+        
+        function updateAllDropdowns() {
+            const selectedVINs = getSelectedVINs();
+            const selects = document.querySelectorAll('.vehicle-select');
+            
+            selects.forEach(select => {
+                const currentValue = select.value;
+                
+                // Clear and rebuild options
+                const placeholder = select.querySelector('option[value=""]');
+                select.innerHTML = '';
+                select.appendChild(placeholder);
+                
+                allVehicles.forEach(v => {
+                    if (!selectedVINs.includes(v.vin) || v.vin === currentValue) {
+                        const option = document.createElement('option');
+                        option.value = v.vin;
+                        option.textContent = `${v.year} ${v.make} ${v.model} - $${v.price}`;
+                        if (v.vin === currentValue) option.selected = true;
+                        select.appendChild(option);
+                    }
                 });
             });
         }
+        
+        function updateAddButtonVisibility() {
+            const addBtn = document.getElementById('addCarBtn');
+            addBtn.style.display = vehicleCount >= MAX_CARS ? 'none' : 'block';
+        }
+        
+        document.getElementById('addCarBtn').addEventListener('click', addVehicleDropdown);
         
         // Handle form submission
         document.getElementById('adForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Parse avatar selection (format: "avatar_id|voice_id|chromakey_color")
+            // Parse avatar selection
             const avatarValue = document.getElementById('avatar').value;
             const [avatar_id, voice_id, chromakey_color, chromakey_sensitivity] = avatarValue.split('|');
+            
+            // Get all selected VINs
+            const vins = getSelectedVINs();
+            
+            if (vins.length === 0) {
+                alert('Please select at least one vehicle');
+                return;
+            }
             
             const payload = {
                 avatar_id: avatar_id,
                 voice_id: voice_id,
                 chromakey_color: chromakey_color,
                 chromakey_sensitivity: chromakey_sensitivity,
-                vins: [
-                    document.getElementById('vehicle1').value,
-                    document.getElementById('vehicle2').value,
-                    document.getElementById('vehicle3').value
-                ],
+                vins: vins,
                 theme: document.getElementById('theme').value,
                 email: document.getElementById('email').value,
-                template_id: 'TEMP_001'
+                template_id: 'TEMP_002' // Hardcoded for now
             };
             
             console.log('Sending payload:', payload);
@@ -302,6 +430,11 @@
                     document.getElementById('adForm').reset();
                     document.getElementById('adForm').style.display = 'block';
                     document.getElementById('success').style.display = 'none';
+                    
+                    // Reset to single vehicle dropdown
+                    document.getElementById('vehicleContainer').innerHTML = '';
+                    vehicleCount = 0;
+                    addVehicleDropdown();
                 }, 3000);
                 
             } catch (error) {
@@ -323,7 +456,3 @@
     </script>
 </body>
 </html>
-
-
-
-
