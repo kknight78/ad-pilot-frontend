@@ -94,9 +94,11 @@
         
         .add-car-btn {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            padding: 10px;
+            padding: 12px 20px;  /* More padding */
             font-size: 16px;
-            margin-top: -10px;
+            margin-top: 10px;  /* Add some space */
+            width: auto;  /* Don't stretch full width */
+            display: inline-block;
         }
         
         .add-car-btn:hover {
@@ -117,18 +119,24 @@
             position: absolute;
             top: -8px;
             right: -8px;
-            background: #ef4444;
+            background: #1f2937;  /* Black instead of red */
             color: white;
             border: none;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            font-size: 16px;
+            width: 28px;  /* Slightly bigger */
+            height: 28px;
+            font-size: 20px;
+            line-height: 1;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .remove-car-btn:hover {
+            background: #374151;  /* Lighter on hover */
         }
         
         .loading {
@@ -306,7 +314,7 @@
                 const removeBtn = document.createElement('button');
                 removeBtn.type = 'button';
                 removeBtn.className = 'remove-car-btn';
-                removeBtn.textContent = '×';
+                removeBtn.textContent = '-';
                 removeBtn.onclick = () => removeVehicleDropdown(wrapper);
                 wrapper.appendChild(removeBtn);
             }
@@ -455,4 +463,5 @@
     </script>
 </body>
 </html>
+
 
