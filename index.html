@@ -439,35 +439,29 @@
                 return;
             }
             
-            // Validate theme for TEMP_002
-            if (template === 'TEMP_002' && !theme) {
-                showStatus('Theme is required for Animated Theme Showcase template', 'error');
-                return;
-            }
-            
             // Parse avatar (format: avatar_id|voice_id|chromakey_color|chromakey_sensitivity)
             const [avatar_id, voice_id, chromakey_color, chromakey_sensitivity] = avatarValue.split('|');
             
-            const vehicles = [];
+            const vins = [];
             for (let i = 1; i <= vehicleCount; i++) {
                 const vin = formData.get(`vehicle${i}`);
-                if (vin) vehicles.push(vin);
+                if (vin) vins.push(vin);
             }
             
-            if (vehicles.length === 0) {
+            if (vins.length === 0) {
                 showStatus('Please select at least one vehicle', 'error');
                 return;
             }
             
             const payload = {
-                template: template,
-                theme: theme || null,
+                template_id: template,  // ✅ Changed
+                theme: theme,
                 avatar_id: avatar_id,
                 voice_id: voice_id,
                 chromakey_color: chromakey_color,
                 chromakey_sensitivity: chromakey_sensitivity,
                 email: email,
-                vehicles: vehicles
+                vins: vins  // ✅ Changed
             };
             
             console.log('Submitting payload:', payload);
@@ -503,7 +497,6 @@
                 document.getElementById('submitBtn').disabled = false;
             }
         });
-
         function showStatus(message, type) {
             const statusDiv = document.getElementById('status');
             statusDiv.textContent = message;
@@ -522,3 +515,4 @@
     </script>
 </body>
 </html>
+
