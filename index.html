@@ -244,11 +244,10 @@
                     mileage: row.c[5]?.v || ''
                 }))
                 .filter(v => {
+                    // Only filter out obvious bad rows
                     return v.vin && 
-                           v.vin.length > 5 &&
                            !v.vin.includes('$') &&
-                           !v.vin.toLowerCase().includes('vin') &&
-                           v.year && !isNaN(v.year);
+                           !v.vin.toLowerCase().includes('title');
                 });
                 
                 // Add first vehicle dropdown
@@ -456,3 +455,4 @@
     </script>
 </body>
 </html>
+
