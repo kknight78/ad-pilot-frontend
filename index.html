@@ -75,14 +75,28 @@
             outline: none;
             border-color: #667eea;
         }
-        
-        .template-info {
-            background: #f5f5f5;
+
+        /* Checkbox styling */
+        .checkbox-group {
+            margin-left: 20px;
             padding: 15px;
+            border-left: 3px solid #667eea;
+            background: #f8f9ff;
             border-radius: 8px;
             margin-top: 10px;
-            font-size: 14px;
-            color: #666;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            cursor: pointer;
         }
         
         .vehicle-group {
@@ -198,99 +212,99 @@
         <p class="subtitle">Generate TikTok car ads with AI</p>
         
         <form id="adForm">
-            <!-- Template Selection -->
+            <!-- Theme (always visible, optional) -->
             <div class="form-group">
-                <label for="template">
-                    Select Template
+                <label for="theme">
+                    Theme (Optional)
+                    <span class="label-description">e.g., Summer Blowout, Back to School, Harvest Deals</span>
                 </label>
-                <select id="template" name="template" required>
-                    <option value="">Choose a template...</option>
-                    <option value="TEMP_001">Clean Professional Showcase</option>
-                    <option value="TEMP_002">Animated Theme Showcase</option>
-                </select>
-                <div id="templateInfo" class="template-info hidden"></div>
+                <input type="text" id="theme" name="theme" placeholder="Leave blank for generic ad">
             </div>
 
-            <!-- Theme (only for TEMP_002) -->
-            <div class="form-group hidden" id="themeGroup">
-                <label for="theme">
-                    Theme
-                    <span class="label-description">e.g., Muscle Cars Monday, Truck Month, Family SUV Sale</span>
+            <!-- Include Animation Checkbox (only visible when theme provided) -->
+            <div class="checkbox-group hidden" id="animationGroup">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="includeAnimation" name="include_animation" value="true">
+                    <span>
+                        <strong>Include theme animation</strong>
+                        <div class="label-description">Adds a 2-second animated intro based on your theme</div>
+                    </span>
                 </label>
-                <input type="text" id="theme" name="theme" placeholder="Enter your theme">
             </div>
 
             <!-- Avatar Selection -->
             <div class="form-group">
                 <label for="avatar">
-                    Avatar Presenter
+                    Select Avatar & Voice
                 </label>
                 <select id="avatar" name="avatar" required>
-                    <option value="">Select avatar...</option>
-                    <option value="229bfc03d4d24d5ab7a5c71ce4b10d4b|bWI0w7QVOZiBvlJQahML|#89be5a|22">🎭 Awesome Shad</option>
-                    <option value="f9bb73f75160463ea82fe93f71592fce|PLIIMyTPQ4vQTTqSCAx9|#7fc741|29">😌 Calm Gary Knight</option>
-                    <option value="5b9c75a2f13e4d60b09bcfdafa7339dd|eezuv0zKVdVTS0jHdxFa|#6da264|8">💃 Sexy Kelly, not Kelly</option>
+                    <option value="">Choose an avatar...</option>
+                    <option value="229bfc03d4d24d5ab7a5c71ce4b10d4b|bWI0w7QVOZiBvlJQahML|#89be5a|22">Dad (Professional Male)</option>
                 </select>
-            </div>
-            
-            <!-- Vehicle Selection -->
-            <div class="form-group">
-                <label>
-                    Select Vehicles (1-5)
-                </label>
-                <div id="vehicleContainer">
-                    <div class="vehicle-group" data-vehicle-num="1">
-                        <button type="button" class="remove-vehicle" onclick="removeVehicle(1)">−</button>
-                        <select name="vehicle1" required>
-                            <option value="">Loading vehicles...</option>
-                        </select>
-                    </div>
-                </div>
-                <button type="button" class="add-vehicle" id="addVehicleBtn" onclick="addVehicle()" disabled>+ Add Vehicle</button>
             </div>
 
             <!-- Email -->
             <div class="form-group">
                 <label for="email">
                     Email Address
-                    <span class="label-description">For delivery and whitelist verification</span>
+                    <span class="label-description">We'll send the finished video here</span>
                 </label>
-                <input type="email" id="email" name="email" placeholder="your@email.com" required>
+                <input type="email" id="email" name="email" required placeholder="your.email@example.com">
             </div>
-            
-            <button type="submit" id="submitBtn" disabled>Generate Ad</button>
+
+            <!-- Vehicles -->
+            <div class="form-group">
+                <label>Vehicles (1-5)</label>
+                <div id="vehicleContainer">
+                    <!-- First vehicle group added by default -->
+                </div>
+                <button type="button" id="addVehicleBtn" class="add-vehicle" onclick="addVehicle()" disabled>
+                    + Add Vehicle (max 5)
+                </button>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" id="submitBtn" disabled>
+                🚀 Generate Ad
+            </button>
+
+            <!-- Status Messages -->
+            <div id="status" class="status"></div>
         </form>
-        
-        <div id="status" class="status"></div>
     </div>
 
     <script>
-        const SHEET_URL = 'https://docs.google.com/spreadsheets/d/1kgSVMgpWVSFeAAz4M2LpNmIbuhaJKds9gnbsvLdP-t4/gviz/tq?tqx=out:json&sheet=Feed';
         const WEBHOOK_URL = 'https://corsproxy.io/?https://kelly-ads.app.n8n.cloud/webhook/ad-pilot-draft';
+        const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1TFqvX8ViUn1nfUqCnpSxOH-a9p0A2ZBMS1xYyA1wuOo/edit?gid=0#gid=0';
         const MAX_CARS = 5;
         
-        let vehicleCount = 1;
+        let vehicleCount = 0;
         let inventory = [];
 
-        // Template descriptions
-        const templateInfo = {
-            'TEMP_001': 'Straightforward car showcase with avatar presenter. No gimmicks, just professional presentation. Best for: YouTube, longer-form content.',
-            'TEMP_002': 'Wacky animated theme hook in Garbage Pail Kids style + car showcase. Maximum scroll-stopping power. Best for: TikTok, Instagram Reels.'
-        };
+        // Show/hide animation checkbox based on theme
+        const themeInput = document.getElementById('theme');
+        const animationGroup = document.getElementById('animationGroup');
+        const animationCheckbox = document.getElementById('includeAnimation');
+        
+        themeInput.addEventListener('input', function() {
+            const hasTheme = this.value.trim() !== '';
+            
+            if (hasTheme) {
+                animationGroup.classList.remove('hidden');
+            } else {
+                animationGroup.classList.add('hidden');
+                animationCheckbox.checked = false; // Uncheck if theme removed
+            }
+        });
 
-        // Load inventory from Google Sheets
         async function loadInventory() {
             try {
-                const response = await fetch(SHEET_URL);
+                const sheetId = INVENTORY_SHEET.match(/\/d\/([a-zA-Z0-9-_]+)/)[1];
+                const response = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`);
                 const text = await response.text();
+                const json = JSON.parse(text.substr(47).slice(0, -2));
                 
-                // Parse Google Sheets JSON (remove the prefix)
-                const jsonString = text.substring(47).slice(0, -2);
-                const data = JSON.parse(jsonString);
-                
-                // Extract rows
-                const rows = data.table.rows;
-                inventory = rows.map(row => {
+                inventory = json.table.rows.slice(1).map(row => {
                     const cells = row.c;
                     return {
                         vin: cells[0]?.v || '',
@@ -303,10 +317,12 @@
                         bodyStyle: cells[7]?.v || '',
                         images: cells[8]?.v ? cells[8].v.split(',') : []
                     };
-                }).filter(v => v.vin); // Only include rows with VIN
+                }).filter(v => v.vin);
                 
                 console.log(`Loaded ${inventory.length} vehicles`);
-                populateVehicleDropdowns();
+                
+                // Add first vehicle by default
+                addVehicle();
                 
                 // Enable form elements
                 document.getElementById('addVehicleBtn').disabled = false;
@@ -316,42 +332,6 @@
                 console.error('Error loading inventory:', error);
                 showStatus('Error loading vehicle inventory. Please refresh the page.', 'error');
             }
-        }
-
-        // Template selection handler
-        document.getElementById('template').addEventListener('change', function() {
-            const template = this.value;
-            const themeGroup = document.getElementById('themeGroup');
-            const templateInfoDiv = document.getElementById('templateInfo');
-            
-            if (template) {
-                // Show template description
-                templateInfoDiv.textContent = templateInfo[template];
-                templateInfoDiv.classList.remove('hidden');
-                
-                // Show/hide theme field based on template
-                if (template === 'TEMP_002') {
-                    themeGroup.classList.remove('hidden');
-                    document.getElementById('theme').required = true;
-                } else {
-                    themeGroup.classList.add('hidden');
-                    document.getElementById('theme').required = false;
-                    document.getElementById('theme').value = '';
-                }
-                
-                // Adjust max vehicles based on template
-                updateAddButtonText();
-            } else {
-                templateInfoDiv.classList.add('hidden');
-                themeGroup.classList.add('hidden');
-            }
-        });
-
-        function updateAddButtonText() {
-            const template = document.getElementById('template').value;
-            const addButton = document.getElementById('addVehicleBtn');
-            const maxVehicles = template === 'TEMP_001' ? 3 : 5;
-            addButton.textContent = `+ Add Vehicle (max ${maxVehicles})`;
         }
 
         function populateVehicleDropdowns() {
@@ -379,11 +359,8 @@
         }
 
         function addVehicle() {
-            const template = document.getElementById('template').value;
-            const maxVehicles = template === 'TEMP_001' ? 3 : MAX_CARS;
-            
-            if (vehicleCount >= maxVehicles) {
-                showStatus(`Maximum ${maxVehicles} vehicles allowed for this template`, 'error');
+            if (vehicleCount >= MAX_CARS) {
+                showStatus(`Maximum ${MAX_CARS} vehicles allowed`, 'error');
                 return;
             }
             
@@ -428,16 +405,10 @@
             e.preventDefault();
             
             const formData = new FormData(e.target);
-            const template = formData.get('template');
-            const theme = formData.get('theme');
+            const theme = formData.get('theme') || '';
+            const includeAnimation = formData.get('include_animation') === 'true';
             const avatarValue = formData.get('avatar');
             const email = formData.get('email');
-            
-            // Validate template selection
-            if (!template) {
-                showStatus('Please select a template', 'error');
-                return;
-            }
             
             // Parse avatar (format: avatar_id|voice_id|chromakey_color|chromakey_sensitivity)
             const [avatar_id, voice_id, chromakey_color, chromakey_sensitivity] = avatarValue.split('|');
@@ -454,14 +425,15 @@
             }
             
             const payload = {
-                template_id: template,  // ✅ Changed
+                template_id: 'TEMP_001',  // Always use unified template
                 theme: theme,
+                include_animation: includeAnimation,
                 avatar_id: avatar_id,
                 voice_id: voice_id,
                 chromakey_color: chromakey_color,
                 chromakey_sensitivity: chromakey_sensitivity,
                 email: email,
-                vins: vins  // ✅ Changed
+                vins: vins
             };
             
             console.log('Submitting payload:', payload);
@@ -497,6 +469,7 @@
                 document.getElementById('submitBtn').disabled = false;
             }
         });
+
         function showStatus(message, type) {
             const statusDiv = document.getElementById('status');
             statusDiv.textContent = message;
@@ -515,5 +488,3 @@
     </script>
 </body>
 </html>
-
-
