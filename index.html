@@ -221,10 +221,10 @@
                 <input type="text" id="theme" name="theme" placeholder="Leave blank for generic ad">
             </div>
 
-            <!-- Include Animation Checkbox (only visible when theme provided) -->
-            <div class="checkbox-group hidden" id="animationGroup">
+            <!-- Include Animation Checkbox (HIDDEN - coming soon!) -->
+            <div class="checkbox-group hidden" id="animationGroup" style="display: none !important;">
                 <label class="checkbox-label">
-                    <input type="checkbox" id="includeAnimation" name="include_animation" value="true">
+                    <input type="checkbox" id="includeAnimation" name="include_animation" value="false">
                     <span>
                         <strong>Include theme animation</strong>
                         <div class="label-description">Adds a 2-second animated intro based on your theme</div>
@@ -277,33 +277,34 @@
 
     <script>
         const WEBHOOK_URL = 'https://corsproxy.io/?https://kelly-ads.app.n8n.cloud/webhook/ad-pilot-draft';
-        const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1kgSVMgpWVSFeAAz4M2LpNmIbuhaJKds9gnbsvLdP-t4/gviz/tq?tqx=out:json&sheet=Feed';
+        const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1TFqvX8ViUn1nfUqCnpSxOH-a9p0A2ZBMS1xYyA1wuOo/edit?gid=0#gid=0';
         const MAX_CARS = 5;
         
         let vehicleCount = 0;
         let inventory = [];
 
-        // Show/hide animation checkbox based on theme
-        const themeInput = document.getElementById('theme');
-        const animationGroup = document.getElementById('animationGroup');
-        const animationCheckbox = document.getElementById('includeAnimation');
-        
-        themeInput.addEventListener('input', function() {
-            const hasTheme = this.value.trim() !== '';
-            
-            if (hasTheme) {
-                animationGroup.classList.remove('hidden');
-            } else {
-                animationGroup.classList.add('hidden');
-                animationCheckbox.checked = false; // Uncheck if theme removed
-            }
-        });
+        // Animation option hidden for now - coming soon!
+        // (Theme still works to influence the script)
 
         async function loadInventory() {
             try {
                 const sheetId = INVENTORY_SHEET.match(/\/d\/([a-zA-Z0-9-_]+)/)[1];
-                const response = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`);
+                const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+                
+                console.log('Loading inventory from:', url);
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    throw new Error(`Sheet not accessible (${response.status}). Please check the sheet URL and permissions.`);
+                }
+                
                 const text = await response.text();
+                
+                // Check if we got valid JSONP response
+                if (!text.startsWith('google.visualization.Query.setResponse(')) {
+                    throw new Error('Invalid response format from Google Sheets. Check sheet permissions.');
+                }
+                
                 const json = JSON.parse(text.substr(47).slice(0, -2));
                 
                 inventory = json.table.rows.slice(1).map(row => {
@@ -321,7 +322,7 @@
                     };
                 }).filter(v => v.vin);
                 
-                console.log(`Loaded ${inventory.length} vehicles`);
+                console.log(`✅ Loaded ${inventory.length} vehicles`);
                 
                 // Add first vehicle by default
                 addVehicle();
@@ -332,7 +333,12 @@
                 
             } catch (error) {
                 console.error('Error loading inventory:', error);
-                showStatus('Error loading vehicle inventory. Please refresh the page.', 'error');
+                showStatus(`⚠️ ${error.message}`, 'error');
+                
+                // Still enable the form so users can try manual entry if needed
+                addVehicle();
+                document.getElementById('addVehicleBtn').disabled = false;
+                document.getElementById('submitBtn').disabled = false;
             }
         }
 
@@ -490,4 +496,3 @@
     </script>
 </body>
 </html>
-
