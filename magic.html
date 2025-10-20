@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic Hour Style Tester</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .preset-btn {
+            padding: 10px;
+            background: #f0f0f0;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .preset-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        button[type="submit"] {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        button[type="submit"]:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 8px;
+            display: none;
+        }
+        .result.show {
+            display: block;
+        }
+        .result video {
+            width: 100%;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .result pre {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+        .note {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Magic Hour Style Tester</h1>
+        <p class="subtitle">Test different prompt styles and see what Magic Hour generates</p>
+        
+        <form id="testForm">
+            <div class="form-group">
+                <label>Quick Presets:</label>
+                <div class="preset-buttons">
+                    <button type="button" class="preset-btn" onclick="loadPreset('pixar')">🎬 Pixar Dog</button>
+                    <button type="button" class="preset-btn" onclick="loadPreset('popart')">💥 Pop Art Dog</button>
+                    <button type="button" class="preset-btn" onclick="loadPreset('neon')">🌃 Neon Dog</button>
+                    <button type="button" class="preset-btn" onclick="loadPreset('mascot')">🐶 Mascot Dog</button>
+                    <button type="button" class="preset-btn" onclick="loadPreset('cinematic')">📸 Cinematic Dog</button>
+                    <button type="button" class="preset-btn" onclick="loadPreset('flat')">🎨 Flat Design Dog</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="style">Style Name (for reference):</label>
+                <select id="style" name="style">
+                    <option value="pixar">3D Cartoon (Pixar)</option>
+                    <option value="popart">Pop Art (Comic)</option>
+                    <option value="neon">Neon Glow (Synthwave)</option>
+                    <option value="mascot">Cute Mascot</option>
+                    <option value="cinematic">Cinematic</option>
+                    <option value="flat">Flat Design</option>
+                    <option value="custom">Custom</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="prompt">Prompt:</label>
+                <textarea id="prompt" name="prompt" placeholder="Enter your Magic Hour prompt here..." required></textarea>
+                <div class="note">Edit the preset or write your own!</div>
+            </div>
+
+            <button type="submit" id="submitBtn">🚀 Generate Video</button>
+        </form>
+
+        <div id="result" class="result">
+            <h3>Result:</h3>
+            <div id="resultContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const WEBHOOK_URL = 'https://kelly-ads.app.n8n.cloud/webhook-test/magic-hour-test';
+
+        const presets = {
+            pixar: `3D rendered cartoon golden retriever puppy, vibrant colors, cute and friendly, Pixar style animation, smooth glossy finish, big expressive eyes, happy expression, simple solid blue background, professional lighting, high quality digital render`,
+            
+            popart: `Bold pop art illustration of a golden retriever, comic book style, ben-day dots pattern, bright primary colors (red, yellow, blue), thick black outlines, retro 1960s advertisement style, Roy Lichtenstein inspired, 'WOOF!' text burst, vintage comic aesthetic`,
+            
+            neon: `Neon glowing outline of a golden retriever, cyberpunk style, electric bright purple and cyan colors, dark background with bokeh lights, 80s aesthetic, synthwave vibe, glowing edges, futuristic feel, dramatic backlighting, vapor wave style`,
+            
+            mascot: `Adorable friendly golden retriever mascot character, cute cartoon style with oversized head, huge sparkling eyes, cheerful smile, simple rounded shapes, fun and approachable design, wearing a bandana, family-friendly, corporate mascot style, clean vector-like appearance, solid color background`,
+            
+            cinematic: `Cinematic portrait of a majestic golden retriever, dramatic studio lighting, reflective black surface below, premium feel, professional photography, high contrast, shallow depth of field, bokeh background, award-winning pet photography, luxury aesthetic, soft rim lighting`,
+            
+            flat: `Minimalist flat design illustration of a golden retriever, geometric shapes, limited color palette (warm oranges and yellows), simple clean lines, modern graphic design style, negative space, contemporary art, trendy and professional, flat colors no gradients`
+        };
+
+        function loadPreset(style) {
+            document.getElementById('style').value = style;
+            document.getElementById('prompt').value = presets[style];
+        }
+
+        // Load first preset by default
+        loadPreset('pixar');
+
+        document.getElementById('testForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const style = document.getElementById('style').value;
+            const prompt = document.getElementById('prompt').value;
+
+            const submitBtn = document.getElementById('submitBtn');
+            const resultDiv = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+
+            submitBtn.disabled = true;
+            resultDiv.classList.add('show');
+            resultContent.innerHTML = '<div class="loading">⏳ Generating video... This may take 30-60 seconds...</div>';
+
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        style: style,
+                        prompt: prompt
+                    })
+                });
+
+                const result = await response.json();
+                console.log('Result:', result);
+
+                let html = `<strong>Style:</strong> ${result.style}<br>`;
+                html += `<strong>Status:</strong> ${result.status}<br>`;
+                html += `<strong>Timestamp:</strong> ${result.timestamp}<br><br>`;
+
+                if (result.video_url) {
+                    html += `<video controls autoplay loop><source src="${result.video_url}" type="video/mp4"></video>`;
+                    html += `<br><br><a href="${result.video_url}" target="_blank">Open video in new tab</a>`;
+                } else {
+                    html += `<p>Status: ${result.status}</p>`;
+                    html += `<p>Video may still be processing. Check the raw response below.</p>`;
+                }
+
+                html += `<br><br><strong>Raw Response:</strong><pre>${JSON.stringify(result.raw_response, null, 2)}</pre>`;
+
+                resultContent.innerHTML = html;
+
+            } catch (error) {
+                console.error('Error:', error);
+                resultContent.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
