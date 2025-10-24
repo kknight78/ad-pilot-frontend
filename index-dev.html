@@ -357,16 +357,17 @@
                 const text = await response.text();
                 const json = JSON.parse(text.substr(47).slice(0, -2));
                 
-                inventory = json.table.rows.slice(1).map(row => {
-                    const cells = row.c;
-                    return {
-                        vin: cells[0]?.v || '',
-                        year: cells[1]?.v || '',
-                        make: cells[2]?.v || '',
-                        model: cells[3]?.v || '',
-                        price: cells[4]?.v || ''
-                    };
-                }).filter(car => car.vin && car.year && car.make && car.model);
+               inventory = json.table.rows.slice(1).map(row => {
+                const cells = row.c;
+                return {
+                    // Corrected Indices
+                    vin: cells[1]?.v || '',      // Column B
+                    make: cells[4]?.v || '',     // Column E
+                    model: cells[5]?.v || '',    // Column F
+                    year: cells[6]?.v || '',     // Column G
+                    price: cells[14]?.v || ''    // Assumes price is in Column O
+                };
+            }).filter(car => car.vin && car.year && car.make && car.model);
                 
                 // Sort by year descending (newest first)
                 inventory.sort((a, b) => b.year - a.year);
