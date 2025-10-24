@@ -239,65 +239,60 @@
                 </label>
                 <select id="template" name="template" required onchange="handleTemplateChange()">
                     <option value="">Select template...</option>
-                    <option value="temp_001">🚗 Multi-Vehicle Showcase <span class="template-badge multi">up to 5 cars</span></option>
-                    <option value="temp_002">⭐ Single Vehicle Spotlight <span class="template-badge spotlight">premium</span></option>
+                    <option value="temp_001">🚗 Multi-Car Showcase (1-5 cars)</option>
+                    <option value="temp_002">⭐ Single Vehicle Spotlight (premium)</option>
                 </select>
             </div>
 
-            <!-- Theme (Optional) -->
+            <!-- Theme (always visible, optional) -->
             <div class="form-group">
                 <label for="theme">
                     Theme (Optional)
                     <span class="label-description">e.g., Summer Blowout, Back to School, Harvest Deals</span>
                 </label>
-                <input type="text" id="theme" name="theme" placeholder="Don't get tricked this halloween">
+                <input type="text" id="theme" name="theme" placeholder="Leave blank for generic ad">
             </div>
 
-            <!-- Animation Toggle (Only for TEMP_001) -->
-            <div class="form-group" id="animationGroup">
-                <label>
-                    Animation
-                    <span class="label-description">Choose animation style</span>
+            <!-- Include Animation Checkbox (HIDDEN - coming soon!) -->
+            <div class="checkbox-group hidden" id="animationGroup" style="display: none !important;">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="includeAnimation" name="include_animation" value="false">
+                    <span>
+                        <strong>Include theme animation</strong>
+                        <div class="label-description">Adds a 2-second animated intro based on your theme</div>
+                    </span>
                 </label>
-                <div class="checkbox-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="include_animation" name="include_animation" value="true">
-                        Include animated car graphics
-                    </label>
-                </div>
             </div>
 
-            <!-- Avatar Presenter Selection -->
+            <!-- Avatar Selection -->
             <div class="form-group">
                 <label for="avatar">
                     Avatar Presenter
-                    <span class="label-description">Who will present your ad</span>
                 </label>
                 <select id="avatar" name="avatar" required>
-                    <option value="">Select presenter...</option>
-                    <option value="5b9c75a2f13e4d60b09bcfdafa7339dd|eezuv0zKVdVTS0jHdxFa|#6da264|8">💁 Sexy Kelly, not Kelly</option>
-                    <option value="a6c01c29d5094af5803ff47558e93ee4|cgSgspJ2msm6clMCkdW9|#00FF00|20">👨 Chill Steve</option>
-                    <option value="a1bcbac30daa42008d29ff0ec12f76d5|pqHfZKP75CvOlQylNhV4|#00FF00|20">👔 Professional Marcus</option>
+                    <option value="">Select avatar...</option>
+                    <option value="229bfc03d4d24d5ab7a5c71ce4b10d4b|bWI0w7QVOZiBvlJQahML|#89be5a|22">🎭 Awesome Shad</option>
+                    <option value="f9bb73f75160463ea82fe93f71592fce|xvBFrvpBNGBaCHOlL3IP|#7fc741|29">😌 Calm Gary Knight</option>
+                    <option value="5b9c75a2f13e4d60b09bcfdafa7339dd|eezuv0zKVdVTS0jHdxFa|#6da264|8">💃 Sexy Kelly, not Kelly</option>
                 </select>
             </div>
 
-            <!-- Email Address -->
+            <!-- Email -->
             <div class="form-group">
                 <label for="email">
                     Email Address
                     <span class="label-description">We'll send the finished video here</span>
                 </label>
-                <input type="email" id="email" name="email" placeholder="kelly@kellyrae.net" required>
+                <input type="email" id="email" name="email" required placeholder="your.email@example.com">
             </div>
 
-            <!-- Vehicle Selection -->
+            <!-- Vehicles -->
             <div class="form-group">
-                <label id="vehicleLabel">
-                    Vehicles (1-5)
-                    <span class="label-description">Select up to 5 vehicles</span>
-                </label>
-                <div id="vehicleContainer"></div>
-                <button type="button" id="addVehicleBtn" class="add-vehicle" onclick="addVehicle()">
+                <label id="vehicleLabel">Vehicles (1-5)</label>
+                <div id="vehicleContainer">
+                    <!-- Vehicle groups added dynamically -->
+                </div>
+                <button type="button" id="addVehicleBtn" class="add-vehicle" onclick="addVehicle()" disabled>
                     + Add Vehicle (max 5)
                 </button>
             </div>
@@ -313,38 +308,40 @@
     </div>
 
     <script>
-        // Configuration
         const WEBHOOK_URL = 'https://corsproxy.io/?https://kelly-ads.app.n8n.cloud/webhook/ad-pilot-dev';
-        const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1Qs6LJNXiOQQjP9-XVShg6RbILIwSGwCVAJeVE-VC9J0/edit?gid=0#gid=0';
-        const MAX_CARS = 5;
+        const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1kgSVMgpWVSFeAAz4M2LpNmIbuhaJKds9gnbsvLdP-t4/gviz/tq?tqx=out:json&sheet=Feed';
+        let MAX_CARS = 5; // Will change based on template
         
-        let inventory = [];
         let vehicleCount = 0;
+        let inventory = [];
         let selectedTemplate = '';
+
+        // Animation option hidden for now - coming soon!
+        // (Theme still works to influence the script)
 
         function handleTemplateChange() {
             selectedTemplate = document.getElementById('template').value;
-            const animationGroup = document.getElementById('animationGroup');
-            const vehicleLabel = document.getElementById('vehicleLabel');
             const addBtn = document.getElementById('addVehicleBtn');
+            const vehicleLabel = document.getElementById('vehicleLabel');
             
             if (selectedTemplate === 'temp_002') {
-                // Template 2: Spotlight (1 vehicle only)
-                animationGroup.classList.add('hidden');
-                vehicleLabel.innerHTML = 'Vehicle (1)<span class="label-description">Select one vehicle for spotlight</span>';
+                // Template 2: Single vehicle only
+                MAX_CARS = 1;
+                vehicleLabel.textContent = 'Vehicle (1)';
                 addBtn.textContent = '+ Add 1 Vehicle';
-                addBtn.disabled = vehicleCount >= 1;
+                addBtn.disabled = true;
                 
-                // Remove extra vehicles if switching from multi-car
+                // Remove extra vehicles if any
                 while (vehicleCount > 1) {
                     const lastGroup = document.querySelector(`[data-vehicle-num="${vehicleCount}"]`);
                     if (lastGroup) lastGroup.remove();
                     vehicleCount--;
                 }
-            } else {
-                // Template 1: Multi-vehicle (up to 5)
-                animationGroup.classList.remove('hidden');
-                vehicleLabel.innerHTML = 'Vehicles (1-5)<span class="label-description">Select up to 5 vehicles</span>';
+                
+            } else if (selectedTemplate === 'temp_001') {
+                // Template 1: 1-5 vehicles
+                MAX_CARS = 5;
+                vehicleLabel.textContent = 'Vehicles (1-5)';
                 addBtn.textContent = '+ Add Vehicle (max 5)';
                 addBtn.disabled = vehicleCount >= MAX_CARS || vehicleCount === 0;
             }
@@ -411,7 +408,7 @@
                 const removeBtn = document.createElement('button');
                 removeBtn.type = 'button';
                 removeBtn.className = 'remove-vehicle';
-                removeBtn.textContent = '−'; // Changed from × to −
+                removeBtn.textContent = '−';
                 removeBtn.onclick = () => removeVehicle(vehicleCount);
                 vehicleGroup.appendChild(removeBtn);
             }
@@ -433,7 +430,6 @@
                     if (!selectedVins.includes(car.vin) || car.vin === currentValue) {
                         const option = document.createElement('option');
                         option.value = car.vin;
-                        // Clean format: Year Make Model - VIN
                         option.textContent = `${car.year} ${car.make} ${car.model} - ${car.vin}`;
                         select.appendChild(option);
                     }
