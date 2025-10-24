@@ -431,7 +431,7 @@
                     if (!selectedVins.includes(car.vin) || car.vin === currentValue) {
                         const option = document.createElement('option');
                         option.value = car.vin;
-                        option.textContent = `${car.year} ${car.make} ${car.model} - ${car.vin}`;
+                        option.textContent = `${car.year} ${car.make} ${car.model}, ${car.price} - ${car.vin}`;
                         select.appendChild(option);
                     }
                 });
