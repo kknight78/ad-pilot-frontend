@@ -100,49 +100,48 @@
         }
         
         .vehicle-group {
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
+            display: flex;
+            gap: 10px;
             margin-bottom: 15px;
-            position: relative;
+            align-items: center;
+        }
+        
+        .vehicle-group select {
+            flex: 1;
         }
         
         .remove-vehicle {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 24px;
-            height: 24px;
-            background: #333;
+            padding: 12px 16px;
+            background: #000000;
             color: white;
             border: none;
-            border-radius: 50%;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 18px;
-            line-height: 20px;
-            display: none;
+            font-weight: 600;
+            transition: background 0.2s;
         }
         
-        .vehicle-group:hover .remove-vehicle {
-            display: block;
+        .remove-vehicle:hover {
+            background: #333333;
         }
         
         .add-vehicle {
             width: 100%;
             padding: 12px;
-            background: #f5f5f5;
+            background: #f0f0f0;
+            color: #333;
             border: 2px dashed #ccc;
             border-radius: 8px;
-            color: #667eea;
-            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
         }
         
-        .add-vehicle:hover {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
+        .add-vehicle:hover:not(:disabled) {
+            background: #e0e0e0;
+            border-color: #999;
         }
         
         .add-vehicle:disabled {
@@ -204,6 +203,26 @@
         .hidden {
             display: none;
         }
+
+        /* Template badge styling */
+        .template-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .template-badge.multi {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .template-badge.spotlight {
+            background: #fff3e0;
+            color: #e65100;
+        }
     </style>
 </head>
 <body>
@@ -212,6 +231,19 @@
         <p class="subtitle">Generate TikTok car ads with AI</p>
         
         <form id="adForm">
+            <!-- Template Selection -->
+            <div class="form-group">
+                <label for="template">
+                    Template
+                    <span class="label-description">Choose your ad style</span>
+                </label>
+                <select id="template" name="template" required onchange="handleTemplateChange()">
+                    <option value="">Select template...</option>
+                    <option value="temp_001">🚗 Multi-Car Showcase (1-5 cars)</option>
+                    <option value="temp_002">⭐ Single Vehicle Spotlight (premium)</option>
+                </select>
+            </div>
+
             <!-- Theme (always visible, optional) -->
             <div class="form-group">
                 <label for="theme">
@@ -256,9 +288,9 @@
 
             <!-- Vehicles -->
             <div class="form-group">
-                <label>Vehicles (1-5)</label>
+                <label id="vehicleLabel">Vehicles (1-5)</label>
                 <div id="vehicleContainer">
-                    <!-- First vehicle group added by default -->
+                    <!-- Vehicle groups added dynamically -->
                 </div>
                 <button type="button" id="addVehicleBtn" class="add-vehicle" onclick="addVehicle()" disabled>
                     + Add Vehicle (max 5)
@@ -276,15 +308,47 @@
     </div>
 
     <script>
-        const WEBHOOK_URL = 'https://corsproxy.io/?https://kelly-ads.app.n8n.cloud/webhook/ad-pilot-draft';
+        const WEBHOOK_URL = 'https://corsproxy.io/?https://kelly-ads.app.n8n.cloud/webhook/ad-pilot-dev';
         const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1kgSVMgpWVSFeAAz4M2LpNmIbuhaJKds9gnbsvLdP-t4/gviz/tq?tqx=out:json&sheet=Feed';
-        const MAX_CARS = 5;
+        let MAX_CARS = 5; // Will change based on template
         
         let vehicleCount = 0;
         let inventory = [];
+        let selectedTemplate = '';
 
         // Animation option hidden for now - coming soon!
         // (Theme still works to influence the script)
+
+        function handleTemplateChange() {
+            selectedTemplate = document.getElementById('template').value;
+            const addBtn = document.getElementById('addVehicleBtn');
+            const vehicleLabel = document.getElementById('vehicleLabel');
+            
+            if (selectedTemplate === 'temp_002') {
+                // Template 2: Single vehicle only
+                MAX_CARS = 1;
+                vehicleLabel.textContent = 'Vehicle (1)';
+                addBtn.textContent = '+ Add 1 Vehicle';
+                addBtn.disabled = true;
+                
+                // Remove extra vehicles if any
+                while (vehicleCount > 1) {
+                    const lastGroup = document.querySelector(`[data-vehicle-num="${vehicleCount}"]`);
+                    if (lastGroup) lastGroup.remove();
+                    vehicleCount--;
+                }
+                
+            } else if (selectedTemplate === 'temp_001') {
+                // Template 1: 1-5 vehicles
+                MAX_CARS = 5;
+                vehicleLabel.textContent = 'Vehicles (1-5)';
+                addBtn.textContent = '+ Add Vehicle (max 5)';
+                addBtn.disabled = vehicleCount >= MAX_CARS || vehicleCount === 0;
+            }
+            
+            // Enable submit button check
+            checkFormValidity();
+        }
 
         async function loadInventory() {
             try {
@@ -293,29 +357,25 @@
                 const text = await response.text();
                 const json = JSON.parse(text.substr(47).slice(0, -2));
                 
-                inventory = json.table.rows.slice(1).map(row => {
-                    const cells = row.c;
-                    return {
-                        vin: cells[0]?.v || '',
-                        year: cells[1]?.v || '',
-                        make: cells[2]?.v || '',
-                        model: cells[3]?.v || '',
-                        internetPrice: cells[4]?.v || 0,
-                        stockNumber: cells[5]?.v || '',
-                        mileage: cells[6]?.v || 0,
-                        bodyStyle: cells[7]?.v || '',
-                        images: cells[8]?.v ? cells[8].v.split(',') : []
-                    };
-                }).filter(v => v.vin);
+               inventory = json.table.rows.slice(1).map(row => {
+                const cells = row.c;
+                return {
+                    // Corrected Indices
+                    vin: cells[1]?.v || '',      // Column B
+                    make: cells[4]?.v || '',     // Column E
+                    model: cells[5]?.v || '',    // Column F
+                    year: cells[6]?.v || '',     // Column G
+                    price: cells[14]?.v || ''    // Assumes price is in Column O
+                };
+            }).filter(car => car.vin && car.year && car.make && car.model);
                 
-                console.log(`✅ Loaded ${inventory.length} vehicles`);
+                // Sort by year descending (newest first)
+                inventory.sort((a, b) => b.year - a.year);
                 
-                // Add first vehicle by default
+                console.log(`Loaded ${inventory.length} vehicles from inventory`);
+                
+                // Add first vehicle dropdown
                 addVehicle();
-                
-                // Enable form elements
-                document.getElementById('addVehicleBtn').disabled = false;
-                document.getElementById('submitBtn').disabled = false;
                 
             } catch (error) {
                 console.error('Error loading inventory:', error);
@@ -323,49 +383,70 @@
             }
         }
 
-        function populateVehicleDropdowns() {
-            const selects = document.querySelectorAll('[name^="vehicle"]');
-            selects.forEach(select => {
-                const currentValue = select.value;
-                select.innerHTML = '<option value="">Select a vehicle...</option>';
-                
-                const selectedVINs = Array.from(selects)
-                    .filter(s => s !== select && s.value)
-                    .map(s => s.value);
-                
-                inventory.forEach(vehicle => {
-                    if (!selectedVINs.includes(vehicle.vin)) {
-                        const option = document.createElement('option');
-                        option.value = vehicle.vin;
-                        option.textContent = `${vehicle.year} ${vehicle.make} ${vehicle.model} - $${vehicle.internetPrice.toLocaleString()}`;
-                        if (vehicle.vin === currentValue) {
-                            option.selected = true;
-                        }
-                        select.appendChild(option);
-                    }
-                });
-            });
-        }
-
         function addVehicle() {
-            if (vehicleCount >= MAX_CARS) {
-                showStatus(`Maximum ${MAX_CARS} vehicles allowed`, 'error');
-                return;
-            }
+            if (vehicleCount >= MAX_CARS) return;
             
             vehicleCount++;
             const container = document.getElementById('vehicleContainer');
             const vehicleGroup = document.createElement('div');
             vehicleGroup.className = 'vehicle-group';
             vehicleGroup.dataset.vehicleNum = vehicleCount;
-            vehicleGroup.innerHTML = `
-                <button type="button" class="remove-vehicle" onclick="removeVehicle(${vehicleCount})">−</button>
-                <select name="vehicle${vehicleCount}" required>
-                    <option value="">Select a vehicle...</option>
-                </select>
-            `;
+            
+            const select = document.createElement('select');
+            select.name = `vehicle${vehicleCount}`;
+            select.required = true;
+            select.onchange = checkFormValidity;
+            
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Select vehicle...';
+            select.appendChild(defaultOption);
+            
+            vehicleGroup.appendChild(select);
+            
+            // Add remove button (hide for first vehicle)
+            if (vehicleCount > 1) {
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'remove-vehicle';
+                removeBtn.textContent = '−';
+                removeBtn.onclick = () => removeVehicle(vehicleCount);
+                vehicleGroup.appendChild(removeBtn);
+            }
+            
             container.appendChild(vehicleGroup);
             populateVehicleDropdowns();
+            checkFormValidity();
+        }
+
+        function populateVehicleDropdowns() {
+            const selects = document.querySelectorAll('#vehicleContainer select');
+            const selectedVins = Array.from(selects).map(s => s.value).filter(v => v);
+            
+            selects.forEach(select => {
+                const currentValue = select.value;
+                select.innerHTML = '<option value="">Select vehicle...</option>';
+                
+                inventory.forEach(car => {
+                    if (!selectedVins.includes(car.vin) || car.vin === currentValue) {
+                        const option = document.createElement('option');
+                        option.value = car.vin;
+                        option.textContent = `${car.year} ${car.make} ${car.model}, ${car.price} - ${car.vin}`;
+                        select.appendChild(option);
+                    }
+                });
+                
+                if (currentValue) {
+                    select.value = currentValue;
+                }
+            });
+            
+            const addBtn = document.getElementById('addVehicleBtn');
+            if (selectedTemplate === 'temp_002') {
+                addBtn.disabled = true; // Always disabled for Template 2
+            } else {
+                addBtn.disabled = vehicleCount >= MAX_CARS;
+            }
         }
 
         function removeVehicle(num) {
@@ -383,17 +464,31 @@
                 const select = group.querySelector('select');
                 select.name = `vehicle${newNum}`;
                 const button = group.querySelector('.remove-vehicle');
-                button.onclick = () => removeVehicle(newNum);
+                if (button) {
+                    button.onclick = () => removeVehicle(newNum);
+                }
             });
             
             vehicleCount = groups.length;
             populateVehicleDropdowns();
         }
 
+        function checkFormValidity() {
+            const template = document.getElementById('template').value;
+            const avatar = document.getElementById('avatar').value;
+            const email = document.getElementById('email').value;
+            const selects = document.querySelectorAll('#vehicleContainer select');
+            const hasVehicles = Array.from(selects).some(s => s.value);
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = !(template && avatar && email && hasVehicles);
+        }
+
         document.getElementById('adForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const formData = new FormData(e.target);
+            const template = formData.get('template');
             const theme = formData.get('theme') || '';
             const includeAnimation = formData.get('include_animation') === 'true';
             const avatarValue = formData.get('avatar');
@@ -412,9 +507,14 @@
                 showStatus('Please select at least one vehicle', 'error');
                 return;
             }
+
+            if (template === 'temp_002' && vins.length > 1) {
+                showStatus('Template 2 only supports 1 vehicle', 'error');
+                return;
+            }
             
             const payload = {
-                template_id: 'TEMP_001',  // Always use unified template
+                template_id: template.toUpperCase(), // TEMP_001 or TEMP_002
                 theme: theme,
                 include_animation: includeAnimation,
                 avatar_id: avatar_id,
@@ -426,7 +526,9 @@
             };
             
             console.log('Submitting payload:', payload);
-            showStatus('Generating your ad... This will take 3-4 minutes. ⏱️', 'loading');
+            
+            const timeEstimate = template === 'temp_002' ? '4-5 minutes' : '3-4 minutes';
+            showStatus(`Generating your ad... This will take ${timeEstimate}. ⏱️`, 'loading');
             
             // Disable submit button
             document.getElementById('submitBtn').disabled = true;
@@ -472,10 +574,12 @@
             }
         }
 
+        // Add event listeners for form validation
+        document.getElementById('avatar').addEventListener('change', checkFormValidity);
+        document.getElementById('email').addEventListener('input', checkFormValidity);
+
         // Initialize on page load
         loadInventory();
     </script>
 </body>
 </html>
-
-
