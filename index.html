@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ad Pilot - TikTok Ad Generator</title>
+    <title>Ad Pilot - Video Generator</title>
     <style>
         * {
             margin: 0;
@@ -227,8 +227,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎬 Ad Pilot</h1>
-        <p class="subtitle">Generate TikTok car ads with AI</p>
+        <h1>🎬 Ad Pilot Video Generator</h1>
+        <p class="subtitle">Drive Business, Boost Social Presence</p>
         
         <form id="adForm">
             <!-- Template Selection -->
@@ -263,6 +263,20 @@
                     </span>
                 </label>
             </div>
+            <!-- Target Length -->
+            <div class="form-group">
+                <label for="scriptLength" title="TikTok: 15-30s | Instagram Reels: 20-40s | YouTube Shorts: 30-60s | Facebook Reels: 30-60s" style="cursor: help;">
+                    Target Length ℹ️
+                    <span class="label-description">How detailed should the script be?</span>
+                </label>
+                <select id="scriptLength" name="script_length" required onchange="checkFormValidity()">
+                    <option value="">Select length...</option>
+                    <option value="quick">Quick (15-30 sec) - Fast-paced, key features only</option>
+                    <option value="standard">Standard (30-45 sec) - Balanced, main selling points</option>
+                    <option value="detailed">Detailed (45-60 sec) - Full feature breakdown</option>
+                </select>
+            </div>
+
 
             <!-- Avatar Selection -->
             <div class="form-group">
@@ -475,12 +489,13 @@
         function checkFormValidity() {
             const template = document.getElementById('template').value;
             const avatar = document.getElementById('avatar').value;
+            const scriptLength = document.getElementById('scriptLength').value;
             const email = document.getElementById('email').value;
             const selects = document.querySelectorAll('#vehicleContainer select');
             const hasVehicles = Array.from(selects).some(s => s.value);
             
             const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = !(template && avatar && email && hasVehicles);
+            submitBtn.disabled = !(template && scriptLength && avatar && email && hasVehicles);
         }
 
         document.getElementById('adForm').addEventListener('submit', async (e) => {
@@ -492,6 +507,7 @@
             const includeAnimation = formData.get('include_animation') === 'true';
             const avatarValue = formData.get('avatar');
             const email = formData.get('email');
+            const scriptLength = formData.get('script_length');
             
             // Parse avatar (format: avatar_id|voice_id|chromakey_color|chromakey_sensitivity)
             const [avatar_id, voice_id, chromakey_color, chromakey_sensitivity] = avatarValue.split('|');
@@ -576,10 +592,10 @@
         // Add event listeners for form validation
         document.getElementById('avatar').addEventListener('change', checkFormValidity);
         document.getElementById('email').addEventListener('input', checkFormValidity);
+        document.getElementById('scriptLength').addEventListener('change', checkFormValidity);
 
         // Initialize on page load
         loadInventory();
     </script>
 </body>
 </html>
-
