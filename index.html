@@ -244,6 +244,21 @@
                 </select>
             </div>
 
+            <!-- Platform Selection -->
+            <div class="form-group">
+                <label for="platform">
+                    Platform
+                    <span class="label-description">Where will this video be posted?</span>
+                </label>
+                <select id="platform" name="platform" required onchange="checkFormValidity()">
+                    <option value="">Select platform...</option>
+                    <option value="tiktok">TikTok</option>
+                    <option value="youtube">YouTube Shorts</option>
+                    <option value="instagram">Instagram Reels</option>
+                    <option value="facebook">Facebook Reels</option>
+                </select>
+            </div>
+
             <!-- Theme (always visible, optional) -->
             <div class="form-group">
                 <label for="theme">
@@ -489,13 +504,14 @@
         function checkFormValidity() {
             const template = document.getElementById('template').value;
             const avatar = document.getElementById('avatar').value;
+            const platform = document.getElementById('platform').value;
             const scriptLength = document.getElementById('scriptLength').value;
             const email = document.getElementById('email').value;
             const selects = document.querySelectorAll('#vehicleContainer select');
             const hasVehicles = Array.from(selects).some(s => s.value);
             
             const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = !(template && scriptLength && avatar && email && hasVehicles);
+            submitBtn.disabled = !(template && platform && scriptLength && avatar && email && hasVehicles);
         }
 
         document.getElementById('adForm').addEventListener('submit', async (e) => {
@@ -503,6 +519,7 @@
             
             const formData = new FormData(e.target);
             const template = formData.get('template');
+            const platform = formData.get('platform');
             const theme = formData.get('theme') || '';
             const includeAnimation = formData.get('include_animation') === 'true';
             const avatarValue = formData.get('avatar');
@@ -531,6 +548,7 @@
             const payload = {
                 template_id: template.toUpperCase(), // TEMP_001 or TEMP_002
                 theme: theme,
+                platform: platform,
                 include_animation: includeAnimation,
                 avatar_id: avatar_id,
                 voice_id: voice_id,
@@ -592,6 +610,7 @@
 
         // Add event listeners for form validation
         document.getElementById('avatar').addEventListener('change', checkFormValidity);
+        document.getElementById('platform').addEventListener('change', checkFormValidity);
         document.getElementById('email').addEventListener('input', checkFormValidity);
         document.getElementById('scriptLength').addEventListener('change', checkFormValidity);
 
@@ -600,5 +619,6 @@
     </script>
 </body>
 </html>
+
 
 
