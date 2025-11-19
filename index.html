@@ -401,7 +401,7 @@ function handleTemplateChange() {
             vehicleCount--;
         }
         themeGroup.classList.remove('hidden');
-        vehiclesGroup.classList.add('hidden');
+        vehiclesGroup.classList.remove('hidden');
     
     } else if (selectedTemplate === 'temp_001') {
         // Template 1: 1-5 vehicles
@@ -411,7 +411,7 @@ function handleTemplateChange() {
         addBtn.disabled = vehicleCount >= MAX_CARS || vehicleCount === 0;
 
         themeGroup.classList.remove('hidden');
-        vehiclesGroup.classList.add('hidden');
+        vehiclesGroup.classList.remove('hidden');
         
     } else if (selectedTemplate == 'temp_003') {
         topicGroup.classList.remove('hidden');
@@ -671,3 +671,4 @@ loadInventory();
 </script>
 </body>
 </html>
+
