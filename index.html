@@ -3,622 +3,242 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ad Pilot - Video Generator</title>
+    <title>Ad Pilot Video Generator</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 40px 20px;
-        }
-        
-        .container {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
-        
         h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 32px;
-        }
-        
-        .subtitle {
-            color: #666;
+            color: white;
+            text-align: center;
             margin-bottom: 30px;
-            font-size: 16px;
         }
-        
         .form-group {
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
-        
         label {
             display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 600;
+            margin-bottom: 5px;
+            color: white;
+            font-weight: 500;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
             font-size: 14px;
+            box-sizing: border-box;
         }
-        
-        .label-description {
-            font-weight: 400;
-            color: #666;
-            font-size: 13px;
-            margin-top: 4px;
+        textarea {
+            min-height: 80px;
+            resize: vertical;
         }
-        
-        input[type="text"],
-        input[type="email"],
-        select {
+        button {
             width: 100%;
             padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
             font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        
-        input[type="text"]:focus,
-        input[type="email"]:focus,
-        select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        /* Checkbox styling */
-        .checkbox-group {
-            margin-left: 20px;
-            padding: 15px;
-            border-left: 3px solid #667eea;
-            background: #f8f9ff;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
-
-        .checkbox-label {
-            display: flex;
-            align-items: center;
             cursor: pointer;
+            transition: background 0.3s;
         }
-
-        input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            margin-right: 10px;
-            cursor: pointer;
+        button:hover {
+            background: #45a049;
         }
-        
-        .vehicle-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            align-items: center;
-        }
-        
-        .vehicle-group select {
-            flex: 1;
-        }
-        
-        .remove-vehicle {
-            padding: 12px 16px;
-            background: #000000;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 18px;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
-        
-        .remove-vehicle:hover {
-            background: #333333;
-        }
-        
-        .add-vehicle {
-            width: 100%;
-            padding: 12px;
-            background: #f0f0f0;
-            color: #333;
-            border: 2px dashed #ccc;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-        
-        .add-vehicle:hover:not(:disabled) {
-            background: #e0e0e0;
-            border-color: #999;
-        }
-        
-        .add-vehicle:disabled {
-            opacity: 0.5;
+        button:disabled {
+            background: #cccccc;
             cursor: not-allowed;
         }
-        
-        button[type="submit"] {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        
-        button[type="submit"]:hover {
-            transform: translateY(-2px);
-        }
-        
-        button[type="submit"]:active {
-            transform: translateY(0);
-        }
-        
-        button[type="submit"]:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .status {
+        #status {
             margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
             display: none;
         }
-        
-        .status.success {
+        .success {
             background: #d4edda;
             color: #155724;
-            border: 1px solid #c3e6cb;
         }
-        
-        .status.error {
+        .error {
             background: #f8d7da;
             color: #721c24;
-            border: 1px solid #f5c6cb;
         }
-        
-        .status.loading {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-
         .hidden {
             display: none;
-        }
-
-        /* Template badge styling */
-        .template-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-left: 8px;
-        }
-
-        .template-badge.multi {
-            background: #e3f2fd;
-            color: #1976d2;
-        }
-
-        .template-badge.spotlight {
-            background: #fff3e0;
-            color: #e65100;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎬 Ad Pilot Video Generator</h1>
-        <p class="subtitle">Drive Business, Boost Social Presence</p>
-        
-        <form id="adForm">
-            <!-- Template Selection -->
-            <div class="form-group">
-                <label for="template">
-                    Template
-                    <span class="label-description">Choose your ad style</span>
-                </label>
-                <select id="template" name="template" required onchange="handleTemplateChange()">
-                    <option value="">Select template...</option>
-                    <option value="temp_001">🚗 Multi-Car Showcase (1-5 cars)</option>
-                    <option value="temp_002">⭐ Single Vehicle Spotlight (premium)</option>
-                </select>
-            </div>
+    <h1>🎬 Ad Pilot Video Generator</h1>
+    <h2 style="color: white; text-align: center; margin-top: -20px; margin-bottom: 30px; font-size: 14px;">Drive Business, Boost Social Presence</h2>
+    
+    <form id="videoForm">
+        <div class="form-group">
+            <label for="template">Template</label>
+            <select id="template" name="template" required>
+                <option value="">Choose your ad style</option>
+                <option value="TEMP_001">⭐ Single Vehicle Spotlight (premium)</option>
+                <option value="TEMP_002">🚗 Multi-Car Carousel Showcase</option>
+                <option value="TEMP_003">📚 Organic Instructional</option>
+            </select>
+        </div>
 
-            <!-- Platform Selection -->
-            <div class="form-group">
-                <label for="platform">
-                    Platform
-                    <span class="label-description">Where will this video be posted?</span>
-                </label>
-                <select id="platform" name="platform" required onchange="checkFormValidity()">
-                    <option value="">Select platform...</option>
-                    <option value="tiktok">TikTok</option>
-                    <option value="youtube">YouTube Shorts</option>
-                    <option value="instagram">Instagram Reels</option>
-                    <option value="facebook">Facebook Reels</option>
-                </select>
-            </div>
+        <div class="form-group" id="themeGroup">
+            <label for="theme">Theme (Optional)</label>
+            <input type="text" id="theme" name="theme" placeholder="e.g., Summer Blowout, Back to School, Harvest Deals">
+            <small style="color: #e0e0e0;">Leave blank for a general promotional vibe</small>
+        </div>
 
-            <!-- Theme (always visible, optional) -->
-            <div class="form-group">
-                <label for="theme">
-                    Theme (Optional)
-                    <span class="label-description">e.g., Summer Blowout, Back to School, Harvest Deals</span>
-                </label>
-                <input type="text" id="theme" name="theme" placeholder="Leave blank for generic ad">
-            </div>
+        <div class="form-group" id="topicGroup" class="hidden">
+            <label for="topic">Educational Topic</label>
+            <input type="text" id="topic" name="topic" placeholder="e.g., What to check before buying a used car">
+        </div>
 
-            <!-- Include Animation Checkbox (HIDDEN - coming soon!) -->
-            <div class="checkbox-group hidden" id="animationGroup" style="display: none !important;">
-                <label class="checkbox-label">
-                    <input type="checkbox" id="includeAnimation" name="include_animation" value="false">
-                    <span>
-                        <strong>Include theme animation</strong>
-                        <div class="label-description">Adds a 2-second animated intro based on your theme</div>
-                    </span>
-                </label>
-            </div>
-            <!-- Target Length -->
-            <div class="form-group">
-                <label for="scriptLength" title="TikTok: 15-30s | Instagram Reels: 20-40s | YouTube Shorts: 30-60s | Facebook Reels: 30-60s" style="cursor: help;">
-                    Target Length ℹ️
-                    <span class="label-description">How detailed should the script be?</span>
-                </label>
-                <select id="scriptLength" name="script_length" required onchange="checkFormValidity()">
-                    <option value="">Select length...</option>
-                    <option value="quick">Quick (15-30 sec) - Fast-paced, key features only</option>
-                    <option value="standard">Standard (30-45 sec) - Balanced, main selling points</option>
-                    <option value="detailed">Detailed (45-60 sec) - Full feature breakdown</option>
-                </select>
-            </div>
+        <div class="form-group">
+            <label for="platform">Platform</label>
+            <select id="platform" name="platform" required>
+                <option value="tiktok">TikTok</option>
+                <option value="facebook">Facebook</option>
+                <option value="instagram">Instagram</option>
+                <option value="youtube">YouTube Shorts</option>
+            </select>
+        </div>
 
+        <div class="form-group" id="vehiclesGroup">
+            <label for="vehicles">Vehicle(s)</label>
+            <textarea id="vehicles" name="vehicles" placeholder="Enter stock numbers, one per line. For Template 2, list multiple (e.g., STOCK123, STOCK456, STOCK789)" required></textarea>
+            <small style="color: #e0e0e0;">Tip: Use 3-5 vehicles for best carousel results</small>
+        </div>
 
-            <!-- Avatar Selection -->
-            <div class="form-group">
-                <label for="avatar">
-                    Avatar Presenter
-                </label>
-                <select id="avatar" name="avatar" required>
-                    <option value="">Select avatar...</option>
-                    <option value="229bfc03d4d24d5ab7a5c71ce4b10d4b|bWI0w7QVOZiBvlJQahML|#89be5a|22">🎭 Awesome Shad</option>
-                    <option value="f9bb73f75160463ea82fe93f71592fce|xvBFrvpBNGBaCHOlL3IP|#7fc741|29">😌 Calm Gary Knight</option>
-                    <option value="5b9c75a2f13e4d60b09bcfdafa7339dd|eezuv0zKVdVTS0jHdxFa|#6da264|8">💃 Sexy Kelly, not Kelly</option>
-                </select>
-            </div>
+        <div class="form-group">
+            <label for="scriptLength">Target Length</label>
+            <select id="scriptLength" name="scriptLength" required>
+                <option value="quick">⚡ Quick (30-45 sec) - Full feature breakdown</option>
+                <option value="medium" selected>📊 Medium (45-60 sec) - Balanced detail</option>
+                <option value="detailed">🔍 Detailed (60+ sec) - Comprehensive showcase</option>
+            </select>
+        </div>
 
-            <!-- Email -->
-            <div class="form-group">
-                <label for="email">
-                    Email Address
-                    <span class="label-description">We'll send the finished video here</span>
-                </label>
-                <input type="email" id="email" name="email" required placeholder="your.email@example.com">
-            </div>
+        <div class="form-group">
+            <label for="avatar">Avatar Presenter</label>
+            <select id="avatar" name="avatar" required>
+                <option value="5b9c75a2f13e4d60b09bcfdafa7339dd|eezuv0zKVdVTS0jHdxFa|#6da264|8|Kelly">💃 Sexy Kelly, not Kelly</option>
+                <option value="daf747d9cd9a480d8ccf2aeed1b990aa|DRJWGIRGOAcIvQsGEXLt|#00B140|medium|Shad" selected>🧑‍💼 Awesome Shad</option>
+            </select>
+        </div>
 
-            <!-- Vehicles -->
-            <div class="form-group">
-                <label id="vehicleLabel">Vehicles (1-5)</label>
-                <div id="vehicleContainer">
-                    <!-- Vehicle groups added dynamically -->
-                </div>
-                <button type="button" id="addVehicleBtn" class="add-vehicle" onclick="addVehicle()" disabled>
-                    + Add Vehicle (max 5)
-                </button>
-            </div>
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" required placeholder="your@email.com">
+            <small style="color: #e0e0e0;">We'll send your finished video here!</small>
+        </div>
 
-            <!-- Submit Button -->
-            <button type="submit" id="submitBtn" disabled>
-                🚀 Generate Ad
-            </button>
+        <button type="submit" id="submitBtn">🎥 Generate Ad</button>
+    </form>
 
-            <!-- Status Messages -->
-            <div id="status" class="status"></div>
-        </form>
-    </div>
+    <div id="status"></div>
 
     <script>
-        const WEBHOOK_URL = 'https://corsproxy.io/?https://kelly-ads.app.n8n.cloud/webhook/ad-pilot';
-        const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1kgSVMgpWVSFeAAz4M2LpNmIbuhaJKds9gnbsvLdP-t4/gviz/tq?tqx=out:json&sheet=Feed';
-        let MAX_CARS = 5; // Will change based on template
-        
-        let vehicleCount = 0;
-        let inventory = [];
-        let selectedTemplate = '';
+        const form = document.getElementById('videoForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const status = document.getElementById('status');
+        const templateSelect = document.getElementById('template');
+        const themeGroup = document.getElementById('themeGroup');
+        const topicGroup = document.getElementById('topicGroup');
+        const vehiclesGroup = document.getElementById('vehiclesGroup');
 
-        // Animation option hidden for now - coming soon!
-        // (Theme still works to influence the script)
-
-        function handleTemplateChange() {
-            selectedTemplate = document.getElementById('template').value;
-            const addBtn = document.getElementById('addVehicleBtn');
-            const vehicleLabel = document.getElementById('vehicleLabel');
+        // Show/hide fields based on template selection
+        templateSelect.addEventListener('change', function() {
+            const isTemp3 = this.value === 'TEMP_003';
             
-            if (selectedTemplate === 'temp_002') {
-                // Template 2: Single vehicle only
-                MAX_CARS = 1;
-                vehicleLabel.textContent = 'Vehicle (1)';
-                addBtn.textContent = '+ Add 1 Vehicle';
-                addBtn.disabled = true;
-                
-                // Remove extra vehicles if any
-                while (vehicleCount > 1) {
-                    const lastGroup = document.querySelector(`[data-vehicle-num="${vehicleCount}"]`);
-                    if (lastGroup) lastGroup.remove();
-                    vehicleCount--;
-                }
-                
-            } else if (selectedTemplate === 'temp_001') {
-                // Template 1: 1-5 vehicles
-                MAX_CARS = 5;
-                vehicleLabel.textContent = 'Vehicles (1-5)';
-                addBtn.textContent = '+ Add Vehicle (max 5)';
-                addBtn.disabled = vehicleCount >= MAX_CARS || vehicleCount === 0;
-            }
-            
-            // Enable submit button check
-            checkFormValidity();
-        }
-
-        async function loadInventory() {
-            try {
-                const response = await fetch(INVENTORY_SHEET);
-                const text = await response.text();
-                const json = JSON.parse(text.substr(47).slice(0, -2));
-                
-               inventory = json.table.rows.slice(1).map(row => {
-                const cells = row.c;
-                return {
-                    // Corrected Indices
-                    vin: cells[1]?.v || '',      // Column B
-                    make: cells[4]?.v || '',     // Column E
-                    model: cells[5]?.v || '',    // Column F
-                    year: cells[6]?.v || '',     // Column G
-                    price: cells[14]?.v || ''    // Assumes price is in Column O
-                };
-            }).filter(car => car.vin && car.year && car.make && car.model);
-                
-                // Sort by year descending (newest first)
-                inventory.sort((a, b) => b.year - a.year);
-                
-                console.log(`Loaded ${inventory.length} vehicles from inventory`);
-                
-                // Add first vehicle dropdown
-                addVehicle();
-                
-            } catch (error) {
-                console.error('Error loading inventory:', error);
-                showStatus('Error loading vehicle inventory. Please refresh the page.', 'error');
-            }
-        }
-
-        function addVehicle() {
-            if (vehicleCount >= MAX_CARS) return;
-            
-            vehicleCount++;
-            const container = document.getElementById('vehicleContainer');
-            const vehicleGroup = document.createElement('div');
-            vehicleGroup.className = 'vehicle-group';
-            vehicleGroup.dataset.vehicleNum = vehicleCount;
-            
-            const select = document.createElement('select');
-            select.name = `vehicle${vehicleCount}`;
-            select.required = true;
-            select.onchange = checkFormValidity;
-            
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = 'Select vehicle...';
-            select.appendChild(defaultOption);
-            
-            vehicleGroup.appendChild(select);
-            
-            // Add remove button (hide for first vehicle)
-            if (vehicleCount > 1) {
-                const removeBtn = document.createElement('button');
-                removeBtn.type = 'button';
-                removeBtn.className = 'remove-vehicle';
-                removeBtn.textContent = '−';
-                removeBtn.onclick = () => removeVehicle(vehicleCount);
-                vehicleGroup.appendChild(removeBtn);
-            }
-            
-            container.appendChild(vehicleGroup);
-            populateVehicleDropdowns();
-            checkFormValidity();
-        }
-
-        function populateVehicleDropdowns() {
-            const selects = document.querySelectorAll('#vehicleContainer select');
-            const selectedVins = Array.from(selects).map(s => s.value).filter(v => v);
-            
-            selects.forEach(select => {
-                const currentValue = select.value;
-                select.innerHTML = '<option value="">Select vehicle...</option>';
-                
-                inventory.forEach(car => {
-                    if (!selectedVins.includes(car.vin) || car.vin === currentValue) {
-                        const option = document.createElement('option');
-                        option.value = car.vin;
-                        option.textContent = `${car.year} ${car.make} ${car.model}, ${car.price} - ${car.vin}`;
-                        select.appendChild(option);
-                    }
-                });
-                
-                if (currentValue) {
-                    select.value = currentValue;
-                }
-            });
-            
-            const addBtn = document.getElementById('addVehicleBtn');
-            if (selectedTemplate === 'temp_002') {
-                addBtn.disabled = true; // Always disabled for Template 2
+            if (isTemp3) {
+                themeGroup.classList.add('hidden');
+                vehiclesGroup.classList.add('hidden');
+                topicGroup.classList.remove('hidden');
+                document.getElementById('vehicles').removeAttribute('required');
+                document.getElementById('topic').setAttribute('required', 'required');
             } else {
-                addBtn.disabled = vehicleCount >= MAX_CARS;
+                themeGroup.classList.remove('hidden');
+                vehiclesGroup.classList.remove('hidden');
+                topicGroup.classList.add('hidden');
+                document.getElementById('vehicles').setAttribute('required', 'required');
+                document.getElementById('topic').removeAttribute('required');
             }
-        }
+        });
 
-        function removeVehicle(num) {
-            if (vehicleCount <= 1) return;
-            
-            const vehicleGroup = document.querySelector(`[data-vehicle-num="${num}"]`);
-            vehicleGroup.remove();
-            vehicleCount--;
-            
-            // Renumber remaining vehicles
-            const groups = document.querySelectorAll('.vehicle-group');
-            groups.forEach((group, index) => {
-                const newNum = index + 1;
-                group.dataset.vehicleNum = newNum;
-                const select = group.querySelector('select');
-                select.name = `vehicle${newNum}`;
-                const button = group.querySelector('.remove-vehicle');
-                if (button) {
-                    button.onclick = () => removeVehicle(newNum);
-                }
-            });
-            
-            vehicleCount = groups.length;
-            populateVehicleDropdowns();
-        }
-
-        function checkFormValidity() {
-            const template = document.getElementById('template').value;
-            const avatar = document.getElementById('avatar').value;
-            const platform = document.getElementById('platform').value;
-            const scriptLength = document.getElementById('scriptLength').value;
-            const email = document.getElementById('email').value;
-            const selects = document.querySelectorAll('#vehicleContainer select');
-            const hasVehicles = Array.from(selects).some(s => s.value);
-            
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = !(template && platform && scriptLength && avatar && email && hasVehicles);
-        }
-
-        document.getElementById('adForm').addEventListener('submit', async (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const formData = new FormData(e.target);
-            const template = formData.get('template');
-            const platform = formData.get('platform');
-            const theme = formData.get('theme') || '';
-            const includeAnimation = formData.get('include_animation') === 'true';
-            const avatarValue = formData.get('avatar');
-            const email = formData.get('email');
-            const scriptLength = formData.get('script_length');
-            
-            // Parse avatar (format: avatar_id|voice_id|chromakey_color|chromakey_sensitivity)
-            const [avatar_id, voice_id, chromakey_color, chromakey_sensitivity] = avatarValue.split('|');
-            
-            const vins = [];
-            for (let i = 1; i <= vehicleCount; i++) {
-                const vin = formData.get(`vehicle${i}`);
-                if (vin) vins.push(vin);
-            }
-            
-            if (vins.length === 0) {
-                showStatus('Please select at least one vehicle', 'error');
-                return;
-            }
+            submitBtn.disabled = true;
+            submitBtn.textContent = '🎬 Generating...';
+            status.style.display = 'none';
 
-            if (template === 'temp_002' && vins.length > 1) {
-                showStatus('Template 2 only supports 1 vehicle', 'error');
-                return;
-            }
+            const formData = new FormData(form);
+            const template = formData.get('template');
+            
+            // Parse avatar value (format: avatar_id|voice_id|chromakey_color|chromakey_sensitivity|name)
+            const avatarValue = formData.get('avatar');
+            const [avatarId, voiceId, chromakeyColor, chromakeySensitivity, avatarName] = avatarValue.split('|');
             
             const payload = {
-                template_id: template.toUpperCase(), // TEMP_001 or TEMP_002
-                theme: theme,
-                platform: platform,
-                include_animation: includeAnimation,
-                avatar_id: avatar_id,
-                voice_id: voice_id,
-                chromakey_color: chromakey_color,
-                chromakey_sensitivity: chromakey_sensitivity,
-                script_length: scriptLength,
-                email: email,
-                vins: vins
+                template_id: template,
+                platform: formData.get('platform'),
+                avatar_id: avatarId,
+                voice_id: voiceId,
+                chromakey_color: chromakeyColor,
+                chromakey_sensitivity: chromakeySensitivity,
+                avatar_name: avatarName,
+                script_length: formData.get('scriptLength'),
+                email: formData.get('email')
             };
-            
-            console.log('Submitting payload:', payload);
-            
-            const timeEstimate = template === 'temp_002' ? '4-5 minutes' : '3-4 minutes';
-            showStatus(`Generating your ad... This will take ${timeEstimate}. ⏱️`, 'loading');
-            
-            // Disable submit button
-            document.getElementById('submitBtn').disabled = true;
-            
+
+            // Add template-specific fields
+            if (template === 'TEMP_003') {
+                payload.topic = formData.get('topic');
+            } else {
+                payload.theme = formData.get('theme');
+                const vehicleInput = formData.get('vehicles');
+                payload.stock_numbers = vehicleInput.split('\n')
+                    .map(v => v.trim())
+                    .filter(v => v.length > 0);
+            }
+
             try {
-                const response = await fetch(WEBHOOK_URL, {
+                const response = await fetch('https://kelly-ads.app.n8n.cloud/webhook/generate-video', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(payload)
                 });
-                
-                const result = await response.json();
-                
+
                 if (response.ok) {
-                    showStatus(`Success! Your ad is being generated. Check your email in a few minutes. 🎬`, 'success');
-                    // Re-enable submit after 5 seconds
-                    setTimeout(() => {
-                        document.getElementById('submitBtn').disabled = false;
-                    }, 5000);
+                    status.className = 'success';
+                    status.textContent = '✅ Success! Check your email for the video link.';
+                    status.style.display = 'block';
+                    form.reset();
                 } else {
-                    showStatus(`Error: ${result.message || 'Something went wrong'}`, 'error');
-                    document.getElementById('submitBtn').disabled = false;
+                    throw new Error('Server error');
                 }
             } catch (error) {
-                console.error('Submission error:', error);
-                showStatus(`Error: ${error.message}`, 'error');
-                document.getElementById('submitBtn').disabled = false;
+                status.className = 'error';
+                status.textContent = '❌ Something went wrong. Please try again.';
+                status.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🎥 Generate Ad';
             }
         });
-
-        function showStatus(message, type) {
-            const statusDiv = document.getElementById('status');
-            statusDiv.textContent = message;
-            statusDiv.className = `status ${type}`;
-            statusDiv.style.display = 'block';
-            
-            if (type !== 'loading') {
-                setTimeout(() => {
-                    statusDiv.style.display = 'none';
-                }, 5000);
-            }
-        }
-
-        // Add event listeners for form validation
-        document.getElementById('avatar').addEventListener('change', checkFormValidity);
-        document.getElementById('platform').addEventListener('change', checkFormValidity);
-        document.getElementById('email').addEventListener('input', checkFormValidity);
-        document.getElementById('scriptLength').addEventListener('change', checkFormValidity);
-
-        // Initialize on page load
-        loadInventory();
     </script>
 </body>
 </html>
-
-
-
