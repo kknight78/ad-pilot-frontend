@@ -260,6 +260,19 @@ color: #e65100;
         </select>
     </div>
 
+    <!-- Avatar Selection -->
+    <div class="form-group hidden" id="avatarGroup">
+        <label for="avatar">
+        Avatar Presenter
+        </label>
+        <select id="avatar" name="avatar" required>
+            <option value="">Select avatar...</option>
+            <option value="229bfc03d4d24d5ab7a5c71ce4b10d4b|bWI0w7QVOZiBvlJQahML|#89be5a|22|Shad">🎭 Awesome Shad</option>
+            <option value="5b9c75a2f13e4d60b09bcfdafa7339dd|eezuv0zKVdVTS0jHdxFa|#6da264|8|Kelly">💃 Sexy Kelly, not Kelly</option>
+            <option value="f9bb73f75160463ea82fe93f71592fce|xvBFrvpBNGBaCHOlL3IP|#7fc741|29|Gary">😌 Calm Gary Knight</option>
+        </select>
+    </div>
+
     <!-- Target Length (show early for temp_003) -->
     <div class="form-group hidden" id="lengthGroup">
         <label for="scriptLength" title="TikTok: 15-30s | Instagram Reels: 20-40s | YouTube Shorts: 30-60s | Facebook Reels: 30-60s" style="cursor: help;">
@@ -321,9 +334,6 @@ color: #e65100;
             <div id="topicSuggestions" style="display: none; margin-top: 15px; padding: 15px; background: #f8f9ff; border-radius: 8px; border-left: 4px solid #667eea;">
                 <div style="font-size: 13px; color: #666; margin-bottom: 10px; font-weight: 600;">Click a suggestion to use it:</div>
                 <div id="suggestionsList"></div>
-                <!-- <button type="button" id="suggestMoreBtn" onclick="suggestTopics()" style="margin-top: 10px; padding: 8px 16px; background: #f0f0f0; color: #333; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; width: 100%;">
-                    🔄 Suggest More
-                </button> -->
             </div>
         </fieldset>
     </div>
@@ -346,19 +356,6 @@ color: #e65100;
                 <div class="label-description">Adds a 2-second animated intro based on your theme</div>
             </span>
         </label>
-    </div>
-
-    <!-- Avatar Selection -->
-    <div class="form-group hidden" id="avatarGroup">
-        <label for="avatar">
-        Avatar Presenter
-        </label>
-        <select id="avatar" name="avatar" required>
-            <option value="">Select avatar...</option>
-            <option value="229bfc03d4d24d5ab7a5c71ce4b10d4b|bWI0w7QVOZiBvlJQahML|#89be5a|22|Shad">🎭 Awesome Shad</option>
-            <option value="5b9c75a2f13e4d60b09bcfdafa7339dd|eezuv0zKVdVTS0jHdxFa|#6da264|8|Kelly">💃 Sexy Kelly, not Kelly</option>
-            <option value="f9bb73f75160463ea82fe93f71592fce|xvBFrvpBNGBaCHOlL3IP|#7fc741|29|Gary">😌 Calm Gary Knight</option>
-        </select>
     </div>
 
     <!-- Email -->
@@ -726,6 +723,7 @@ statusDiv.style.display = 'none';
 
 async function suggestTopics() {
     const scriptLength = document.getElementById('scriptLength').value;
+    const avatarName = document.getElementById('avatar').value.split("|").pop();
     const suggestionMode = document.querySelector('input[name="suggestionMode"]:checked').value;
     const topicGuidance = document.getElementById('topicGuidance').value.trim();
     const suggestBtn = document.getElementById('suggestTopicsBtn');
@@ -756,7 +754,8 @@ async function suggestTopics() {
             },
             body: JSON.stringify({
                 target_length: targetLength,
-                topic_guidance: guidanceText
+                topic_guidance: guidanceText,
+                avatar_name: avatarName
             })
         });
         
@@ -815,9 +814,11 @@ function handleLengthChange() {
     const template = document.getElementById('template').value;
     const scriptLength = document.getElementById('scriptLength').value;
     const topicGroup = document.getElementById('topicGroup');
+
+    const avatar = document.getElementById('avatar').value;
     
     // Only show topic group for temp_003 after length is selected
-    if (template === 'temp_003' && scriptLength) {
+    if (template === 'temp_003' && scriptLength && avatar) {
         topicGroup.classList.remove('hidden');
     } else if (template === 'temp_003') {
         topicGroup.classList.add('hidden');
@@ -837,5 +838,6 @@ loadInventory();
 </script>
 </body>
 </html>
+
 
 
