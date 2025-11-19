@@ -793,6 +793,7 @@ async function suggestTopics() {
 function handleSuggestionModeChange() {
     const mode = document.querySelector('input[name="suggestionMode"]:checked').value;
     const guidanceContainer = document.getElementById('topicGuidanceContainer');
+    const suggestBtn = document.getElementById('suggestTopicsBtn');
     
     if (mode === 'guided') {
         guidanceContainer.style.display = 'block';
@@ -838,6 +839,7 @@ loadInventory();
 </script>
 </body>
 </html>
+
 
 
 
