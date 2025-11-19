@@ -260,6 +260,63 @@ color: #e65100;
         </select>
     </div>
 
+    <!-- Target Length (show early for temp_003) -->
+    <div class="form-group hidden" id="lengthGroup">
+        <label for="scriptLength" title="TikTok: 15-30s | Instagram Reels: 20-40s | YouTube Shorts: 30-60s | Facebook Reels: 30-60s" style="cursor: help;">
+            Target Length ℹ️
+            <span class="label-description">How detailed should the script be?</span>
+        </label>
+        <select id="scriptLength" name="script_length" required onchange="handleLengthChange()">
+            <option value="">Select length...</option>
+            <option value="quick">Brief (~15-30 sec)</option>
+            <option value="standard">Standard (~30-45 sec)</option>
+            <option value="detailed">Detailed (~45-60 sec)</option>
+        </select>
+    </div>
+
+    <!-- Educational Topic Section (only shows after length selected for temp_003) -->
+    <div class="form-group hidden" id="topicGroup">
+        <label for="topic" style="font-weight: 600; font-size: 16px;">Create your own</label>
+        <input type="text" id="topic" name="topic" placeholder="e.g., What to check before buying a used car" required="required">
+        
+        <div style="text-align: center; margin: 20px 0; color: #999; font-weight: 600; font-size: 14px;">OR</div>
+        
+        <label style="font-weight: 600; font-size: 16px;">Let us help</label>
+        
+        <!-- Radio buttons for suggestion mode -->
+        <div style="margin-top: 10px; margin-bottom: 15px;">
+            <label style="display: flex; align-items: center; margin-bottom: 10px; cursor: pointer; font-weight: 400;">
+                <input type="radio" name="suggestionMode" value="lucky" checked onchange="handleSuggestionModeChange()" style="margin-right: 8px;">
+                <span>I'm feeling lucky</span>
+            </label>
+            <label style="display: flex; align-items: center; cursor: pointer; font-weight: 400;">
+                <input type="radio" name="suggestionMode" value="guided" onchange="handleSuggestionModeChange()" style="margin-right: 8px;">
+                <span>Give me topics about...</span>
+            </label>
+        </div>
+        
+        <!-- Topic Guidance input (hidden unless "guided" mode selected) -->
+        <div id="topicGuidanceContainer" style="display: none; margin-bottom: 15px;">
+            <input type="text" id="topicGuidance" name="topic_guidance" placeholder="e.g., winter driving, Thanksgiving travel, financing" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+        </div>
+        
+        <!-- Suggest Topics Button -->
+        <div style="margin-bottom: 15px;">
+            <button type="button" id="suggestTopicsBtn" onclick="suggestTopics()" style="padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; width: 100%;">
+                💡 Suggest Topics
+            </button>
+        </div>
+        
+        <!-- Suggestions Display -->
+        <div id="topicSuggestions" style="display: none; margin-top: 15px; padding: 15px; background: #f8f9ff; border-radius: 8px; border-left: 4px solid #667eea;">
+            <div style="font-size: 13px; color: #666; margin-bottom: 10px; font-weight: 600;">Click a suggestion to use it:</div>
+            <div id="suggestionsList"></div>
+            <button type="button" id="suggestMoreBtn" onclick="suggestTopics()" style="margin-top: 10px; padding: 8px 16px; background: #f0f0f0; color: #333; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; width: 100%;">
+                🔄 Suggest More
+            </button>
+        </div>
+    </div>
+
 
     <div class="form-group hidden" id="themeGroup">
         <label for="theme">
@@ -267,11 +324,6 @@ color: #e65100;
             <span class="label-description">e.g., Summer Blowout, Back to School, Harvest Deals</span>
         </label>
         <input type="text" id="theme" name="theme" placeholder="Leave blank for generic ad">
-    </div>
-
-    <div class="form-group hidden" id="topicGroup">
-        <label for="topic">Educational Topic</label>
-        <input type="text" id="topic" name="topic" placeholder="e.g., What to check before buying a used car" required="required">
     </div>
 
     <!-- Include Animation Checkbox (HIDDEN - coming soon!) -->
@@ -284,20 +336,6 @@ color: #e65100;
             </span>
         </label>
     </div>
-    <!-- Target Length -->
-    <div class="form-group hidden" id="lengthGroup">
-        <label for="scriptLength" title="TikTok: 15-30s | Instagram Reels: 20-40s | YouTube Shorts: 30-60s | Facebook Reels: 30-60s" style="cursor: help;">
-            Target Length ℹ️
-            <span class="label-description">How detailed should the script be?</span>
-        </label>
-        <select id="scriptLength" name="script_length" required onchange="checkFormValidity()">
-            <option value="">Select length...</option>
-            <option value="quick">Quick (~15-30 sec)</option>
-            <option value="standard">Standard (~30-45 sec)</option>
-            <option value="detailed">Detailed (~45-60 sec)</option>
-        </select>
-    </div>
-
 
     <!-- Avatar Selection -->
     <div class="form-group hidden" id="avatarGroup">
@@ -344,6 +382,7 @@ color: #e65100;
 
 <script>
 const WEBHOOK_URL = 'https://corsproxy.io/?https://kelly-ads.app.n8n.cloud/webhook/ad-pilot';
+const TOPIC_SUGGEST_URL = 'https://corsproxy.io/?https://kelly-ads.app.n8n.cloud/webhook/topic-suggest';
 const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1kgSVMgpWVSFeAAz4M2LpNmIbuhaJKds9gnbsvLdP-t4/gviz/tq?tqx=out:json&sheet=Feed';
 let MAX_CARS = 5; // Will change based on template
 
@@ -423,7 +462,7 @@ function handleTemplateChange() {
         
     } else if (selectedTemplate == 'temp_003') {
         // Template 3: Organic/Education - no vehicles needed
-        topicGroup.classList.remove('hidden');
+        // Don't show topicGroup yet - wait for length selection
         vehiclesGroup.classList.add('hidden');
         
         // Remove required from any existing vehicle selects
@@ -611,7 +650,7 @@ document.getElementById('adForm').addEventListener('submit', async (e) => {
     }
 
     const payload = {
-        template_id: template.toUpperCase(), // TEMP_001 or TEMP_002
+        template_id: template.toUpperCase(), // TEMP_001, TEMP_002, or TEMP_003
         theme: theme,
         topic: topic,
         platform: platform,
@@ -672,6 +711,95 @@ setTimeout(() => {
 statusDiv.style.display = 'none';
 }, 5000);
 }
+}
+
+async function suggestTopics() {
+    const scriptLength = document.getElementById('scriptLength').value;
+    const suggestionMode = document.querySelector('input[name="suggestionMode"]:checked').value;
+    const topicGuidance = document.getElementById('topicGuidance').value.trim();
+    const suggestBtn = document.getElementById('suggestTopicsBtn');
+    const suggestionsDiv = document.getElementById('topicSuggestions');
+    const suggestionsList = document.getElementById('suggestionsList');
+    
+    // Map UI values to API values
+    const lengthMap = {
+        'quick': 'brief_15_30',
+        'standard': 'standard_30_45',
+        'detailed': 'detailed_45_60'
+    };
+    
+    const targetLength = lengthMap[scriptLength];
+    
+    // Only use guidance if in "guided" mode
+    const guidanceText = suggestionMode === 'guided' ? topicGuidance : '';
+    
+    // Disable button and show loading
+    suggestBtn.disabled = true;
+    suggestBtn.textContent = '⏳ Generating...';
+    
+    try {
+        const response = await fetch(TOPIC_SUGGEST_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                target_length: targetLength,
+                topic_guidance: guidanceText
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+            // Display suggestions
+            suggestionsList.innerHTML = result.suggestions.map(topic => 
+                `<div style="padding: 10px; margin-bottom: 8px; background: white; border-radius: 6px; cursor: pointer; border: 2px solid #e0e0e0; transition: all 0.2s;" 
+                     onmouseover="this.style.borderColor='#667eea'; this.style.background='#f8f9ff';" 
+                     onmouseout="this.style.borderColor='#e0e0e0'; this.style.background='white';"
+                     onclick="document.getElementById('topic').value = '${topic.replace(/'/g, "\\'")}'; document.getElementById('topicSuggestions').style.display='none';">
+                    ${topic}
+                </div>`
+            ).join('');
+            
+            suggestionsDiv.style.display = 'block';
+        } else {
+            showStatus('Failed to generate suggestions. Please try again.', 'error');
+        }
+    } catch (error) {
+        console.error('Suggestion error:', error);
+        showStatus('Error generating suggestions. Please try again.', 'error');
+    } finally {
+        // Re-enable button
+        suggestBtn.disabled = false;
+        suggestBtn.textContent = '💡 Suggest Topics';
+    }
+}
+
+function handleSuggestionModeChange() {
+    const mode = document.querySelector('input[name="suggestionMode"]:checked').value;
+    const guidanceContainer = document.getElementById('topicGuidanceContainer');
+    
+    if (mode === 'guided') {
+        guidanceContainer.style.display = 'block';
+    } else {
+        guidanceContainer.style.display = 'none';
+    }
+}
+
+function handleLengthChange() {
+    const template = document.getElementById('template').value;
+    const scriptLength = document.getElementById('scriptLength').value;
+    const topicGroup = document.getElementById('topicGroup');
+    
+    // Only show topic group for temp_003 after length is selected
+    if (template === 'temp_003' && scriptLength) {
+        topicGroup.classList.remove('hidden');
+    } else if (template === 'temp_003') {
+        topicGroup.classList.add('hidden');
+    }
+    
+    checkFormValidity();
 }
 
 // Add event listeners for form validation
