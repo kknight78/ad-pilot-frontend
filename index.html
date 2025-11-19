@@ -793,7 +793,6 @@ async function suggestTopics() {
 function handleSuggestionModeChange() {
     const mode = document.querySelector('input[name="suggestionMode"]:checked').value;
     const guidanceContainer = document.getElementById('topicGuidanceContainer');
-    const suggestBtn = document.getElementById('suggestTopicsBtn');
     
     if (mode === 'guided') {
         guidanceContainer.style.display = 'block';
@@ -804,6 +803,8 @@ function handleSuggestionModeChange() {
 
 function handleGuidanceChange() {
     const topicGuidance = document.getElementById('topicGuidance').value.trim();
+    const suggestBtn = document.getElementById('suggestTopicsBtn');
+    
     if (topicGuidance.length > 0) {
         suggestBtn.textContent = '💡 Suggest topics related to ' + topicGuidance;
     } else {
@@ -839,6 +840,7 @@ loadInventory();
 </script>
 </body>
 </html>
+
 
 
 
