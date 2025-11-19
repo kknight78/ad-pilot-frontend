@@ -401,7 +401,11 @@ function handleTemplateChange() {
             vehicleCount--;
         }
         themeGroup.classList.remove('hidden');
-        vehiclesGroup.classList.remove('hidden');
+        vehiclesGroup.classList.add('hidden');
+        
+        // Make vehicle selects required again
+        const vehicleSelects = document.querySelectorAll('#vehicleContainer select');
+        vehicleSelects.forEach(select => select.required = true);
     
     } else if (selectedTemplate === 'temp_001') {
         // Template 1: 1-5 vehicles
@@ -411,10 +415,20 @@ function handleTemplateChange() {
         addBtn.disabled = vehicleCount >= MAX_CARS || vehicleCount === 0;
 
         themeGroup.classList.remove('hidden');
-        vehiclesGroup.classList.remove('hidden');
+        vehiclesGroup.classList.add('hidden');
+        
+        // Make vehicle selects required again
+        const vehicleSelects = document.querySelectorAll('#vehicleContainer select');
+        vehicleSelects.forEach(select => select.required = true);
         
     } else if (selectedTemplate == 'temp_003') {
+        // Template 3: Organic/Education - no vehicles needed
         topicGroup.classList.remove('hidden');
+        vehiclesGroup.classList.add('hidden');
+        
+        // Remove required from any existing vehicle selects
+        const vehicleSelects = document.querySelectorAll('#vehicleContainer select');
+        vehicleSelects.forEach(select => select.required = false);
     }
     
     // Enable submit button check
@@ -671,4 +685,3 @@ loadInventory();
 </script>
 </body>
 </html>
-
