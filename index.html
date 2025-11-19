@@ -464,7 +464,7 @@ vehicleGroup.dataset.vehicleNum = vehicleCount;
 
 const select = document.createElement('select');
 select.name = `vehicle${vehicleCount}`;
-select.required = true;
+select.required = selectedTemplate !== 'temp_003'; // Only required if NOT organic/education
 select.onchange = checkFormValidity;
 
 const defaultOption = document.createElement('option');
@@ -583,9 +583,12 @@ document.getElementById('adForm').addEventListener('submit', async (e) => {
         if (vin) vins.push(vin);
     }
 
-    if (vins.length === 0) {
-        showStatus('Please select at least one vehicle', 'error');
-        return;
+    // Only validate vehicles if NOT temp_003
+    if (template !== 'temp_003') {
+        if (vins.length === 0) {
+            showStatus('Please select at least one vehicle', 'error');
+            return;
+        }
     }
 
     if (template === 'temp_002' && vins.length > 1) {
@@ -668,6 +671,3 @@ loadInventory();
 </script>
 </body>
 </html>
-
-
-
