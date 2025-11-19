@@ -241,7 +241,7 @@ color: #e65100;
             <option value="">Select template...</option>
             <option value="temp_001">🚗 Multi-Car Showcase (1-5 cars)</option>
             <option value="temp_002">⭐ Single Vehicle Spotlight (premium)</option>
-        <option value="temp_003">💡 Organic / Education</option>
+        <option value="temp_003">💡 Capitol Smarts (Organic / Education)</option>
         </select>
     </div>
 
@@ -276,45 +276,54 @@ color: #e65100;
 
     <!-- Educational Topic Section (only shows after length selected for temp_003) -->
     <div class="form-group hidden" id="topicGroup">
-        <label for="topic" style="font-weight: 600; font-size: 16px;">Create your own</label>
-        <input type="text" id="topic" name="topic" placeholder="e.g., What to check before buying a used car" required="required">
-        
-        <div style="text-align: center; margin: 20px 0; color: #999; font-weight: 600; font-size: 14px;">OR</div>
-        
-        <label style="font-weight: 600; font-size: 16px;">Let us help</label>
-        
-        <!-- Radio buttons for suggestion mode -->
-        <div style="margin-top: 10px; margin-bottom: 15px;">
-            <label style="display: flex; align-items: center; margin-bottom: 10px; cursor: pointer; font-weight: 400;">
-                <input type="radio" name="suggestionMode" value="lucky" checked onchange="handleSuggestionModeChange()" style="margin-right: 8px;">
-                <span>I'm feeling lucky</span>
+        <fieldset>
+            <legend>Capitol Smarts Topic</legend>
+            <label for="topic">
+                Create your own
+                <span class="label-description">Specify a topic.</span>
             </label>
-            <label style="display: flex; align-items: center; cursor: pointer; font-weight: 400;">
-                <input type="radio" name="suggestionMode" value="guided" onchange="handleSuggestionModeChange()" style="margin-right: 8px;">
-                <span>Give me topics about...</span>
+            <input type="text" id="topic" name="topic" placeholder="e.g., What to check before buying a used car" required="required">
+            
+            <div style="text-align: left; margin: 15px; color: #000; font-weight: 600; font-size: 18px;">OR</div>
+            
+            <label>
+                Let us help
+                <span class="label-description">We make suggestions for you.</span>
             </label>
-        </div>
-        
-        <!-- Topic Guidance input (hidden unless "guided" mode selected) -->
-        <div id="topicGuidanceContainer" style="display: none; margin-bottom: 15px;">
-            <input type="text" id="topicGuidance" name="topic_guidance" placeholder="e.g., winter driving, Thanksgiving travel, financing" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
-        </div>
-        
-        <!-- Suggest Topics Button -->
-        <div style="margin-bottom: 15px;">
-            <button type="button" id="suggestTopicsBtn" onclick="suggestTopics()" style="padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; width: 100%;">
-                💡 Suggest Topics
-            </button>
-        </div>
-        
-        <!-- Suggestions Display -->
-        <div id="topicSuggestions" style="display: none; margin-top: 15px; padding: 15px; background: #f8f9ff; border-radius: 8px; border-left: 4px solid #667eea;">
-            <div style="font-size: 13px; color: #666; margin-bottom: 10px; font-weight: 600;">Click a suggestion to use it:</div>
-            <div id="suggestionsList"></div>
-            <button type="button" id="suggestMoreBtn" onclick="suggestTopics()" style="margin-top: 10px; padding: 8px 16px; background: #f0f0f0; color: #333; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; width: 100%;">
-                🔄 Suggest More
-            </button>
-        </div>
+            
+            <!-- Radio buttons for suggestion mode -->
+            <div style="margin-top: 10px; margin-bottom: 15px;">
+                <label style="display: flex; align-items: center; margin-bottom: 10px; cursor: pointer; font-weight: 400;">
+                    <input type="radio" name="suggestionMode" value="lucky" checked onchange="handleSuggestionModeChange()" style="margin-right: 8px;">
+                    <span>I'm feeling lucky</span>
+                </label>
+                <label style="display: flex; align-items: center; cursor: pointer; font-weight: 400;">
+                    <input type="radio" name="suggestionMode" value="guided" onchange="handleSuggestionModeChange()" style="margin-right: 8px;">
+                    <span>Give me topics about...</span>
+                </label>
+            </div>
+            
+            <!-- Topic Guidance input (hidden unless "guided" mode selected) -->
+            <div id="topicGuidanceContainer" style="display: none; margin-bottom: 15px;">
+                <input type="text" id="topicGuidance" name="topic_guidance" oninput="handleGuidanceChange()" placeholder="e.g., winter driving, Thanksgiving travel, financing" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+            </div>
+            
+            <!-- Suggest Topics Button -->
+            <div style="margin-bottom: 15px;">
+                <button type="button" id="suggestTopicsBtn" onclick="suggestTopics()" style="padding: 5px 12px 7px 12px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                    💡 Suggest Topics
+                </button>
+            </div>
+            
+            <!-- Suggestions Display -->
+            <div id="topicSuggestions" style="display: none; margin-top: 15px; padding: 15px; background: #f8f9ff; border-radius: 8px; border-left: 4px solid #667eea;">
+                <div style="font-size: 13px; color: #666; margin-bottom: 10px; font-weight: 600;">Click a suggestion to use it:</div>
+                <div id="suggestionsList"></div>
+                <!-- <button type="button" id="suggestMoreBtn" onclick="suggestTopics()" style="margin-top: 10px; padding: 8px 16px; background: #f0f0f0; color: #333; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; width: 100%;">
+                    🔄 Suggest More
+                </button> -->
+            </div>
+        </fieldset>
     </div>
 
 
@@ -772,7 +781,11 @@ async function suggestTopics() {
     } finally {
         // Re-enable button
         suggestBtn.disabled = false;
-        suggestBtn.textContent = '💡 Suggest Topics';
+        if (topicGuidance.length > 1) {
+            suggestBtn.textContent = '💡 Suggest more topics related to ' + topicGuidance;
+        } else {
+            suggestBtn.textContent = '💡 Suggest more topics';
+        }
     }
 }
 
@@ -784,6 +797,15 @@ function handleSuggestionModeChange() {
         guidanceContainer.style.display = 'block';
     } else {
         guidanceContainer.style.display = 'none';
+    }
+}
+
+function handleGuidanceChange() {
+    const topicGuidance = document.getElementById('topicGuidance').value.trim();
+    if (topicGuidance.length > 0) {
+        suggestBtn.textContent = '💡 Suggest topics related to ' + topicGuidance;
+    } else {
+        suggestBtn.textContent = '💡 Suggest topics';
     }
 }
 
@@ -813,3 +835,4 @@ loadInventory();
 </script>
 </body>
 </html>
+
