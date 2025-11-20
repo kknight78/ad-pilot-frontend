@@ -476,9 +476,13 @@ function handleTemplateChange() {
         
     } else if (selectedTemplate == 'temp_003') {
         // Template 3: Organic/Education - no vehicles needed
-        // Don't show topicGroup yet - wait for length selection
+        
         vehiclesGroup.classList.add('hidden');
 
+        // If length is already selected, show topic section
+        if (document.getElementById('scriptLength').value) {
+            topicGroup.classList.remove('hidden');
+        }
         // Require topic
         document.getElementById('topic').required = true;
         
@@ -849,6 +853,7 @@ loadInventory();
 </script>
 </body>
 </html>
+
 
 
 
