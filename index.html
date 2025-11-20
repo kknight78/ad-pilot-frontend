@@ -297,7 +297,7 @@ color: #e65100;
                 Create your own
                 <span class="label-description">Specify a topic.</span>
             </label>
-            <input type="text" id="topic" name="topic" placeholder="e.g., What to check before buying a used car" required="required">
+            <input type="text" id="topic" name="topic" placeholder="e.g., What to check before buying a used car">
             
             <div style="text-align: left; margin: 15px; color: #000; font-weight: 600; font-size: 18px;">OR</div>
             
@@ -449,6 +449,9 @@ function handleTemplateChange() {
         }
         themeGroup.classList.remove('hidden');
         vehiclesGroup.classList.remove('hidden');
+
+        // Remove require for topic
+        document.getElementById('topic').required = false;
         
         // Make vehicle selects required again
         const vehicleSelects = document.querySelectorAll('#vehicleContainer select');
@@ -463,6 +466,9 @@ function handleTemplateChange() {
 
         themeGroup.classList.remove('hidden');
         vehiclesGroup.classList.remove('hidden');
+
+        // Remove require for topic
+        document.getElementById('topic').required = false;
         
         // Make vehicle selects required again
         const vehicleSelects = document.querySelectorAll('#vehicleContainer select');
@@ -472,6 +478,9 @@ function handleTemplateChange() {
         // Template 3: Organic/Education - no vehicles needed
         // Don't show topicGroup yet - wait for length selection
         vehiclesGroup.classList.add('hidden');
+
+        // Require topic
+        document.getElementById('topic').required = true;
         
         // Remove required from any existing vehicle selects
         const vehicleSelects = document.querySelectorAll('#vehicleContainer select');
@@ -840,6 +849,7 @@ loadInventory();
 </script>
 </body>
 </html>
+
 
 
 
