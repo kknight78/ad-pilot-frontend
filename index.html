@@ -448,7 +448,7 @@ function handleTemplateChange() {
             vehicleCount--;
         }
         themeGroup.classList.remove('hidden');
-        vehiclesGroup.classList.add('hidden');
+        vehiclesGroup.classList.remove('hidden');
         
         // Make vehicle selects required again
         const vehicleSelects = document.querySelectorAll('#vehicleContainer select');
@@ -462,7 +462,7 @@ function handleTemplateChange() {
         addBtn.disabled = vehicleCount >= MAX_CARS || vehicleCount === 0;
 
         themeGroup.classList.remove('hidden');
-        vehiclesGroup.classList.add('hidden');
+        vehiclesGroup.classList.remove('hidden');
         
         // Make vehicle selects required again
         const vehicleSelects = document.querySelectorAll('#vehicleContainer select');
@@ -840,6 +840,7 @@ loadInventory();
 </script>
 </body>
 </html>
+
 
 
 
