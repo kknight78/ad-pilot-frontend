@@ -385,6 +385,9 @@ color: #e65100;
 
     <!-- Status Messages -->
     <div id="status" class="status"></div>
+    <br>
+    <input type="checkbox" id="testMode" name="test_mode" value="false">
+    <label>Test Mode (reuse cached assets)</label>
 </form>
 </div>
 
@@ -647,6 +650,7 @@ document.getElementById('adForm').addEventListener('submit', async (e) => {
     const avatarValue = formData.get('avatar');
     const email = formData.get('email');
     const scriptLength = formData.get('script_length');
+    const testMode = formData.get('test_mode');
     
     // Parse avatar (format: avatar_id|voice_id|chromakey_color|chromakey_sensitivity)
     const [avatar_id, voice_id, chromakey_color, chromakey_sensitivity, avatar_name] = avatarValue.split('|');
@@ -683,7 +687,8 @@ document.getElementById('adForm').addEventListener('submit', async (e) => {
         avatar_name: avatar_name,
         script_length: scriptLength,
         email: email,
-        vins: vins
+        vins: vins,
+        test_mode: testMode
     };
 
 console.log('Submitting payload:', payload);
@@ -853,6 +858,7 @@ loadInventory();
 </script>
 </body>
 </html>
+
 
 
 
