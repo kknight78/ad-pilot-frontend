@@ -652,7 +652,7 @@ document.getElementById('adForm').addEventListener('submit', async (e) => {
     const scriptLength = formData.get('script_length');
     const testMode = document.getElementById('testMode').checked;
     formData.set('test_mode', testMode);
-    const testMode = formData.get('test_mode');
+    testMode = formData.get('test_mode');
     
     // Parse avatar (format: avatar_id|voice_id|chromakey_color|chromakey_sensitivity)
     const [avatar_id, voice_id, chromakey_color, chromakey_sensitivity, avatar_name] = avatarValue.split('|');
@@ -860,6 +860,7 @@ loadInventory();
 </script>
 </body>
 </html>
+
 
 
 
