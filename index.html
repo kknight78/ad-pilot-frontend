@@ -786,7 +786,7 @@ async function suggestTopics() {
                 `<div style="padding: 10px; margin-bottom: 8px; background: white; border-radius: 6px; cursor: pointer; border: 2px solid #e0e0e0; transition: all 0.2s;" 
                      onmouseover="this.style.borderColor='#667eea'; this.style.background='#f8f9ff';" 
                      onmouseout="this.style.borderColor='#e0e0e0'; this.style.background='white';"
-                     onclick="document.getElementById('topic').value = '${topic.replace(/'/g, "\\'")}'; document.getElementById('topicSuggestions').style.display='none';">
+                     onclick="document.getElementById('topic').value = '${topic.replace(/'/g, "\\'")}'; checkFormValidity(); document.getElementById('topicSuggestions').style.display='none';">
                     ${topic}
                 </div>`
             ).join('');
@@ -859,6 +859,7 @@ loadInventory();
 </script>
 </body>
 </html>
+
 
 
 
