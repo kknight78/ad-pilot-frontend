@@ -1,585 +1,1314 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ad Pilot - TikTok Ad Generator</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 40px 20px;
-        }
-        
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 32px;
-        }
-        
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 16px;
-        }
-        
-        .form-group {
-            margin-bottom: 25px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        
-        .label-description {
-            font-weight: 400;
-            color: #666;
-            font-size: 13px;
-            margin-top: 4px;
-        }
-        
-        input[type="text"],
-        input[type="email"],
-        select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        
-        input[type="text"]:focus,
-        input[type="email"]:focus,
-        select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ad Pilot - Video Generator</title>
+<style>
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
 
-        /* Checkbox styling */
-        .checkbox-group {
-            margin-left: 20px;
-            padding: 15px;
-            border-left: 3px solid #667eea;
-            background: #f8f9ff;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
+body {
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+min-height: 100vh;
+padding: 40px 20px;
+}
 
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-        }
+.container {
+max-width: 600px;
+margin: 0 auto;
+background: white;
+border-radius: 20px;
+padding: 40px;
+box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
 
-        input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            margin-right: 10px;
-            cursor: pointer;
-        }
-        
-        .vehicle-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            align-items: center;
-        }
-        
-        .vehicle-group select {
-            flex: 1;
-        }
-        
-        .remove-vehicle {
-            padding: 12px 16px;
-            background: #000000;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 18px;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
-        
-        .remove-vehicle:hover {
-            background: #333333;
-        }
-        
-        .add-vehicle {
-            width: 100%;
-            padding: 12px;
-            background: #f0f0f0;
-            color: #333;
-            border: 2px dashed #ccc;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-        
-        .add-vehicle:hover:not(:disabled) {
-            background: #e0e0e0;
-            border-color: #999;
-        }
-        
-        .add-vehicle:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        button[type="submit"] {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        
-        button[type="submit"]:hover {
-            transform: translateY(-2px);
-        }
-        
-        button[type="submit"]:active {
-            transform: translateY(0);
-        }
-        
-        button[type="submit"]:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .status {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            display: none;
-        }
-        
-        .status.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .status.loading {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
+h1 {
+color: #333;
+margin-bottom: 10px;
+font-size: 32px;
+}
 
-        .hidden {
-            display: none;
-        }
+.subtitle {
+color: #666;
+margin-bottom: 30px;
+font-size: 16px;
+}
 
-        /* Template badge styling */
-        .template-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-left: 8px;
-        }
+.form-group {
+margin-bottom: 25px;
+}
 
-        .template-badge.multi {
-            background: #e3f2fd;
-            color: #1976d2;
-        }
+label {
+display: block;
+margin-bottom: 8px;
+color: #333;
+font-weight: 600;
+font-size: 14px;
+}
 
-        .template-badge.spotlight {
-            background: #fff3e0;
-            color: #e65100;
-        }
-    </style>
+.label-description {
+font-weight: 400;
+color: #666;
+font-size: 13px;
+margin-top: 4px;
+}
+
+input[type="text"],
+input[type="email"],
+select {
+width: 100%;
+padding: 12px;
+border: 2px solid #e0e0e0;
+border-radius: 8px;
+font-size: 16px;
+transition: border-color 0.3s;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+select:focus {
+outline: none;
+border-color: #667eea;
+}
+
+/* Checkbox styling */
+.checkbox-group {
+margin-left: 20px;
+padding: 15px;
+border-left: 3px solid #667eea;
+background: #f8f9ff;
+border-radius: 8px;
+margin-top: 10px;
+}
+
+.checkbox-label {
+display: flex;
+align-items: center;
+cursor: pointer;
+}
+
+input[type="checkbox"] {
+width: 20px;
+height: 20px;
+margin-right: 10px;
+cursor: pointer;
+}
+
+.vehicle-group {
+display: flex;
+gap: 10px;
+margin-bottom: 15px;
+align-items: center;
+}
+
+.vehicle-group select {
+flex: 1;
+}
+
+.remove-vehicle {
+padding: 12px 16px;
+background: #000000;
+color: white;
+border: none;
+border-radius: 8px;
+cursor: pointer;
+font-size: 18px;
+font-weight: 600;
+transition: background 0.2s;
+}
+
+.remove-vehicle:hover {
+background: #333333;
+}
+
+.add-vehicle {
+width: 100%;
+padding: 12px;
+background: #f0f0f0;
+color: #333;
+border: 2px dashed #ccc;
+border-radius: 8px;
+cursor: pointer;
+font-size: 14px;
+font-weight: 600;
+transition: all 0.2s;
+}
+
+.add-vehicle:hover:not(:disabled) {
+background: #e0e0e0;
+border-color: #999;
+}
+
+.add-vehicle:disabled {
+opacity: 0.5;
+cursor: not-allowed;
+}
+
+button[type="submit"],
+.btn-primary {
+width: 100%;
+padding: 16px;
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+color: white;
+border: none;
+border-radius: 8px;
+font-size: 18px;
+font-weight: 600;
+cursor: pointer;
+transition: transform 0.2s;
+}
+
+button[type="submit"]:hover,
+.btn-primary:hover {
+transform: translateY(-2px);
+}
+
+button[type="submit"]:active,
+.btn-primary:active {
+transform: translateY(0);
+}
+
+button[type="submit"]:disabled,
+.btn-primary:disabled {
+opacity: 0.5;
+cursor: not-allowed;
+transform: none;
+}
+
+.btn-secondary {
+width: 100%;
+padding: 14px;
+background: #f0f0f0;
+color: #333;
+border: 2px solid #ddd;
+border-radius: 8px;
+font-size: 16px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.2s;
+}
+
+.btn-secondary:hover:not(:disabled) {
+background: #e0e0e0;
+border-color: #bbb;
+}
+
+.btn-secondary:disabled {
+opacity: 0.5;
+cursor: not-allowed;
+}
+
+.button-group {
+display: flex;
+gap: 12px;
+margin-top: 20px;
+}
+
+.button-group button {
+flex: 1;
+}
+
+.status {
+margin-top: 20px;
+padding: 15px;
+border-radius: 8px;
+display: none;
+}
+
+.status.success {
+background: #d4edda;
+color: #155724;
+border: 1px solid #c3e6cb;
+}
+
+.status.error {
+background: #f8d7da;
+color: #721c24;
+border: 1px solid #f5c6cb;
+}
+
+.status.loading {
+background: #d1ecf1;
+color: #0c5460;
+border: 1px solid #bee5eb;
+}
+
+.hidden {
+display: none !important;
+}
+
+/* Template badge styling */
+.template-badge {
+display: inline-block;
+padding: 4px 12px;
+border-radius: 12px;
+font-size: 12px;
+font-weight: 600;
+margin-left: 8px;
+}
+
+.template-badge.multi {
+background: #e3f2fd;
+color: #1976d2;
+}
+
+.template-badge.spotlight {
+background: #fff3e0;
+color: #e65100;
+}
+
+/* Script Editor Styles */
+.script-editor {
+background: #f8f9ff;
+border: 2px solid #667eea;
+border-radius: 12px;
+padding: 24px;
+margin-top: 20px;
+}
+
+.script-editor h2 {
+color: #333;
+font-size: 20px;
+margin-bottom: 16px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.script-section {
+margin-bottom: 20px;
+}
+
+.script-section label {
+font-size: 13px;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+color: #667eea;
+margin-bottom: 8px;
+}
+
+.script-section textarea {
+width: 100%;
+padding: 12px;
+border: 2px solid #e0e0e0;
+border-radius: 8px;
+font-size: 15px;
+font-family: inherit;
+line-height: 1.5;
+resize: vertical;
+transition: border-color 0.3s;
+}
+
+.script-section textarea:focus {
+outline: none;
+border-color: #667eea;
+}
+
+.script-section textarea.hook {
+min-height: 60px;
+}
+
+.script-section textarea.body {
+min-height: 200px;
+}
+
+.script-section textarea.cta {
+min-height: 80px;
+}
+
+.script-meta {
+display: flex;
+gap: 16px;
+margin-bottom: 16px;
+flex-wrap: wrap;
+}
+
+.script-meta-item {
+background: white;
+padding: 8px 14px;
+border-radius: 20px;
+font-size: 13px;
+color: #666;
+border: 1px solid #e0e0e0;
+}
+
+.script-meta-item strong {
+color: #333;
+}
+
+.script-actions {
+display: flex;
+gap: 12px;
+margin-top: 20px;
+}
+
+.script-actions button {
+flex: 1;
+padding: 14px;
+border-radius: 8px;
+font-size: 15px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.2s;
+}
+
+.btn-regenerate {
+background: white;
+color: #667eea;
+border: 2px solid #667eea;
+}
+
+.btn-regenerate:hover {
+background: #f8f9ff;
+}
+
+.btn-approve {
+background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+color: white;
+border: none;
+}
+
+.btn-approve:hover {
+transform: translateY(-1px);
+box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-back {
+background: #f0f0f0;
+color: #666;
+border: none;
+}
+
+.btn-back:hover {
+background: #e0e0e0;
+}
+
+.word-count {
+font-size: 12px;
+color: #999;
+text-align: right;
+margin-top: 4px;
+}
+
+/* Timing estimate */
+.timing-estimate {
+background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+border-radius: 8px;
+padding: 12px 16px;
+margin-top: 16px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.timing-estimate .icon {
+font-size: 20px;
+}
+
+.timing-estimate .text {
+font-size: 14px;
+color: #333;
+}
+
+.timing-estimate .duration {
+font-weight: 600;
+color: #667eea;
+}
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎬 Ad Pilot</h1>
-        <p class="subtitle">Generate TikTok car ads with AI</p>
-        
-        <form id="adForm">
-            <!-- Template Selection -->
-            <div class="form-group">
-                <label for="template">
-                    Template
-                    <span class="label-description">Choose your ad style</span>
+<div class="container">
+<h1>🎬 Ad Pilot Video Generator</h1>
+<p class="subtitle">Drive Business, Boost Social Presence</p>
+
+<!-- FORM VIEW -->
+<form id="adForm">
+    <!-- Template Selection -->
+    <div class="form-group">
+        <label for="template">
+            Template
+            <span class="label-description">Choose your video style</span>
+        </label>
+        <select id="template" name="template" required onchange="handleTemplateChange()">
+            <option value="">Select template...</option>
+            <option value="temp_001">🚗 Multi-Car Showcase (1-5 cars)</option>
+            <option value="temp_002">⭐ Single Vehicle Spotlight (premium)</option>
+            <option value="temp_003">💡 Capitol Smarts (Organic / Education)</option>
+        </select>
+    </div>
+
+    <!-- Platform Selection -->
+    <div class="form-group hidden" id="platformGroup">
+        <label for="platform">
+            Platform
+            <span class="label-description">Where will this video be posted?</span>
+        </label>
+        <select id="platform" name="platform" required onchange="checkFormValidity()">
+            <option value="">Select platform...</option>
+            <option value="tiktok">TikTok</option>
+            <option value="youtube">YouTube Shorts</option>
+            <option value="instagram">Instagram Reels</option>
+            <option value="facebook">Facebook Reels</option>
+        </select>
+    </div>
+
+    <!-- Avatar Selection -->
+    <div class="form-group hidden" id="avatarGroup">
+        <label for="avatar">
+        Avatar Presenter
+        </label>
+        <select id="avatar" name="avatar" required>
+            <option value="">Select avatar...</option>
+            <option value="229bfc03d4d24d5ab7a5c71ce4b10d4b|bWI0w7QVOZiBvlJQahML|#89be5a|22|Shad">🎭 Awesome Shad</option>
+            <option value="5b9c75a2f13e4d60b09bcfdafa7339dd|eezuv0zKVdVTS0jHdxFa|#6da264|8|Kelly">💃 Sexy Kelly, not Kelly</option>
+            <option value="f9bb73f75160463ea82fe93f71592fce|xvBFrvpBNGBaCHOlL3IP|#7fc741|29|Gary">😌 Calm Gary Knight</option>
+        </select>
+    </div>
+
+    <!-- Target Length (show early for temp_003) -->
+    <div class="form-group hidden" id="lengthGroup">
+        <label for="scriptLength" title="TikTok: 15-30s | Instagram Reels: 20-40s | YouTube Shorts: 30-60s | Facebook Reels: 30-60s" style="cursor: help;">
+            Target Length ℹ️
+            <span class="label-description">How detailed should the script be?</span>
+        </label>
+        <select id="scriptLength" name="script_length" required onchange="handleLengthChange()">
+            <option value="">Select length...</option>
+            <option value="quick">Brief (~15-30 sec)</option>
+            <option value="standard">Standard (~30-45 sec)</option>
+            <option value="detailed">Detailed (~45-60 sec)</option>
+        </select>
+    </div>
+
+    <!-- Educational Topic Section (only shows after length selected for temp_003) -->
+    <div class="form-group hidden" id="topicGroup">
+        <label>Capitol Smarts Topic
+            <span class="label-description">What should the video be about?</span>
+        </label>
+        <fieldset style="padding:20px;background-color:#f8f8f8">
+            <label for="topic">
+                Create your own
+                <span class="label-description">Specify a topic.</span>
+            </label>
+            <input type="text" id="topic" name="topic" placeholder="e.g., What to check before buying a used car">
+
+            <div style="text-align: left; margin: 15px; color: #000; font-weight: 600; font-size: 18px;">OR</div>
+
+            <label>
+                Let us help
+                <span class="label-description">We make suggestions for you.</span>
+            </label>
+
+            <!-- Radio buttons for suggestion mode -->
+            <div style="margin-top: 10px; margin-bottom: 15px;">
+                <label style="display: flex; align-items: center; margin-bottom: 10px; cursor: pointer; font-weight: 400;">
+                    <input type="radio" name="suggestionMode" value="lucky" checked onchange="handleSuggestionModeChange()" style="margin-right: 8px;">
+                    <span>I'm feeling lucky</span>
                 </label>
-                <select id="template" name="template" required onchange="handleTemplateChange()">
-                    <option value="">Select template...</option>
-                    <option value="temp_001">🚗 Multi-Car Showcase (1-5 cars)</option>
-                    <option value="temp_002">⭐ Single Vehicle Spotlight (premium)</option>
-                </select>
+                <label style="display: flex; align-items: center; cursor: pointer; font-weight: 400;">
+                    <input type="radio" name="suggestionMode" value="guided" onchange="handleSuggestionModeChange()" style="margin-right: 8px;">
+                    <span>Give me topics about...</span>
+                </label>
             </div>
 
-            <!-- Theme (always visible, optional) -->
-            <div class="form-group">
-                <label for="theme">
-                    Theme (Optional)
-                    <span class="label-description">e.g., Summer Blowout, Back to School, Harvest Deals</span>
-                </label>
-                <input type="text" id="theme" name="theme" placeholder="Leave blank for generic ad">
+            <!-- Topic Guidance input (hidden unless "guided" mode selected) -->
+            <div id="topicGuidanceContainer" style="display: none; margin-bottom: 15px;">
+                <input type="text" id="topicGuidance" name="topic_guidance" oninput="handleGuidanceChange()" placeholder="e.g., winter driving, Thanksgiving travel, financing" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
             </div>
 
-            <!-- Include Animation Checkbox (HIDDEN - coming soon!) -->
-            <div class="checkbox-group hidden" id="animationGroup" style="display: none !important;">
-                <label class="checkbox-label">
-                    <input type="checkbox" id="includeAnimation" name="include_animation" value="false">
-                    <span>
-                        <strong>Include theme animation</strong>
-                        <div class="label-description">Adds a 2-second animated intro based on your theme</div>
-                    </span>
-                </label>
-            </div>
-
-            <!-- Avatar Selection -->
-            <div class="form-group">
-                <label for="avatar">
-                    Avatar Presenter
-                </label>
-                <select id="avatar" name="avatar" required>
-                    <option value="">Select avatar...</option>
-                    <option value="229bfc03d4d24d5ab7a5c71ce4b10d4b|bWI0w7QVOZiBvlJQahML|#89be5a|22">🎭 Awesome Shad</option>
-                    <option value="f9bb73f75160463ea82fe93f71592fce|xvBFrvpBNGBaCHOlL3IP|#7fc741|29">😌 Calm Gary Knight</option>
-                    <option value="5b9c75a2f13e4d60b09bcfdafa7339dd|eezuv0zKVdVTS0jHdxFa|#6da264|8">💃 Sexy Kelly, not Kelly</option>
-                </select>
-            </div>
-
-            <!-- Email -->
-            <div class="form-group">
-                <label for="email">
-                    Email Address
-                    <span class="label-description">We'll send the finished video here</span>
-                </label>
-                <input type="email" id="email" name="email" required placeholder="your.email@example.com">
-            </div>
-
-            <!-- Vehicles -->
-            <div class="form-group">
-                <label id="vehicleLabel">Vehicles (1-5)</label>
-                <div id="vehicleContainer">
-                    <!-- Vehicle groups added dynamically -->
-                </div>
-                <button type="button" id="addVehicleBtn" class="add-vehicle" onclick="addVehicle()" disabled>
-                    + Add Vehicle (max 5)
+            <!-- Suggest Topics Button -->
+            <div style="margin-bottom: 15px;">
+                <button type="button" id="suggestTopicsBtn" onclick="suggestTopics()" style="padding: 5px 12px 7px 12px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                    💡 Suggest Topics
                 </button>
             </div>
 
-            <!-- Submit Button -->
-            <button type="submit" id="submitBtn" disabled>
-                🚀 Generate Ad
-            </button>
-
-            <!-- Status Messages -->
-            <div id="status" class="status"></div>
-        </form>
+            <!-- Suggestions Display -->
+            <div id="topicSuggestions" style="display: none; margin-top: 15px; padding: 15px; background: #f8f9ff; border-radius: 8px; border-left: 4px solid #667eea;">
+                <div style="font-size: 13px; color: #666; margin-bottom: 10px; font-weight: 600;">Click a suggestion to use it:</div>
+                <div id="suggestionsList"></div>
+            </div>
+        </fieldset>
     </div>
 
-    <script>
-        const WEBHOOK_URL = 'https://corsproxy.io/?https://kelly-ads.app.n8n.cloud/webhook/ad-pilot-dev';
-        const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1kgSVMgpWVSFeAAz4M2LpNmIbuhaJKds9gnbsvLdP-t4/gviz/tq?tqx=out:json&sheet=Feed';
-        let MAX_CARS = 5; // Will change based on template
+
+    <div class="form-group hidden" id="themeGroup">
+        <label for="theme">
+            Theme (Optional)
+            <span class="label-description">e.g., Summer Blowout, Back to School, Harvest Deals</span>
+        </label>
+        <input type="text" id="theme" name="theme" placeholder="Leave blank for generic ad">
+    </div>
+
+    <!-- Include Animation Checkbox (HIDDEN - coming soon!) -->
+    <div class="checkbox-group hidden" id="animationGroup" style="display: none !important;">
+        <label class="checkbox-label">
+            <input type="checkbox" id="includeAnimation" name="include_animation" value="false">
+            <span>
+                <strong>Include theme animation</strong>
+                <div class="label-description">Adds a 2-second animated intro based on your theme</div>
+            </span>
+        </label>
+    </div>
+
+    <!-- Email -->
+    <div class="form-group hidden" id="emailGroup">
+        <label for="email">
+            Email Address
+            <span class="label-description">We'll send the finished video here</span>
+        </label>
+        <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+    </div>
+
+    <!-- Vehicles -->
+    <div class="form-group hidden" id="vehiclesGroup">
+        <label id="vehicleLabel">Vehicles (1-5)</label>
+        <div id="vehicleContainer">
+            <!-- Vehicle groups added dynamically -->
+        </div>
+        <button type="button" id="addVehicleBtn" class="add-vehicle" onclick="addVehicle()" disabled>
+            + Add Vehicle (max 5)
+        </button>
+    </div>
+
+    <!-- Action Buttons -->
+    <div id="formButtons">
+        <div class="button-group">
+            <button type="button" id="previewBtn" class="btn-secondary" onclick="previewScript()" disabled>
+                📝 Preview Script
+            </button>
+            <button type="submit" id="submitBtn" class="btn-primary" disabled>
+                🚀 Generate Ad
+            </button>
+        </div>
+    </div>
+
+    <!-- Status Messages -->
+    <div id="status" class="status"></div>
+    
+    <div style="margin-top: 20px;">
+        <input type="checkbox" id="testMode" name="test_mode" value="true">
+        <label for="testMode" style="display: inline; font-weight: normal;">Test Mode (cache API responses for debugging)</label>
+    </div>
+</form>
+
+<!-- SCRIPT EDITOR VIEW (hidden by default) -->
+<div id="scriptEditor" class="script-editor hidden">
+    <h2>📝 Review Your Script</h2>
+    
+    <div class="script-meta">
+        <div class="script-meta-item">
+            <strong>Template:</strong> <span id="metaTemplate">-</span>
+        </div>
+        <div class="script-meta-item">
+            <strong>Length:</strong> <span id="metaLength">-</span>
+        </div>
+        <div class="script-meta-item">
+            <strong>Presenter:</strong> <span id="metaPresenter">-</span>
+        </div>
+    </div>
+    
+    <div class="script-section">
+        <label for="editHook">Hook (Opening)</label>
+        <textarea id="editHook" class="hook" placeholder="The attention-grabbing opening..."></textarea>
+        <div class="word-count" id="hookWordCount">0 words</div>
+    </div>
+    
+    <div class="script-section">
+        <label for="editBody">Body (Main Content)</label>
+        <textarea id="editBody" class="body" placeholder="The main content of the script..."></textarea>
+        <div class="word-count" id="bodyWordCount">0 words</div>
+    </div>
+    
+    <div class="script-section">
+        <label for="editCta">Call to Action (Closing)</label>
+        <textarea id="editCta" class="cta" placeholder="The closing call to action..."></textarea>
+        <div class="word-count" id="ctaWordCount">0 words</div>
+    </div>
+    
+    <div class="timing-estimate">
+        <span class="icon">⏱️</span>
+        <span class="text">Estimated duration: <span class="duration" id="estimatedDuration">~30 seconds</span></span>
+    </div>
+    
+    <div class="script-actions">
+        <button type="button" class="btn-back" onclick="backToForm()">
+            ← Back
+        </button>
+        <button type="button" class="btn-regenerate" onclick="regenerateScript()">
+            🔄 Regenerate
+        </button>
+        <button type="button" class="btn-approve" onclick="approveAndGenerate()">
+            ✅ Approve & Generate Video
+        </button>
+    </div>
+    
+    <div id="editorStatus" class="status"></div>
+</div>
+
+</div>
+
+<script>
+const WEBHOOK_URL = 'https://corsproxy.io/?https://kelly-ads.app.n8n.cloud/webhook/ad-pilot';
+const TOPIC_SUGGEST_URL = 'https://corsproxy.io/?https://kelly-ads.app.n8n.cloud/webhook/topic-suggest';
+const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1kgSVMgpWVSFeAAz4M2LpNmIbuhaJKds9gnbsvLdP-t4/gviz/tq?tqx=out:json&sheet=Feed';
+let MAX_CARS = 5;
+
+let vehicleCount = 0;
+let inventory = [];
+let selectedTemplate = '';
+
+// Store the full workflow config after script preview
+let cachedWorkflowConfig = null;
+
+// =====================
+// SCRIPT EDITOR FUNCTIONS
+// =====================
+
+async function previewScript() {
+    const payload = buildPayload();
+    if (!payload) return;
+    
+    // Add preview_mode flag
+    payload.preview_mode = true;
+    
+    console.log('Previewing script with payload:', payload);
+    
+    showStatus('Generating script preview... ✍️', 'loading');
+    document.getElementById('previewBtn').disabled = true;
+    document.getElementById('submitBtn').disabled = true;
+    
+    try {
+        const response = await fetch(WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
         
-        let vehicleCount = 0;
-        let inventory = [];
-        let selectedTemplate = '';
-
-        // Animation option hidden for now - coming soon!
-        // (Theme still works to influence the script)
-
-        function handleTemplateChange() {
-            selectedTemplate = document.getElementById('template').value;
-            const addBtn = document.getElementById('addVehicleBtn');
-            const vehicleLabel = document.getElementById('vehicleLabel');
+        const result = await response.json();
+        console.log('Preview response:', result);
+        
+        if (response.ok && result.script) {
+            // Store the full config for later
+            cachedWorkflowConfig = result;
             
-            if (selectedTemplate === 'temp_002') {
-                // Template 2: Single vehicle only
-                MAX_CARS = 1;
-                vehicleLabel.textContent = 'Vehicle (1)';
-                addBtn.textContent = '+ Add 1 Vehicle';
-                addBtn.disabled = true;
-                
-                // Remove extra vehicles if any
-                while (vehicleCount > 1) {
-                    const lastGroup = document.querySelector(`[data-vehicle-num="${vehicleCount}"]`);
-                    if (lastGroup) lastGroup.remove();
-                    vehicleCount--;
-                }
-                
-            } else if (selectedTemplate === 'temp_001') {
-                // Template 1: 1-5 vehicles
-                MAX_CARS = 5;
-                vehicleLabel.textContent = 'Vehicles (1-5)';
-                addBtn.textContent = '+ Add Vehicle (max 5)';
-                addBtn.disabled = vehicleCount >= MAX_CARS || vehicleCount === 0;
-            }
+            // Populate the editor
+            populateScriptEditor(result);
             
-            // Enable submit button check
-            checkFormValidity();
+            // Switch views
+            document.getElementById('adForm').classList.add('hidden');
+            document.getElementById('scriptEditor').classList.remove('hidden');
+            hideStatus();
+        } else {
+            showStatus(`Error: ${result.message || 'Failed to generate script'}`, 'error');
         }
+    } catch (error) {
+        console.error('Preview error:', error);
+        showStatus(`Error: ${error.message}`, 'error');
+    } finally {
+        document.getElementById('previewBtn').disabled = false;
+        document.getElementById('submitBtn').disabled = false;
+    }
+}
 
-        async function loadInventory() {
-            try {
-                const sheetId = INVENTORY_SHEET.match(/\/d\/([a-zA-Z0-9-_]+)/)[1];
-                const response = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`);
-                const text = await response.text();
-                const json = JSON.parse(text.substr(47).slice(0, -2));
-                
-               inventory = json.table.rows.slice(1).map(row => {
-                const cells = row.c;
-                return {
-                    // Corrected Indices
-                    vin: cells[1]?.v || '',      // Column B
-                    make: cells[4]?.v || '',     // Column E
-                    model: cells[5]?.v || '',    // Column F
-                    year: cells[6]?.v || '',     // Column G
-                    price: cells[14]?.v || ''    // Assumes price is in Column O
-                };
-            }).filter(car => car.vin && car.year && car.make && car.model);
-                
-                // Sort by year descending (newest first)
-                inventory.sort((a, b) => b.year - a.year);
-                
-                console.log(`Loaded ${inventory.length} vehicles from inventory`);
-                
-                // Add first vehicle dropdown
-                addVehicle();
-                
-            } catch (error) {
-                console.error('Error loading inventory:', error);
-                showStatus('Error loading vehicle inventory. Please refresh the page.', 'error');
-            }
+function populateScriptEditor(config) {
+    const script = config.script || {};
+    
+    // Set meta info
+    document.getElementById('metaTemplate').textContent = config.template_id || '-';
+    document.getElementById('metaLength').textContent = config.script_length || '-';
+    document.getElementById('metaPresenter').textContent = config.avatar_name || '-';
+    
+    // Set script content
+    document.getElementById('editHook').value = script.hook || '';
+    
+    // Body could be segments array or full_script minus hook/cta
+    let bodyText = '';
+    if (script.segments && Array.isArray(script.segments)) {
+        bodyText = script.segments.join('\n\n');
+    } else if (script.body) {
+        bodyText = script.body;
+    } else if (script.full_script) {
+        // Extract body from full script (remove hook and cta)
+        bodyText = script.full_script
+            .replace(script.hook || '', '')
+            .replace(script.cta || '', '')
+            .trim();
+    }
+    document.getElementById('editBody').value = bodyText;
+    
+    document.getElementById('editCta').value = script.cta || '';
+    
+    // Update word counts
+    updateWordCounts();
+    updateDurationEstimate();
+}
+
+function updateWordCounts() {
+    const hook = document.getElementById('editHook').value;
+    const body = document.getElementById('editBody').value;
+    const cta = document.getElementById('editCta').value;
+    
+    document.getElementById('hookWordCount').textContent = countWords(hook) + ' words';
+    document.getElementById('bodyWordCount').textContent = countWords(body) + ' words';
+    document.getElementById('ctaWordCount').textContent = countWords(cta) + ' words';
+}
+
+function countWords(text) {
+    return text.trim().split(/\s+/).filter(w => w.length > 0).length;
+}
+
+function updateDurationEstimate() {
+    const hook = document.getElementById('editHook').value;
+    const body = document.getElementById('editBody').value;
+    const cta = document.getElementById('editCta').value;
+    
+    const totalWords = countWords(hook) + countWords(body) + countWords(cta);
+    // Average speaking rate: ~150 words per minute = 2.5 words per second
+    const seconds = Math.round(totalWords / 2.5);
+    
+    document.getElementById('estimatedDuration').textContent = `~${seconds} seconds`;
+}
+
+function backToForm() {
+    document.getElementById('scriptEditor').classList.add('hidden');
+    document.getElementById('adForm').classList.remove('hidden');
+    hideStatus();
+}
+
+async function regenerateScript() {
+    // Go back and re-submit with preview mode
+    cachedWorkflowConfig = null;
+    backToForm();
+    await previewScript();
+}
+
+async function approveAndGenerate() {
+    if (!cachedWorkflowConfig) {
+        showEditorStatus('No cached config found. Please regenerate the script.', 'error');
+        return;
+    }
+    
+    // Get the edited script values
+    const editedHook = document.getElementById('editHook').value.trim();
+    const editedBody = document.getElementById('editBody').value.trim();
+    const editedCta = document.getElementById('editCta').value.trim();
+    
+    // Update the cached config with edited script
+    cachedWorkflowConfig.script = {
+        ...cachedWorkflowConfig.script,
+        hook: editedHook,
+        body: editedBody,
+        cta: editedCta,
+        // Rebuild segments from body (split on double newlines)
+        segments: editedBody.split(/\n\n+/).filter(s => s.trim()),
+        // Rebuild full_script
+        full_script: [editedHook, editedBody, editedCta].filter(s => s).join(' ')
+    };
+    
+    // Remove preview_mode so full generation runs
+    delete cachedWorkflowConfig.preview_mode;
+    
+    console.log('Submitting approved config:', cachedWorkflowConfig);
+    
+    showEditorStatus('Generating your video... This may take a few minutes. ⏱️', 'loading');
+    
+    // Disable buttons
+    document.querySelectorAll('.script-actions button').forEach(btn => btn.disabled = true);
+    
+    try {
+        const response = await fetch(WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cachedWorkflowConfig)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            showEditorStatus('Success! Your video is being generated. Check your email in a few minutes. 🎬', 'success');
+            
+            // Reset after success
+            setTimeout(() => {
+                cachedWorkflowConfig = null;
+                backToForm();
+                document.getElementById('adForm').reset();
+                handleTemplateChange(); // Reset form state
+            }, 5000);
+        } else {
+            showEditorStatus(`Error: ${result.message || 'Something went wrong'}`, 'error');
         }
+    } catch (error) {
+        console.error('Generation error:', error);
+        showEditorStatus(`Error: ${error.message}`, 'error');
+    } finally {
+        document.querySelectorAll('.script-actions button').forEach(btn => btn.disabled = false);
+    }
+}
 
-        function addVehicle() {
-            if (vehicleCount >= MAX_CARS) return;
-            
-            vehicleCount++;
-            const container = document.getElementById('vehicleContainer');
-            const vehicleGroup = document.createElement('div');
-            vehicleGroup.className = 'vehicle-group';
-            vehicleGroup.dataset.vehicleNum = vehicleCount;
-            
-            const select = document.createElement('select');
-            select.name = `vehicle${vehicleCount}`;
-            select.required = true;
-            select.onchange = checkFormValidity;
-            
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = 'Select vehicle...';
-            select.appendChild(defaultOption);
-            
-            vehicleGroup.appendChild(select);
-            
-            // Add remove button (hide for first vehicle)
-            if (vehicleCount > 1) {
-                const removeBtn = document.createElement('button');
-                removeBtn.type = 'button';
-                removeBtn.className = 'remove-vehicle';
-                removeBtn.textContent = '−';
-                removeBtn.onclick = () => removeVehicle(vehicleCount);
-                vehicleGroup.appendChild(removeBtn);
-            }
-            
-            container.appendChild(vehicleGroup);
-            populateVehicleDropdowns();
-            checkFormValidity();
+function showEditorStatus(message, type) {
+    const statusDiv = document.getElementById('editorStatus');
+    statusDiv.textContent = message;
+    statusDiv.className = `status ${type}`;
+    statusDiv.style.display = 'block';
+}
+
+// Add event listeners for word count updates
+document.getElementById('editHook').addEventListener('input', () => { updateWordCounts(); updateDurationEstimate(); });
+document.getElementById('editBody').addEventListener('input', () => { updateWordCounts(); updateDurationEstimate(); });
+document.getElementById('editCta').addEventListener('input', () => { updateWordCounts(); updateDurationEstimate(); });
+
+// =====================
+// ORIGINAL FORM FUNCTIONS
+// =====================
+
+function buildPayload() {
+    const formData = new FormData(document.getElementById('adForm'));
+    const template = formData.get('template');
+    const topic = formData.get('topic');
+    const platform = formData.get('platform');
+    const theme = formData.get('theme') || '';
+    const includeAnimation = formData.get('include_animation') === 'true';
+    const avatarValue = formData.get('avatar');
+    const email = formData.get('email');
+    const scriptLength = formData.get('script_length');
+    const testMode = document.getElementById('testMode').checked;
+
+    // Parse avatar (format: avatar_id|voice_id|chromakey_color|chromakey_sensitivity|avatar_name)
+    const [avatar_id, voice_id, chromakey_color, chromakey_sensitivity, avatar_name] = avatarValue.split('|');
+
+    const vins = [];
+    for (let i = 1; i <= vehicleCount; i++) {
+        const vin = formData.get(`vehicle${i}`);
+        if (vin) vins.push(vin);
+    }
+
+    // Validate vehicles if NOT temp_003
+    if (template !== 'temp_003') {
+        if (vins.length === 0) {
+            showStatus('Please select at least one vehicle', 'error');
+            return null;
         }
+    }
 
-        function populateVehicleDropdowns() {
-            const selects = document.querySelectorAll('#vehicleContainer select');
-            const selectedVins = Array.from(selects).map(s => s.value).filter(v => v);
-            
-            selects.forEach(select => {
-                const currentValue = select.value;
-                select.innerHTML = '<option value="">Select vehicle...</option>';
-                
-                inventory.forEach(car => {
-                    if (!selectedVins.includes(car.vin) || car.vin === currentValue) {
-                        const option = document.createElement('option');
-                        option.value = car.vin;
-                        option.textContent = `${car.year} ${car.make} ${car.model}, ${car.price} - ${car.vin}`;
-                        select.appendChild(option);
-                    }
-                });
-                
-                if (currentValue) {
-                    select.value = currentValue;
-                }
-            });
-            
-            const addBtn = document.getElementById('addVehicleBtn');
-            if (selectedTemplate === 'temp_002') {
-                addBtn.disabled = true; // Always disabled for Template 2
-            } else {
-                addBtn.disabled = vehicleCount >= MAX_CARS;
-            }
-        }
+    if (template === 'temp_002' && vins.length > 1) {
+        showStatus('Template 2 only supports 1 vehicle', 'error');
+        return null;
+    }
 
-        function removeVehicle(num) {
-            if (vehicleCount <= 1) return;
-            
-            const vehicleGroup = document.querySelector(`[data-vehicle-num="${num}"]`);
-            vehicleGroup.remove();
+    return {
+        template_id: template.toUpperCase(),
+        theme: theme,
+        topic: topic,
+        platform: platform,
+        include_animation: includeAnimation,
+        avatar_id: avatar_id,
+        voice_id: voice_id,
+        chromakey_color: chromakey_color,
+        chromakey_sensitivity: chromakey_sensitivity,
+        avatar_name: avatar_name,
+        script_length: scriptLength,
+        email: email,
+        vins: vins,
+        test_mode: testMode
+    };
+}
+
+function handleTemplateChange() {
+    selectedTemplate = document.getElementById('template').value;
+
+    const themeGroup = document.getElementById('themeGroup');
+    const topicGroup = document.getElementById('topicGroup');
+    const emailGroup = document.getElementById('emailGroup');
+    const platformGroup = document.getElementById('platformGroup');
+    const vehiclesGroup = document.getElementById('vehiclesGroup');
+    const lengthGroup = document.getElementById('lengthGroup');
+    const avatarGroup = document.getElementById('avatarGroup');
+    const addBtn = document.getElementById('addVehicleBtn');
+    const vehicleLabel = document.getElementById('vehicleLabel');
+
+    // First, hide everything
+    themeGroup.classList.add('hidden');
+    topicGroup.classList.add('hidden');
+    vehiclesGroup.classList.add('hidden');
+    emailGroup.classList.add('hidden');
+    platformGroup.classList.add('hidden');
+    lengthGroup.classList.add('hidden');
+    avatarGroup.classList.add('hidden');
+
+    // If no template selected, stop here
+    if (!selectedTemplate) return;
+
+    // Show common fields for all templates
+    emailGroup.classList.remove('hidden');
+    platformGroup.classList.remove('hidden');
+    lengthGroup.classList.remove('hidden');
+    avatarGroup.classList.remove('hidden');
+
+    if (selectedTemplate === 'temp_002') {
+        // Template 2: Single vehicle only
+        MAX_CARS = 1;
+        vehicleLabel.textContent = 'Vehicle (1)';
+        addBtn.textContent = '+ Add 1 Vehicle';
+        addBtn.disabled = true;
+
+        // Remove extra vehicles if any
+        while (vehicleCount > 1) {
+            const lastGroup = document.querySelector(`[data-vehicle-num="${vehicleCount}"]`);
+            if (lastGroup) lastGroup.remove();
             vehicleCount--;
-            
-            // Renumber remaining vehicles
-            const groups = document.querySelectorAll('.vehicle-group');
-            groups.forEach((group, index) => {
-                const newNum = index + 1;
-                group.dataset.vehicleNum = newNum;
-                const select = group.querySelector('select');
-                select.name = `vehicle${newNum}`;
-                const button = group.querySelector('.remove-vehicle');
-                if (button) {
-                    button.onclick = () => removeVehicle(newNum);
-                }
-            });
-            
-            vehicleCount = groups.length;
-            populateVehicleDropdowns();
         }
+        themeGroup.classList.remove('hidden');
+        vehiclesGroup.classList.remove('hidden');
 
-        function checkFormValidity() {
-            const template = document.getElementById('template').value;
-            const avatar = document.getElementById('avatar').value;
-            const email = document.getElementById('email').value;
-            const selects = document.querySelectorAll('#vehicleContainer select');
-            const hasVehicles = Array.from(selects).some(s => s.value);
-            
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = !(template && avatar && email && hasVehicles);
+        document.getElementById('topic').required = false;
+
+        const vehicleSelects = document.querySelectorAll('#vehicleContainer select');
+        vehicleSelects.forEach(select => select.required = true);
+
+    } else if (selectedTemplate === 'temp_001') {
+        // Template 1: 1-5 vehicles
+        MAX_CARS = 5;
+        vehicleLabel.textContent = 'Vehicles (1-5)';
+        addBtn.textContent = '+ Add Vehicle (max 5)';
+        addBtn.disabled = vehicleCount >= MAX_CARS || vehicleCount === 0;
+
+        themeGroup.classList.remove('hidden');
+        vehiclesGroup.classList.remove('hidden');
+
+        document.getElementById('topic').required = false;
+
+        const vehicleSelects = document.querySelectorAll('#vehicleContainer select');
+        vehicleSelects.forEach(select => select.required = true);
+
+    } else if (selectedTemplate === 'temp_003') {
+        // Template 3: Organic/Education - no vehicles needed
+        vehiclesGroup.classList.add('hidden');
+
+        // If length is already selected, show topic section
+        if (document.getElementById('scriptLength').value) {
+            topicGroup.classList.remove('hidden');
         }
+        document.getElementById('topic').required = true;
 
-        document.getElementById('adForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const formData = new FormData(e.target);
-            const template = formData.get('template');
-            const theme = formData.get('theme') || '';
-            const includeAnimation = formData.get('include_animation') === 'true';
-            const avatarValue = formData.get('avatar');
-            const email = formData.get('email');
-            
-            // Parse avatar (format: avatar_id|voice_id|chromakey_color|chromakey_sensitivity)
-            const [avatar_id, voice_id, chromakey_color, chromakey_sensitivity] = avatarValue.split('|');
-            
-            const vins = [];
-            for (let i = 1; i <= vehicleCount; i++) {
-                const vin = formData.get(`vehicle${i}`);
-                if (vin) vins.push(vin);
-            }
-            
-            if (vins.length === 0) {
-                showStatus('Please select at least one vehicle', 'error');
-                return;
-            }
+        const vehicleSelects = document.querySelectorAll('#vehicleContainer select');
+        vehicleSelects.forEach(select => select.required = false);
+    }
 
-            if (template === 'temp_002' && vins.length > 1) {
-                showStatus('Template 2 only supports 1 vehicle', 'error');
-                return;
-            }
-            
-            const payload = {
-                template_id: template.toUpperCase(), // TEMP_001 or TEMP_002
-                theme: theme,
-                include_animation: includeAnimation,
-                avatar_id: avatar_id,
-                voice_id: voice_id,
-                chromakey_color: chromakey_color,
-                chromakey_sensitivity: chromakey_sensitivity,
-                email: email,
-                vins: vins
+    checkFormValidity();
+}
+
+async function loadInventory() {
+    try {
+        const response = await fetch(INVENTORY_SHEET);
+        const text = await response.text();
+        const json = JSON.parse(text.substr(47).slice(0, -2));
+
+        inventory = json.table.rows.slice(1).map(row => {
+            const cells = row.c;
+            return {
+                vin: cells[1]?.v || '',
+                make: cells[4]?.v || '',
+                model: cells[5]?.v || '',
+                year: cells[6]?.v || '',
+                price: cells[14]?.v || ''
             };
-            
-            console.log('Submitting payload:', payload);
-            
-            const timeEstimate = template === 'temp_002' ? '4-5 minutes' : '3-4 minutes';
-            showStatus(`Generating your ad... This will take ${timeEstimate}. ⏱️`, 'loading');
-            
-            // Disable submit button
-            document.getElementById('submitBtn').disabled = true;
-            
-            try {
-                const response = await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload)
-                });
-                
-                const result = await response.json();
-                
-                if (response.ok) {
-                    showStatus(`Success! Your ad is being generated. Check your email in a few minutes. 🎬`, 'success');
-                    // Re-enable submit after 5 seconds
-                    setTimeout(() => {
-                        document.getElementById('submitBtn').disabled = false;
-                    }, 5000);
-                } else {
-                    showStatus(`Error: ${result.message || 'Something went wrong'}`, 'error');
-                    document.getElementById('submitBtn').disabled = false;
-                }
-            } catch (error) {
-                console.error('Submission error:', error);
-                showStatus(`Error: ${error.message}`, 'error');
-                document.getElementById('submitBtn').disabled = false;
+        }).filter(car => car.vin && car.year && car.make && car.model);
+
+        inventory.sort((a, b) => b.year - a.year);
+
+        console.log(`Loaded ${inventory.length} vehicles from inventory`);
+
+        addVehicle();
+
+    } catch (error) {
+        console.error('Error loading inventory:', error);
+        showStatus('Error loading vehicle inventory. Please refresh the page.', 'error');
+    }
+}
+
+function addVehicle() {
+    if (vehicleCount >= MAX_CARS) return;
+
+    vehicleCount++;
+    const container = document.getElementById('vehicleContainer');
+    const vehicleGroup = document.createElement('div');
+    vehicleGroup.className = 'vehicle-group';
+    vehicleGroup.dataset.vehicleNum = vehicleCount;
+
+    const select = document.createElement('select');
+    select.name = `vehicle${vehicleCount}`;
+    select.required = selectedTemplate !== 'temp_003';
+    select.onchange = checkFormValidity;
+
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Select vehicle...';
+    select.appendChild(defaultOption);
+
+    vehicleGroup.appendChild(select);
+
+    if (vehicleCount > 1) {
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'remove-vehicle';
+        removeBtn.textContent = '−';
+        removeBtn.onclick = () => removeVehicle(vehicleCount);
+        vehicleGroup.appendChild(removeBtn);
+    }
+
+    container.appendChild(vehicleGroup);
+    populateVehicleDropdowns();
+    checkFormValidity();
+}
+
+function populateVehicleDropdowns() {
+    const selects = document.querySelectorAll('#vehicleContainer select');
+    const selectedVins = Array.from(selects).map(s => s.value).filter(v => v);
+
+    selects.forEach(select => {
+        const currentValue = select.value;
+        select.innerHTML = '<option value="">Select vehicle...</option>';
+
+        inventory.forEach(car => {
+            if (!selectedVins.includes(car.vin) || car.vin === currentValue) {
+                const option = document.createElement('option');
+                option.value = car.vin;
+                option.textContent = `${car.year} ${car.make} ${car.model}, ${car.price} - ${car.vin}`;
+                select.appendChild(option);
             }
         });
 
-        function showStatus(message, type) {
-            const statusDiv = document.getElementById('status');
-            statusDiv.textContent = message;
-            statusDiv.className = `status ${type}`;
-            statusDiv.style.display = 'block';
-            
-            if (type !== 'loading') {
-                setTimeout(() => {
-                    statusDiv.style.display = 'none';
-                }, 5000);
-            }
+        if (currentValue) {
+            select.value = currentValue;
         }
+    });
 
-        // Add event listeners for form validation
-        document.getElementById('avatar').addEventListener('change', checkFormValidity);
-        document.getElementById('email').addEventListener('input', checkFormValidity);
+    const addBtn = document.getElementById('addVehicleBtn');
+    if (selectedTemplate === 'temp_002') {
+        addBtn.disabled = true;
+    } else {
+        addBtn.disabled = vehicleCount >= MAX_CARS;
+    }
+}
 
-        // Initialize on page load
-        loadInventory();
-    </script>
+function removeVehicle(num) {
+    if (vehicleCount <= 1) return;
+
+    const vehicleGroup = document.querySelector(`[data-vehicle-num="${num}"]`);
+    vehicleGroup.remove();
+    vehicleCount--;
+
+    const groups = document.querySelectorAll('.vehicle-group');
+    groups.forEach((group, index) => {
+        const newNum = index + 1;
+        group.dataset.vehicleNum = newNum;
+        const select = group.querySelector('select');
+        select.name = `vehicle${newNum}`;
+        const button = group.querySelector('.remove-vehicle');
+        if (button) {
+            button.onclick = () => removeVehicle(newNum);
+        }
+    });
+
+    vehicleCount = groups.length;
+    populateVehicleDropdowns();
+}
+
+function checkFormValidity() {
+    const template = document.getElementById('template').value;
+    const topic = document.getElementById('topic').value;
+    const avatar = document.getElementById('avatar').value;
+    const platform = document.getElementById('platform').value;
+    const scriptLength = document.getElementById('scriptLength').value;
+    const email = document.getElementById('email').value;
+    const selects = document.querySelectorAll('#vehicleContainer select');
+    const hasVehicles = Array.from(selects).some(s => s.value);
+    
+    const submitBtn = document.getElementById('submitBtn');
+    const previewBtn = document.getElementById('previewBtn');
+    
+    let isValid = false;
+    
+    if (template === 'temp_003') {
+        isValid = !!(template && topic && platform && scriptLength && avatar && email);
+    } else {
+        isValid = !!(template && platform && scriptLength && avatar && email && hasVehicles);
+    }
+    
+    submitBtn.disabled = !isValid;
+    previewBtn.disabled = !isValid;
+}
+
+document.getElementById('adForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const payload = buildPayload();
+    if (!payload) return;
+
+    console.log('Submitting payload:', payload);
+
+    showStatus(`Generating your ad... This will take 10 minutes or less. ⏱️`, 'loading');
+
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('previewBtn').disabled = true;
+
+    try {
+        const response = await fetch(WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            showStatus(`Success! Your ad is being generated. Check your email in a few minutes. 🎬`, 'success');
+            setTimeout(() => {
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('previewBtn').disabled = false;
+            }, 5000);
+        } else {
+            showStatus(`Error: ${result.message || 'Something went wrong'}`, 'error');
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('previewBtn').disabled = false;
+        }
+    } catch (error) {
+        console.error('Submission error:', error);
+        showStatus(`Error: ${error.message}`, 'error');
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('previewBtn').disabled = false;
+    }
+});
+
+function showStatus(message, type) {
+    const statusDiv = document.getElementById('status');
+    statusDiv.textContent = message;
+    statusDiv.className = `status ${type}`;
+    statusDiv.style.display = 'block';
+
+    if (type !== 'loading') {
+        setTimeout(() => {
+            statusDiv.style.display = 'none';
+        }, 5000);
+    }
+}
+
+function hideStatus() {
+    document.getElementById('status').style.display = 'none';
+    document.getElementById('editorStatus').style.display = 'none';
+}
+
+async function suggestTopics() {
+    const scriptLength = document.getElementById('scriptLength').value;
+    const avatarName = document.getElementById('avatar').value.split("|").pop();
+    const suggestionMode = document.querySelector('input[name="suggestionMode"]:checked').value;
+    const topicGuidance = document.getElementById('topicGuidance').value.trim();
+    const suggestBtn = document.getElementById('suggestTopicsBtn');
+    const suggestionsDiv = document.getElementById('topicSuggestions');
+    const suggestionsList = document.getElementById('suggestionsList');
+
+    const lengthMap = {
+        'quick': 'brief_15_30',
+        'standard': 'standard_30_45',
+        'detailed': 'detailed_45_60'
+    };
+
+    const targetLength = lengthMap[scriptLength];
+    const guidanceText = suggestionMode === 'guided' ? topicGuidance : '';
+
+    suggestBtn.disabled = true;
+    suggestBtn.textContent = '⏳ Generating...';
+
+    try {
+        const response = await fetch(TOPIC_SUGGEST_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                target_length: targetLength,
+                topic_guidance: guidanceText,
+                avatar_name: avatarName
+            })
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            suggestionsList.innerHTML = result.suggestions.map(topic => 
+                `<div style="padding: 10px; margin-bottom: 8px; background: white; border-radius: 6px; cursor: pointer; border: 2px solid #e0e0e0; transition: all 0.2s;" 
+                     onmouseover="this.style.borderColor='#667eea'; this.style.background='#f8f9ff';" 
+                     onmouseout="this.style.borderColor='#e0e0e0'; this.style.background='white';"
+                     onclick="document.getElementById('topic').value = '${topic.replace(/'/g, "\\'")}'; checkFormValidity(); document.getElementById('topicSuggestions').style.display='none';">
+                    ${topic}
+                </div>`
+            ).join('');
+
+            suggestionsDiv.style.display = 'block';
+        } else {
+            showStatus('Failed to generate suggestions. Please try again.', 'error');
+        }
+    } catch (error) {
+        console.error('Suggestion error:', error);
+        showStatus('Error generating suggestions. Please try again.', 'error');
+    } finally {
+        suggestBtn.disabled = false;
+        if (topicGuidance.length > 1) {
+            suggestBtn.textContent = '💡 Suggest more topics related to ' + topicGuidance;
+        } else {
+            suggestBtn.textContent = '💡 Suggest more topics';
+        }
+    }
+}
+
+function handleSuggestionModeChange() {
+    const mode = document.querySelector('input[name="suggestionMode"]:checked').value;
+    const guidanceContainer = document.getElementById('topicGuidanceContainer');
+
+    if (mode === 'guided') {
+        guidanceContainer.style.display = 'block';
+    } else {
+        guidanceContainer.style.display = 'none';
+    }
+}
+
+function handleGuidanceChange() {
+    const topicGuidance = document.getElementById('topicGuidance').value.trim();
+    const suggestBtn = document.getElementById('suggestTopicsBtn');
+
+    if (topicGuidance.length > 0) {
+        suggestBtn.textContent = '💡 Suggest topics related to ' + topicGuidance;
+    } else {
+        suggestBtn.textContent = '💡 Suggest topics';
+    }
+}
+
+function handleLengthChange() {
+    const template = document.getElementById('template').value;
+    const scriptLength = document.getElementById('scriptLength').value;
+    const topicGroup = document.getElementById('topicGroup');
+    const avatar = document.getElementById('avatar').value;
+
+    if (template === 'temp_003' && scriptLength && avatar) {
+        topicGroup.classList.remove('hidden');
+    } else if (template === 'temp_003') {
+        topicGroup.classList.add('hidden');
+    }
+
+    checkFormValidity();
+}
+
+// Add event listeners for form validation
+document.getElementById('avatar').addEventListener('change', checkFormValidity);
+document.getElementById('platform').addEventListener('change', checkFormValidity);
+document.getElementById('email').addEventListener('input', checkFormValidity);
+document.getElementById('scriptLength').addEventListener('change', checkFormValidity);
+
+// Initialize on page load
+loadInventory();
+</script>
 </body>
 </html>
