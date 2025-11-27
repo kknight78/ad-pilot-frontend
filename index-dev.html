@@ -781,10 +781,37 @@ function backToForm() {
 }
 
 async function regenerateScript() {
-    // Go back and re-submit with preview mode
-    cachedWorkflowConfig = null;
-    backToForm();
-    await previewScript();
+    showEditorStatus('Regenerating script... ✍️', 'loading');
+    
+    // Disable buttons while regenerating
+    document.querySelectorAll('.script-actions button').forEach(btn => btn.disabled = true);
+    
+    try {
+        // Re-send original form data with preview_mode
+        const payload = buildPayload();
+        payload.preview_mode = true;
+        
+        const response = await fetch(WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.script) {
+            cachedWorkflowConfig = result;
+            populateScriptEditor(result);
+            showEditorStatus('Script regenerated! ✨', 'success');
+        } else {
+            showEditorStatus(`Failed to regenerate: ${result.message || 'Unknown error'}`, 'error');
+        }
+    } catch (error) {
+        console.error('Regenerate error:', error);
+        showEditorStatus(`Error: ${error.message}`, 'error');
+    } finally {
+        document.querySelectorAll('.script-actions button').forEach(btn => btn.disabled = false);
+    }
 }
 
 async function approveAndGenerate() {
