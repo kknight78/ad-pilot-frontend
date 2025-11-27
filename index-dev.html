@@ -826,15 +826,18 @@ async function approveAndGenerate() {
     const editedCta = document.getElementById('editCta').value.trim();
     
     // Update the cached config with edited script
+    // Clean newlines/extra spaces from text
+    const cleanText = (text) => text.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
+    
     cachedWorkflowConfig.script = {
         ...cachedWorkflowConfig.script,
-        hook: editedHook,
-        body: editedBody,
-        cta: editedCta,
+        hook: cleanText(editedHook),
+        body: cleanText(editedBody),
+        cta: cleanText(editedCta),
         // Rebuild segments from body (split on double newlines)
-        segments: editedBody.split(/\n\n+/).filter(s => s.trim()),
+        segments: editedBody.split(/\n\n+/).map(s => cleanText(s)).filter(s => s),
         // Rebuild full_script
-        full_script: [editedHook, editedBody, editedCta].filter(s => s).join(' ')
+        full_script: cleanText([editedHook, editedBody, editedCta].filter(s => s).join(' '))
     };
     
     // Flag to tell n8n to use edited script, not re-parse from cache
