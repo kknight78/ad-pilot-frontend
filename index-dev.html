@@ -837,8 +837,14 @@ async function approveAndGenerate() {
         full_script: [editedHook, editedBody, editedCta].filter(s => s).join(' ')
     };
     
+    // Flag to tell n8n to use edited script, not re-parse from cache
+    cachedWorkflowConfig.script_edited = true;
+    
     // Remove preview_mode so full generation runs
     delete cachedWorkflowConfig.preview_mode;
+    
+    // Clear the Claude script response so parser doesn't overwrite our edits
+    delete cachedWorkflowConfig.api_claude_script_generation;
     
     // IMPORTANT: Clear audio/TTS caches so edited script gets fresh audio!
     delete cachedWorkflowConfig.api_elevenlabs_tts;
