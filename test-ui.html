@@ -233,6 +233,102 @@
       border-radius: 4px;
       font-size: 0.8125rem;
     }
+    
+    .api-picker {
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+      border: 1px solid var(--border);
+    }
+    
+    .picker-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .picker-hint {
+      font-size: 0.75rem;
+      font-weight: normal;
+      color: var(--text-muted);
+    }
+    
+    .checkbox-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .api-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0.75rem;
+      background: var(--bg);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    
+    .api-checkbox:hover {
+      background: rgba(124, 58, 237, 0.1);
+    }
+    
+    .api-checkbox input {
+      width: auto;
+      cursor: pointer;
+      accent-color: var(--primary);
+    }
+    
+    .api-checkbox label {
+      margin: 0;
+      cursor: pointer;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 0.8125rem;
+      flex: 1;
+    }
+    
+    .api-checkbox .status-badge {
+      font-size: 0.6875rem;
+      padding: 0.125rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    
+    .api-checkbox .status-badge.skip {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--success);
+    }
+    
+    .api-checkbox .status-badge.rerun {
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--warning);
+    }
+    
+    .picker-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+    }
+    
+    .picker-actions button {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.75rem;
+      background: var(--border);
+      border: none;
+      border-radius: 4px;
+      color: var(--text);
+      cursor: pointer;
+    }
+    
+    .picker-actions button:hover {
+      background: var(--primary);
+    }
   </style>
 </head>
 <body>
@@ -248,42 +344,19 @@
       <ol>
         <li>Run your workflow until it fails</li>
         <li>In n8n, find the failed node and copy the <strong>INPUT</strong> JSON</li>
-        <li>Select the workflow that failed below</li>
-        <li>Paste the JSON into the test object field</li>
-        <li>Submit - workflow will skip nodes with cached responses!</li>
+        <li>Paste the JSON into the test config field</li>
+        <li>Uncheck any API calls you want to re-run</li>
+        <li>Submit - workflow skips checked APIs, re-runs unchecked ones!</li>
       </ol>
     </div>
 
     <form id="testForm" class="card">
       <div class="config-section">
         <h3>⚙️ N8N CONFIGURATION</h3>
-        <div class="inline-inputs">
-          <div class="form-group">
-            <label>n8n Instance URL</label>
-            <input type="text" id="n8nUrl" placeholder="https://your-instance.app.n8n.cloud" value="">
-          </div>
-          <div class="form-group">
-            <label>API Key <span class="label-hint">(optional, for workflow list)</span></label>
-            <input type="password" id="apiKey" placeholder="n8n_api_...">
-          </div>
-        </div>
         <div class="form-group" style="margin-bottom: 0;">
           <label>Webhook URL</label>
-          <input type="text" id="webhookUrl" placeholder="https://your-instance.app.n8n.cloud/webhook/xxxxx">
+          <input type="text" id="webhookUrl" placeholder="https://kelly-ads.app.n8n.cloud/webhook/ad-pilot" value="https://kelly-ads.app.n8n.cloud/webhook/ad-pilot">
         </div>
-      </div>
-
-      <div class="form-group">
-        <label>
-          Target Workflow
-          <span class="label-hint">Which workflow to resume from</span>
-        </label>
-        <select id="workflowSelect">
-          <option value="">-- Select workflow --</option>
-          <option value="#1 Script Generation">#1 Script Generation</option>
-          <option value="#2 Generate Avatar Video">#2 Generate Avatar Video</option>
-          <option value="#3 Generate Video">#3 Generate Video</option>
-        </select>
       </div>
 
       <div class="form-group">
@@ -297,10 +370,19 @@
   "template_id": "TEMP_001",
   "vehicles": [...],
   "script": {...},
-  "api_elevenlabs_tts_response": {...},
+  "api_claude_categorize_photos": {...},
+  "api_elevenlabs_tts": {...},
   ...
 }'></textarea>
         <div id="jsonStatus" class="json-status"></div>
+        
+        <div id="apiResponsePicker" class="api-picker" style="display: none;">
+          <div class="picker-header">
+            <span>🎯 API Responses Detected</span>
+            <span class="picker-hint">Checked = skip API call | Unchecked = re-run API</span>
+          </div>
+          <div id="apiCheckboxes" class="checkbox-grid"></div>
+        </div>
       </div>
 
       <button type="submit" class="btn btn-primary" id="submitBtn">
@@ -316,12 +398,14 @@
         The workflow automatically detects which API calls to skip based on cached responses in your config:
       </p>
       <ul style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.75rem; margin-left: 1.25rem; line-height: 1.8;">
-        <li><code>api_elevenlabs_tts_response</code> → Skip TTS</li>
-        <li><code>api_elevenlabs_fa_response</code> → Skip Forced Alignment</li>
-        <li><code>api_cloudinary_audio_url</code> → Skip audio upload</li>
-        <li><code>api_heygen_response</code> → Skip HeyGen</li>
-        <li><code>api_creatomate_response</code> → Skip Creatomate</li>
-        <li><code>api_claude_*_response</code> → Skip Claude calls</li>
+        <li><code>api_claude_categorize_photos</code> → Skip photo categorization</li>
+        <li><code>api_claude_feature_identification</code> → Skip feature ID</li>
+        <li><code>api_claude_script_generation</code> → Skip script generation</li>
+        <li><code>api_cloudinary_upload</code> → Skip audio upload</li>
+        <li><code>api_elevenlabs_tts</code> → Skip text-to-speech</li>
+        <li><code>api_elevenlabs_forced_alignment</code> → Skip forced alignment</li>
+        <li><code>api_heygen_create_avatar</code> → Skip HeyGen</li>
+        <li><code>api_creatomate_create_video</code> → Skip Creatomate</li>
       </ul>
     </div>
   </div>
@@ -332,10 +416,37 @@
     const jsonStatusEl = document.getElementById('jsonStatus');
     const statusEl = document.getElementById('status');
     const submitBtn = document.getElementById('submitBtn');
-    const workflowSelect = document.getElementById('workflowSelect');
-    const n8nUrlEl = document.getElementById('n8nUrl');
-    const apiKeyEl = document.getElementById('apiKey');
     const webhookUrlEl = document.getElementById('webhookUrl');
+    const apiResponsePicker = document.getElementById('apiResponsePicker');
+    const apiCheckboxes = document.getElementById('apiCheckboxes');
+    
+    // Track detected API keys
+    let detectedApiKeys = [];
+    let parsedConfig = null;
+
+    // API key display names
+    const apiKeyLabels = {
+      'api_claude_categorize_photos': '🤖 Claude: Categorize Photos',
+      'api_claude_feature_identification': '🤖 Claude: Feature Identification', 
+      'api_claude_script_generation': '🤖 Claude: Script Generation',
+      'api_cloudinary_upload': '☁️ Cloudinary: Upload Audio',
+      'api_elevenlabs_tts': '🔊 ElevenLabs: Text-to-Speech',
+      'api_elevenlabs_forced_alignment': '🔊 ElevenLabs: Forced Alignment',
+      'api_heygen_create_avatar': '🎬 HeyGen: Create Avatar',
+      'api_creatomate_create_video': '🎥 Creatomate: Create Video',
+      'api_remove_bg': '✂️ Remove.bg: Background Removal',
+      'audio_url': '☁️ Cloudinary: Audio URL'
+    };
+    
+    // Keys to detect as cacheable responses (exact matches, in addition to api_* prefix)
+    const cacheableExactKeys = ['audio_url'];
+
+    // Defaults
+    const DEFAULTS = {
+      webhookUrl: 'https://kelly-ads.app.n8n.cloud/webhook/ad-pilot'
+    };
+    
+    const CORS_PROXY = 'https://corsproxy.io/?';
 
     // Load saved config from localStorage
     function loadConfig() {
@@ -343,18 +454,18 @@
       if (saved) {
         try {
           const config = JSON.parse(saved);
-          n8nUrlEl.value = config.n8nUrl || '';
-          apiKeyEl.value = config.apiKey || '';
-          webhookUrlEl.value = config.webhookUrl || '';
-        } catch (e) {}
+          webhookUrlEl.value = config.webhookUrl || DEFAULTS.webhookUrl;
+        } catch (e) {
+          webhookUrlEl.value = DEFAULTS.webhookUrl;
+        }
+      } else {
+        webhookUrlEl.value = DEFAULTS.webhookUrl;
       }
     }
 
     // Save config to localStorage
     function saveConfig() {
       const config = {
-        n8nUrl: n8nUrlEl.value,
-        apiKey: apiKeyEl.value,
         webhookUrl: webhookUrlEl.value
       };
       localStorage.setItem('adPilotDevConfig', JSON.stringify(config));
@@ -367,23 +478,32 @@
         this.classList.remove('json-valid', 'json-invalid');
         jsonStatusEl.textContent = '';
         jsonStatusEl.className = 'json-status';
+        hideApiPicker();
         return;
       }
 
       try {
-        const parsed = JSON.parse(value);
+        let parsed = JSON.parse(value);
+        // If pasted as array, extract first item
+        if (Array.isArray(parsed)) {
+          parsed = parsed[0];
+        }
+        parsedConfig = parsed;
+        
         this.classList.remove('json-invalid');
         this.classList.add('json-valid');
         
-        // Show detected cached responses
-        const cachedKeys = Object.keys(parsed).filter(k => 
-          k.includes('_response') || k.includes('_url') && k.startsWith('api_')
+        // Find all api_* keys and other cacheable keys
+        detectedApiKeys = Object.keys(parsed).filter(k => 
+          k.startsWith('api_') || cacheableExactKeys.includes(k)
         );
         
-        if (cachedKeys.length > 0) {
-          jsonStatusEl.textContent = `✓ Valid JSON - ${cachedKeys.length} cached response(s) detected`;
+        if (detectedApiKeys.length > 0) {
+          jsonStatusEl.textContent = `✓ Valid JSON - ${detectedApiKeys.length} cached response(s) detected`;
+          showApiPicker(detectedApiKeys);
         } else {
           jsonStatusEl.textContent = '✓ Valid JSON - No cached responses (will run all nodes)';
+          hideApiPicker();
         }
         jsonStatusEl.className = 'json-status valid';
       } catch (e) {
@@ -391,66 +511,88 @@
         this.classList.add('json-invalid');
         jsonStatusEl.textContent = `✗ Invalid JSON: ${e.message}`;
         jsonStatusEl.className = 'json-status invalid';
+        hideApiPicker();
+        parsedConfig = null;
       }
     });
-
-    // Save config on change
-    n8nUrlEl.addEventListener('change', saveConfig);
-    apiKeyEl.addEventListener('change', saveConfig);
-    webhookUrlEl.addEventListener('change', saveConfig);
-
-    // Fetch workflows from n8n API (optional enhancement)
-    async function fetchWorkflows() {
-      const n8nUrl = n8nUrlEl.value.trim();
-      const apiKey = apiKeyEl.value.trim();
+    
+    function showApiPicker(keys) {
+      apiCheckboxes.innerHTML = '';
       
-      if (!n8nUrl || !apiKey) return;
-
-      try {
-        const response = await fetch(`${n8nUrl}/api/v1/workflows`, {
-          headers: {
-            'X-N8N-API-KEY': apiKey
+      keys.forEach(key => {
+        const label = apiKeyLabels[key] || key;
+        const div = document.createElement('div');
+        div.className = 'api-checkbox';
+        div.innerHTML = `
+          <input type="checkbox" id="cb_${key}" checked data-key="${key}">
+          <label for="cb_${key}">${label}</label>
+          <span class="status-badge skip">SKIP</span>
+        `;
+        
+        // Toggle badge on change
+        const checkbox = div.querySelector('input');
+        const badge = div.querySelector('.status-badge');
+        checkbox.addEventListener('change', () => {
+          if (checkbox.checked) {
+            badge.textContent = 'SKIP';
+            badge.className = 'status-badge skip';
+          } else {
+            badge.textContent = 'RE-RUN';
+            badge.className = 'status-badge rerun';
           }
         });
         
-        if (response.ok) {
-          const data = await response.json();
-          // Clear existing options except the first
-          workflowSelect.innerHTML = '<option value="">-- Select workflow --</option>';
-          
-          // Add workflows from API
-          data.data.forEach(wf => {
-            const option = document.createElement('option');
-            option.value = wf.name;
-            option.textContent = wf.name + (wf.active ? ' ✓' : '');
-            workflowSelect.appendChild(option);
-          });
-        }
-      } catch (e) {
-        console.log('Could not fetch workflows from API:', e);
-      }
+        apiCheckboxes.appendChild(div);
+      });
+      
+      // Add select all/none buttons
+      const actions = document.createElement('div');
+      actions.className = 'picker-actions';
+      actions.innerHTML = `
+        <button type="button" onclick="selectAllApi(true)">Select All (Skip All)</button>
+        <button type="button" onclick="selectAllApi(false)">Select None (Re-run All)</button>
+      `;
+      apiCheckboxes.appendChild(actions);
+      
+      apiResponsePicker.style.display = 'block';
     }
+    
+    function hideApiPicker() {
+      apiResponsePicker.style.display = 'none';
+      apiCheckboxes.innerHTML = '';
+      detectedApiKeys = [];
+    }
+    
+    function selectAllApi(checked) {
+      apiCheckboxes.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.checked = checked;
+        const badge = cb.closest('.api-checkbox').querySelector('.status-badge');
+        if (checked) {
+          badge.textContent = 'SKIP';
+          badge.className = 'status-badge skip';
+        } else {
+          badge.textContent = 'RE-RUN';
+          badge.className = 'status-badge rerun';
+        }
+      });
+    }
+    
+    // Make selectAllApi available globally for onclick
+    window.selectAllApi = selectAllApi;
 
-    // Try to fetch workflows when API key changes
-    apiKeyEl.addEventListener('change', fetchWorkflows);
-    n8nUrlEl.addEventListener('change', fetchWorkflows);
+    // Save config on change
+    webhookUrlEl.addEventListener('change', saveConfig);
 
     // Submit handler
     form.addEventListener('submit', async function(e) {
       e.preventDefault();
       
       const webhookUrl = webhookUrlEl.value.trim();
-      const testWorkflow = workflowSelect.value;
       const testConfigRaw = testConfigEl.value.trim();
 
       // Validation
       if (!webhookUrl) {
         showStatus('Please enter your webhook URL', 'error');
-        return;
-      }
-
-      if (!testWorkflow) {
-        showStatus('Please select a target workflow', 'error');
         return;
       }
 
@@ -462,16 +604,27 @@
       let testConfig;
       try {
         testConfig = JSON.parse(testConfigRaw);
+        // If pasted as array, extract first item
+        if (Array.isArray(testConfig)) {
+          testConfig = testConfig[0];
+        }
       } catch (e) {
         showStatus(`Invalid JSON: ${e.message}`, 'error');
         return;
       }
 
-      // Build payload
-      const payload = {
-        ...testConfig,
-        test_workflow: testWorkflow
-      };
+      // Remove unchecked API responses (so those APIs will re-run)
+      const checkboxes = apiCheckboxes.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        const key = cb.dataset.key;
+        if (key && !cb.checked) {
+          delete testConfig[key];
+          console.log(`Removing ${key} - will re-run this API`);
+        }
+      });
+
+      // Build payload - just the config with unchecked keys removed
+      const payload = testConfig;
 
       // Send request
       submitBtn.disabled = true;
@@ -479,7 +632,10 @@
       showStatus('Sending to workflow...', 'loading');
 
       try {
-        const response = await fetch(webhookUrl, {
+        // Use CORS proxy for cross-origin requests
+        const proxyUrl = CORS_PROXY + encodeURIComponent(webhookUrl);
+        
+        const response = await fetch(proxyUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -510,7 +666,6 @@
 
     // Initialize
     loadConfig();
-    fetchWorkflows();
   </script>
 </body>
 </html>
