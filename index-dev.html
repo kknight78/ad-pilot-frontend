@@ -840,6 +840,12 @@ async function approveAndGenerate() {
     // Remove preview_mode so full generation runs
     delete cachedWorkflowConfig.preview_mode;
     
+    // IMPORTANT: Clear audio/TTS caches so edited script gets fresh audio!
+    delete cachedWorkflowConfig.api_elevenlabs_tts;
+    delete cachedWorkflowConfig.api_elevenlabs_forced_alignment;
+    delete cachedWorkflowConfig.audio_url;
+    delete cachedWorkflowConfig.api_cloudinary_upload;
+    
     console.log('Submitting approved config:', cachedWorkflowConfig);
     
     showEditorStatus('Generating your video... This may take a few minutes. ⏱️', 'loading');
