@@ -466,7 +466,7 @@ color: #667eea;
             <option value="">Select avatar...</option>
             <option value="229bfc03d4d24d5ab7a5c71ce4b10d4b|bWI0w7QVOZiBvlJQahML|#89be5a|22|Shad">🎭 Awesome Shad</option>
             <option value="5b9c75a2f13e4d60b09bcfdafa7339dd|eezuv0zKVdVTS0jHdxFa|#6da264|8|Kelly">💃 Sexy Kelly, not Kelly</option>
-            <option value="f9bb73f75160463ea82fe93f71592fce|HD83CT0HZl0DNOaKlE8F|#7fc741|29|Gary">😌 Calm Gary Knight</option>
+            <option value="f9bb73f75160463ea82fe93f71592fce|xvBFrvpBNGBaCHOlL3IP|#7fc741|29|Gary">😌 Calm Gary Knight</option>
         </select>
     </div>
 
@@ -664,6 +664,7 @@ let selectedTemplate = '';
 
 // Store the full workflow config after script preview
 let cachedWorkflowConfig = null;
+let originalTestMode = false; // Preserve test_mode setting from form
 
 // =====================
 // SCRIPT EDITOR FUNCTIONS
@@ -672,6 +673,9 @@ let cachedWorkflowConfig = null;
 async function previewScript() {
     const payload = buildPayload();
     if (!payload) return;
+    
+    // Save test_mode setting before we hide the form
+    originalTestMode = document.getElementById('testMode').checked;
     
     // Add preview_mode flag
     payload.preview_mode = true;
@@ -845,6 +849,9 @@ async function approveAndGenerate() {
     
     // Remove preview_mode so full generation runs
     delete cachedWorkflowConfig.preview_mode;
+    
+    // Restore test_mode from original form setting
+    cachedWorkflowConfig.test_mode = originalTestMode;
     
     // Clear the Claude script response so parser doesn't overwrite our edits
     delete cachedWorkflowConfig.api_claude_script_generation;
