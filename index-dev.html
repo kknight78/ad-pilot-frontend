@@ -823,6 +823,11 @@ async function regenerateScript() {
     
     // Disable buttons while regenerating
     document.querySelectorAll('.script-actions button').forEach(btn => btn.disabled = true);
+
+    // Disable textareas too
+    document.getElementById('editHook').disabled = true;
+    document.getElementById('editBody').disabled = true;
+    document.getElementById('editCta').disabled = true;
     
     try {
         // Re-send original form data with preview_mode
@@ -953,6 +958,9 @@ async function approveAndGenerate() {
         showEditorStatus(`Error: ${error.message}`, 'error');
     } finally {
         document.querySelectorAll('.script-actions button').forEach(btn => btn.disabled = false);
+        document.getElementById('editHook').disabled = false;
+        document.getElementById('editBody').disabled = false;
+        document.getElementById('editCta').disabled = false;
     }
 }
 
