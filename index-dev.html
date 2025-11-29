@@ -867,25 +867,14 @@ async function approveAndGenerate() {
         hook: cleanText(editedHook),
         body: cleanText(editedBody),
         cta: cleanText(editedCta),
-        // Rebuild segments from body (split on double newlines)
         segments: editedBody.split(/\n\n+/).map(s => cleanText(s)).filter(s => s),
-        // Rebuild full_script
         full_script: cleanText([editedHook, editedBody, editedCta].filter(s => s).join(' '))
     };
     
-    // Flag to tell n8n to use edited script, not re-parse from cache
     cachedWorkflowConfig.script_edited = true;
-    
-    // Remove preview_mode so full generation runs
     delete cachedWorkflowConfig.preview_mode;
-    
-    // Restore test_mode from original form setting
     cachedWorkflowConfig.test_mode = originalTestMode;
     
-    // KEEP api_claude_script_generation so Claude API is skipped!
-    // The script_edited flag tells the parser to use our edited script instead.
-    
-    // IMPORTANT: Clear audio/TTS caches so edited script gets fresh audio!
     delete cachedWorkflowConfig.api_elevenlabs_tts;
     delete cachedWorkflowConfig.api_elevenlabs_forced_alignment;
     delete cachedWorkflowConfig.audio_url;
@@ -893,33 +882,67 @@ async function approveAndGenerate() {
     
     console.log('Submitting approved config:', cachedWorkflowConfig);
     
-    showEditorStatus('Generating your video... This may take a few minutes. ⏱️', 'loading');
-    
-    // Disable buttons
+    showEditorStatus('Starting video generation... ⏱️', 'loading');
     document.querySelectorAll('.script-actions button').forEach(btn => btn.disabled = true);
     
     try {
-        const response = await fetch(WEBHOOK_URL, {
+        // Step 1: Start the job
+        const startResponse = await fetch(WEBHOOK_URL + '/start', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(cachedWorkflowConfig)
         });
         
-        const result = await response.json();
+        const startResult = await startResponse.json();
+        console.log('Video job started:', startResult);
         
-        if (response.ok) {
-            showEditorStatus('Success! Your video is being generated. Check your email in a few minutes. 🎬', 'success');
-            
-            // Reset after success
-            setTimeout(() => {
-                cachedWorkflowConfig = null;
-                backToForm();
-                document.getElementById('adForm').reset();
-                handleTemplateChange(); // Reset form state
-            }, 5000);
-        } else {
-            showEditorStatus(`Error: ${result.message || 'Something went wrong'}`, 'error');
+        if (!startResponse.ok || !startResult.job_id) {
+            throw new Error(startResult.message || 'Failed to start video job');
         }
+        
+        // Step 2: Poll for completion
+        const jobId = startResult.job_id;
+        let attempts = 0;
+        const maxAttempts = 45; // 15 minutes max (45 * 20 seconds)
+        
+        while (attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 20000));
+            
+            const statusResponse = await fetch(WEBHOOK_URL + '/status?job_id=' + jobId);
+            const statusResult = await statusResponse.json();
+            console.log('Video job status:', statusResult);
+            
+            // Update status message based on job status
+            if (statusResult.status === 'processing') {
+                showEditorStatus('Generating script... ✍️', 'loading');
+            } else if (statusResult.status === 'script_ready' || statusResult.status === 'approved') {
+                showEditorStatus('Creating avatar video... 🎭', 'loading');
+            } else if (statusResult.status === 'rendering') {
+                showEditorStatus('Rendering final video... 🎬', 'loading');
+            } else if (statusResult.status === 'complete') {
+                showEditorStatus('Success! Your video is ready. 🎉', 'success');
+                
+                // TODO: Show video preview if video_url is available
+                if (statusResult.video_url) {
+                    console.log('Video URL:', statusResult.video_url);
+                }
+                
+                setTimeout(() => {
+                    cachedWorkflowConfig = null;
+                    backToForm();
+                    document.getElementById('adForm').reset();
+                    handleTemplateChange();
+                }, 5000);
+                return;
+            } else if (statusResult.status === 'failed') {
+                throw new Error(statusResult.error_message || 'Video generation failed');
+            }
+            
+            attempts++;
+        }
+        
+        throw new Error('Timeout waiting for video generation');
+        
     } catch (error) {
         console.error('Generation error:', error);
         showEditorStatus(`Error: ${error.message}`, 'error');
