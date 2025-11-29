@@ -687,29 +687,58 @@ async function previewScript() {
     document.getElementById('submitBtn').disabled = true;
     
     try {
-        const response = await fetch(WEBHOOK_URL, {
+        // Step 1: Start the job
+        const startResponse = await fetch(WEBHOOK_URL + '/start', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
         
-        const result = await response.json();
-        console.log('Preview response:', result);
+        const startResult = await startResponse.json();
+        console.log('Job started:', startResult);
         
-        if (response.ok && result.script) {
-            // Store the full config for later
-            cachedWorkflowConfig = result;
-            
-            // Populate the editor
-            populateScriptEditor(result);
-            
-            // Switch views
-            document.getElementById('adForm').classList.add('hidden');
-            document.getElementById('scriptEditor').classList.remove('hidden');
-            hideStatus();
-        } else {
-            showStatus(`Error: ${result.message || 'Failed to generate script'}`, 'error');
+        if (!startResponse.ok || !startResult.job_id) {
+            throw new Error(startResult.message || 'Failed to start job');
         }
+        
+        // Step 2: Poll for completion
+        const jobId = startResult.job_id;
+        let attempts = 0;
+        const maxAttempts = 60; // 2 minutes max (60 * 2 seconds)
+        
+        while (attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+            
+            const statusResponse = await fetch(WEBHOOK_URL + '/status?job_id=' + jobId);
+            const statusResult = await statusResponse.json();
+            console.log('Job status:', statusResult);
+            
+            if (statusResult.status === 'script_ready') {
+                // Build the config object UI expects
+                cachedWorkflowConfig = {
+                    ...payload,
+                    script: statusResult.script_data
+                };
+                
+                // Populate the editor
+                populateScriptEditor(cachedWorkflowConfig);
+                
+                // Switch views
+                document.getElementById('adForm').classList.add('hidden');
+                document.getElementById('scriptEditor').classList.remove('hidden');
+                hideStatus();
+                return;
+            } else if (statusResult.status === 'failed') {
+                throw new Error(statusResult.error_message || 'Job failed');
+            }
+            
+            // Update status message with attempt count
+            showStatus(`Generating script preview... ✍️ (${attempts + 1}s)`, 'loading');
+            attempts++;
+        }
+        
+        throw new Error('Timeout waiting for script generation');
+        
     } catch (error) {
         console.error('Preview error:', error);
         showStatus(`Error: ${error.message}`, 'error');
@@ -718,8 +747,6 @@ async function previewScript() {
         document.getElementById('submitBtn').disabled = false;
     }
 }
-
-function populateScriptEditor(config) {
     const script = config.script || {};
     
     // Set meta info
