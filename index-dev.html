@@ -238,6 +238,11 @@ color: #0c5460;
 border: 1px solid #bee5eb;
 }
 
+.status a {
+color: inherit;
+font-weight: 600;
+}
+
 .hidden {
 display: none !important;
 }
@@ -301,12 +306,18 @@ font-size: 15px;
 font-family: inherit;
 line-height: 1.5;
 resize: vertical;
-transition: border-color 0.3s;
+transition: border-color 0.3s, background-color 0.3s;
 }
 
 .script-section textarea:focus {
 outline: none;
 border-color: #667eea;
+}
+
+.script-section textarea:disabled {
+background-color: #f5f5f5;
+color: #666;
+cursor: not-allowed;
 }
 
 .script-section textarea.hook {
@@ -368,7 +379,7 @@ color: #667eea;
 border: 2px solid #667eea;
 }
 
-.btn-regenerate:hover {
+.btn-regenerate:hover:not(:disabled) {
 background: #f8f9ff;
 }
 
@@ -378,9 +389,9 @@ color: white;
 border: none;
 }
 
-.btn-approve:hover {
+.btn-approve:hover:not(:disabled) {
 transform: translateY(-1px);
-box-ow: 0 4px 12px rgba(16, 185, 129, 0.3);
+box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .btn-back {
@@ -389,7 +400,7 @@ color: #666;
 border: none;
 }
 
-.btn-back:hover {
+.btn-back:hover:not(:disabled) {
 background: #e0e0e0;
 }
 
@@ -601,7 +612,7 @@ color: #667eea;
     </div>
 </form>
 
-<!-- SCRIPT EDITOR VIEW (hidden by default) -->
+<!-- SCRIPT EDITOR VIEW -->
 <div id="scriptEditor" class="script-editor hidden">
     <h2>📝 Review Your Script</h2>
     
@@ -618,63 +629,118 @@ color: #667eea;
     </div>
     
     <div class="script-section">
-        <label for="editHook">Hook (Opening)</label>
-        <textarea id="editHook" class="hook" placeholder="The attention-grabbing opening..."></textarea>
-        <div class="word-count" id="hookWordCount">0 words</div>
+        <label for="editHook">HOOK (OPENING)</label>
+        <textarea id="editHook" class="hook" placeholder="Your attention-grabbing opening line..."></textarea>
+        <div class="word-count"><span id="hookWordCount">0 words</span></div>
     </div>
     
     <div class="script-section">
-        <label for="editBody">Body (Main Content)</label>
-        <textarea id="editBody" class="body" placeholder="The main content of the script..."></textarea>
-        <div class="word-count" id="bodyWordCount">0 words</div>
+        <label for="editBody">BODY (MAIN CONTENT)</label>
+        <textarea id="editBody" class="body" placeholder="Main content of your video..."></textarea>
+        <div class="word-count"><span id="bodyWordCount">0 words</span></div>
     </div>
     
     <div class="script-section">
-        <label for="editCta">Call to Action (Closing)</label>
-        <textarea id="editCta" class="cta" placeholder="The closing call to action..."></textarea>
-        <div class="word-count" id="ctaWordCount">0 words</div>
+        <label for="editCta">CALL TO ACTION (CLOSING)</label>
+        <textarea id="editCta" class="cta" placeholder="Your closing call to action..."></textarea>
+        <div class="word-count"><span id="ctaWordCount">0 words</span></div>
     </div>
     
     <div class="timing-estimate">
         <span class="icon">⏱️</span>
-        <span class="text">Estimated duration: <span class="duration" id="estimatedDuration">~30 seconds</span></span>
+        <span class="text">Estimated duration: <span class="duration" id="estimatedDuration">~0 seconds</span></span>
     </div>
     
     <div class="script-actions">
-        <button type="button" class="btn-back" onclick="backToForm()">
-            ← Back
-        </button>
-        <button type="button" class="btn-regenerate" onclick="regenerateScript()">
-            🔄 Regenerate
-        </button>
-        <button type="button" class="btn-approve" onclick="approveAndGenerate()">
-            ✅ Approve & Generate Video
-        </button>
+        <button type="button" class="btn-back" onclick="backToForm()">← Back</button>
+        <button type="button" class="btn-regenerate" onclick="regenerateScript()">🔄 Regenerate</button>
+        <button type="button" class="btn-approve" onclick="approveAndGenerate()">✅ Approve & Generate Video</button>
     </div>
     
     <div id="editorStatus" class="status"></div>
 </div>
-
 </div>
 
 <script>
+// =====================
+// CONFIGURATION
+// =====================
 const WEBHOOK_URL = 'https://kelly-ads.app.n8n.cloud/webhook/ad-pilot';
-const TOPIC_SUGGEST_URL = 'https://kelly-ads.app.n8n.cloud/webhook/topic-suggest';
-const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1kgSVMgpWVSFeAAz4M2LpNmIbuhaJKds9gnbsvLdP-t4/gviz/tq?tqx=out:json&sheet=Feed';
-let MAX_CARS = 5;
+const TOPIC_SUGGEST_URL = 'https://kelly-ads.app.n8n.cloud/webhook/suggest-topics';
+const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1_tTkeqmohzRJQxEYChhvGXLqC5aCXkGgXkMB_kDVjAo/gviz/tq?tqx=out:json&sheet=live';
 
+const MAX_CARS = 5;
 let vehicleCount = 0;
 let inventory = [];
 let selectedTemplate = '';
-
-// Store the full workflow config after script preview
 let cachedWorkflowConfig = null;
-let originalTestMode = false; // Preserve test_mode setting from form
+let originalTestMode = false;
 
 // =====================
-// SCRIPT EDITOR FUNCTIONS
+// TEMPLATE HANDLING
 // =====================
+function handleTemplateChange() {
+    selectedTemplate = document.getElementById('template').value;
+    const platformGroup = document.getElementById('platformGroup');
+    const avatarGroup = document.getElementById('avatarGroup');
+    const lengthGroup = document.getElementById('lengthGroup');
+    const vehiclesGroup = document.getElementById('vehiclesGroup');
+    const topicGroup = document.getElementById('topicGroup');
+    const themeGroup = document.getElementById('themeGroup');
+    const emailGroup = document.getElementById('emailGroup');
+    const addVehicleBtn = document.getElementById('addVehicleBtn');
 
+    // Reset visibility
+    platformGroup.classList.add('hidden');
+    avatarGroup.classList.add('hidden');
+    lengthGroup.classList.add('hidden');
+    vehiclesGroup.classList.add('hidden');
+    topicGroup.classList.add('hidden');
+    themeGroup.classList.add('hidden');
+    emailGroup.classList.add('hidden');
+
+    if (!selectedTemplate) {
+        checkFormValidity();
+        return;
+    }
+
+    // Show common fields for all templates
+    platformGroup.classList.remove('hidden');
+    avatarGroup.classList.remove('hidden');
+    lengthGroup.classList.remove('hidden');
+    emailGroup.classList.remove('hidden');
+
+    if (selectedTemplate === 'temp_001') {
+        vehiclesGroup.classList.remove('hidden');
+        themeGroup.classList.remove('hidden');
+        document.getElementById('vehicleLabel').textContent = 'Vehicles (1-5)';
+        addVehicleBtn.style.display = 'block';
+        addVehicleBtn.disabled = vehicleCount >= MAX_CARS;
+    } else if (selectedTemplate === 'temp_002') {
+        vehiclesGroup.classList.remove('hidden');
+        themeGroup.classList.remove('hidden');
+        document.getElementById('vehicleLabel').textContent = 'Vehicle (single spotlight)';
+        addVehicleBtn.style.display = 'none';
+        
+        // Reset to 1 vehicle for temp_002
+        while (vehicleCount > 1) {
+            removeVehicle(vehicleCount);
+        }
+    } else if (selectedTemplate === 'temp_003') {
+        // Show topic group only after length is selected
+        const scriptLength = document.getElementById('scriptLength').value;
+        const avatar = document.getElementById('avatar').value;
+        if (scriptLength && avatar) {
+            topicGroup.classList.remove('hidden');
+        }
+    }
+
+    checkFormValidity();
+}
+
+// =====================
+// PREVIEW & EDITOR FUNCTIONS
+// =====================
 async function previewScript() {
     const payload = buildPayload();
     if (!payload) return;
@@ -709,10 +775,10 @@ async function previewScript() {
         // Step 2: Poll for completion
         const jobId = startResult.job_id;
         let attempts = 0;
-        const maxAttempts = 60; // 2 minutes max (60 * 2 seconds)
+        const maxAttempts = 40; // 2 minutes max (40 * 3 seconds)
         
         while (attempts < maxAttempts) {
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+            await new Promise(resolve => setTimeout(resolve, 3000)); // Wait 3 seconds
             
             const statusResponse = await fetch(WEBHOOK_URL + '/status?job_id=' + jobId);
             const statusResult = await statusResponse.json();
@@ -737,8 +803,9 @@ async function previewScript() {
                 throw new Error(statusResult.error_message || 'Job failed');
             }
             
-            // Update status message with attempt count
-            showStatus(`Generating script preview... ✍️ (${attempts + 1}s)`, 'loading');
+            // Update status message with elapsed time
+            const elapsed = (attempts + 1) * 3;
+            showStatus(`Generating script preview... ✍️ (${elapsed}s)`, 'loading');
             attempts++;
         }
         
@@ -818,42 +885,77 @@ function backToForm() {
     hideStatus();
 }
 
+function lockEditor(locked) {
+    // Lock/unlock textareas
+    document.getElementById('editHook').disabled = locked;
+    document.getElementById('editBody').disabled = locked;
+    document.getElementById('editCta').disabled = locked;
+    
+    // Lock/unlock buttons
+    document.querySelectorAll('.script-actions button').forEach(btn => btn.disabled = locked);
+}
+
 async function regenerateScript() {
     showEditorStatus('Regenerating script... ✍️', 'loading');
     
-    // Disable buttons while regenerating
-    document.querySelectorAll('.script-actions button').forEach(btn => btn.disabled = true);
-
-    // Disable textareas too
-    document.getElementById('editHook').disabled = true;
-    document.getElementById('editBody').disabled = true;
-    document.getElementById('editCta').disabled = true;
+    // Lock the editor
+    lockEditor(true);
     
     try {
         // Re-send original form data with preview_mode
         const payload = buildPayload();
         payload.preview_mode = true;
         
-        const response = await fetch(WEBHOOK_URL, {
+        // Step 1: Start the job
+        const startResponse = await fetch(WEBHOOK_URL + '/start', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
         
-        const result = await response.json();
+        const startResult = await startResponse.json();
+        console.log('Regenerate job started:', startResult);
         
-        if (response.ok && result.script) {
-            cachedWorkflowConfig = result;
-            populateScriptEditor(result);
-            showEditorStatus('Script regenerated! ✨', 'success');
-        } else {
-            showEditorStatus(`Failed to regenerate: ${result.message || 'Unknown error'}`, 'error');
+        if (!startResponse.ok || !startResult.job_id) {
+            throw new Error(startResult.message || 'Failed to start job');
         }
+        
+        // Step 2: Poll for completion
+        const jobId = startResult.job_id;
+        let attempts = 0;
+        const maxAttempts = 40; // 2 minutes max
+        
+        while (attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            
+            const statusResponse = await fetch(WEBHOOK_URL + '/status?job_id=' + jobId);
+            const statusResult = await statusResponse.json();
+            console.log('Regenerate status:', statusResult);
+            
+            if (statusResult.status === 'script_ready') {
+                cachedWorkflowConfig = {
+                    ...payload,
+                    script: statusResult.script_data
+                };
+                populateScriptEditor(cachedWorkflowConfig);
+                showEditorStatus('Script regenerated! ✨', 'success');
+                return;
+            } else if (statusResult.status === 'failed') {
+                throw new Error(statusResult.error_message || 'Job failed');
+            }
+            
+            const elapsed = (attempts + 1) * 3;
+            showEditorStatus(`Regenerating script... ✍️ (${elapsed}s)`, 'loading');
+            attempts++;
+        }
+        
+        throw new Error('Timeout waiting for script generation');
+        
     } catch (error) {
         console.error('Regenerate error:', error);
         showEditorStatus(`Error: ${error.message}`, 'error');
     } finally {
-        document.querySelectorAll('.script-actions button').forEach(btn => btn.disabled = false);
+        lockEditor(false);
     }
 }
 
@@ -863,13 +965,15 @@ async function approveAndGenerate() {
         return;
     }
     
+    // Lock the editor immediately
+    lockEditor(true);
+    
     // Get the edited script values
     const editedHook = document.getElementById('editHook').value.trim();
     const editedBody = document.getElementById('editBody').value.trim();
     const editedCta = document.getElementById('editCta').value.trim();
     
     // Update the cached config with edited script
-    // Clean newlines/extra spaces from text
     const cleanText = (text) => text.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
     
     cachedWorkflowConfig.script = {
@@ -885,15 +989,16 @@ async function approveAndGenerate() {
     delete cachedWorkflowConfig.preview_mode;
     cachedWorkflowConfig.test_mode = originalTestMode;
     
+    // Clear old API caches
     delete cachedWorkflowConfig.api_elevenlabs_tts;
     delete cachedWorkflowConfig.api_elevenlabs_forced_alignment;
+    delete cachedWorkflowConfig.api_heygen_tts;
     delete cachedWorkflowConfig.audio_url;
     delete cachedWorkflowConfig.api_cloudinary_upload;
     
     console.log('Submitting approved config:', cachedWorkflowConfig);
     
     showEditorStatus('Starting video generation... ⏱️', 'loading');
-    document.querySelectorAll('.script-actions button').forEach(btn => btn.disabled = true);
     
     try {
         // Step 1: Start the job
@@ -916,38 +1021,35 @@ async function approveAndGenerate() {
         const maxAttempts = 45; // 15 minutes max (45 * 20 seconds)
         
         while (attempts < maxAttempts) {
-            await new Promise(resolve => setTimeout(resolve, 20000));
+            await new Promise(resolve => setTimeout(resolve, 20000)); // Wait 20 seconds
             
             const statusResponse = await fetch(WEBHOOK_URL + '/status?job_id=' + jobId);
             const statusResult = await statusResponse.json();
             console.log('Video job status:', statusResult);
             
-            // Update status message based on job status
-            if (statusResult.status === 'processing') {
-                showEditorStatus('Generating script... ✍️', 'loading');
-            } else if (statusResult.status === 'script_ready' || statusResult.status === 'approved') {
-                showEditorStatus('Creating avatar video... 🎭', 'loading');
-            } else if (statusResult.status === 'rendering') {
-                showEditorStatus('Rendering final video... 🎬', 'loading');
-            } else if (statusResult.status === 'complete') {
-                showEditorStatus('Success! Your video is ready. 🎉', 'success');
-                
-                // TODO: Show video preview if video_url is available
+            if (statusResult.status === 'complete') {
+                // Show success with video link
                 if (statusResult.video_url) {
-                    console.log('Video URL:', statusResult.video_url);
+                    showEditorStatus(`🎉 Your video is ready! <a href="${statusResult.video_url}" target="_blank">Click here to view</a>`, 'success');
+                } else {
+                    showEditorStatus('🎉 Success! Your video is ready. Check your email!', 'success');
                 }
                 
+                // Wait longer before resetting so user can see the link
                 setTimeout(() => {
                     cachedWorkflowConfig = null;
                     backToForm();
                     document.getElementById('adForm').reset();
                     handleTemplateChange();
-                }, 5000);
+                }, 15000); // 15 seconds to click the link
                 return;
             } else if (statusResult.status === 'failed') {
                 throw new Error(statusResult.error_message || 'Video generation failed');
             }
             
+            // Show generic progress message with elapsed time
+            const elapsed = Math.round((attempts + 1) * 20 / 60);
+            showEditorStatus(`Generating video... This may take a few minutes ⏳ (~${elapsed} min)`, 'loading');
             attempts++;
         }
         
@@ -956,17 +1058,13 @@ async function approveAndGenerate() {
     } catch (error) {
         console.error('Generation error:', error);
         showEditorStatus(`Error: ${error.message}`, 'error');
-    } finally {
-        document.querySelectorAll('.script-actions button').forEach(btn => btn.disabled = false);
-        document.getElementById('editHook').disabled = false;
-        document.getElementById('editBody').disabled = false;
-        document.getElementById('editCta').disabled = false;
+        lockEditor(false); // Unlock on error so user can try again
     }
 }
 
 function showEditorStatus(message, type) {
     const statusDiv = document.getElementById('editorStatus');
-    statusDiv.textContent = message;
+    statusDiv.innerHTML = message; // Use innerHTML to support links
     statusDiv.className = `status ${type}`;
     statusDiv.style.display = 'block';
 }
@@ -1030,90 +1128,6 @@ function buildPayload() {
         vins: vins,
         test_mode: testMode
     };
-}
-
-function handleTemplateChange() {
-    selectedTemplate = document.getElementById('template').value;
-
-    const themeGroup = document.getElementById('themeGroup');
-    const topicGroup = document.getElementById('topicGroup');
-    const emailGroup = document.getElementById('emailGroup');
-    const platformGroup = document.getElementById('platformGroup');
-    const vehiclesGroup = document.getElementById('vehiclesGroup');
-    const lengthGroup = document.getElementById('lengthGroup');
-    const avatarGroup = document.getElementById('avatarGroup');
-    const addBtn = document.getElementById('addVehicleBtn');
-    const vehicleLabel = document.getElementById('vehicleLabel');
-
-    // First, hide everything
-    themeGroup.classList.add('hidden');
-    topicGroup.classList.add('hidden');
-    vehiclesGroup.classList.add('hidden');
-    emailGroup.classList.add('hidden');
-    platformGroup.classList.add('hidden');
-    lengthGroup.classList.add('hidden');
-    avatarGroup.classList.add('hidden');
-
-    // If no template selected, stop here
-    if (!selectedTemplate) return;
-
-    // Show common fields for all templates
-    emailGroup.classList.remove('hidden');
-    platformGroup.classList.remove('hidden');
-    lengthGroup.classList.remove('hidden');
-    avatarGroup.classList.remove('hidden');
-
-    if (selectedTemplate === 'temp_002') {
-        // Template 2: Single vehicle only
-        MAX_CARS = 1;
-        vehicleLabel.textContent = 'Vehicle (1)';
-        addBtn.textContent = '+ Add 1 Vehicle';
-        addBtn.disabled = true;
-
-        // Remove extra vehicles if any
-        while (vehicleCount > 1) {
-            const lastGroup = document.querySelector(`[data-vehicle-num="${vehicleCount}"]`);
-            if (lastGroup) lastGroup.remove();
-            vehicleCount--;
-        }
-        themeGroup.classList.remove('hidden');
-        vehiclesGroup.classList.remove('hidden');
-
-        document.getElementById('topic').required = false;
-
-        const vehicleSelects = document.querySelectorAll('#vehicleContainer select');
-        vehicleSelects.forEach(select => select.required = true);
-
-    } else if (selectedTemplate === 'temp_001') {
-        // Template 1: 1-5 vehicles
-        MAX_CARS = 5;
-        vehicleLabel.textContent = 'Vehicles (1-5)';
-        addBtn.textContent = '+ Add Vehicle (max 5)';
-        addBtn.disabled = vehicleCount >= MAX_CARS || vehicleCount === 0;
-
-        themeGroup.classList.remove('hidden');
-        vehiclesGroup.classList.remove('hidden');
-
-        document.getElementById('topic').required = false;
-
-        const vehicleSelects = document.querySelectorAll('#vehicleContainer select');
-        vehicleSelects.forEach(select => select.required = true);
-
-    } else if (selectedTemplate === 'temp_003') {
-        // Template 3: Organic/Education - no vehicles needed
-        vehiclesGroup.classList.add('hidden');
-
-        // If length is already selected, show topic section
-        if (document.getElementById('scriptLength').value) {
-            topicGroup.classList.remove('hidden');
-        }
-        document.getElementById('topic').required = true;
-
-        const vehicleSelects = document.querySelectorAll('#vehicleContainer select');
-        vehicleSelects.forEach(select => select.required = false);
-    }
-
-    checkFormValidity();
 }
 
 async function loadInventory() {
