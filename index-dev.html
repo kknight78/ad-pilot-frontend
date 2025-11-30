@@ -667,7 +667,7 @@ color: #667eea;
 // =====================
 const WEBHOOK_URL = 'https://kelly-ads.app.n8n.cloud/webhook/ad-pilot';
 const TOPIC_SUGGEST_URL = 'https://kelly-ads.app.n8n.cloud/webhook/suggest-topics';
-const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1_tTkeqmohzRJQxEYChhvGXLqC5aCXkGgXkMB_kDVjAo/gviz/tq?tqx=out:json&sheet=live';
+const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1kgSVMgpWVSFeAAz4M2LpNmIbuhaJKds9gnbsvLdP-t4/gviz/tq?tqx=out:json&sheet=Feed';
 
 const MAX_CARS = 5;
 let vehicleCount = 0;
@@ -885,6 +885,14 @@ function backToForm() {
     hideStatus();
 }
 
+function resetForm() {
+    cachedWorkflowConfig = null;
+    lockEditor(false);
+    backToForm();
+    document.getElementById('adForm').reset();
+    handleTemplateChange();
+}
+
 function lockEditor(locked) {
     // Lock/unlock textareas
     document.getElementById('editHook').disabled = locked;
@@ -1028,20 +1036,17 @@ async function approveAndGenerate() {
             console.log('Video job status:', statusResult);
             
             if (statusResult.status === 'complete') {
-                // Show success with video link
+                // Show success with video link and reset button
+                let successHtml = '🎉 Your video is ready!';
                 if (statusResult.video_url) {
-                    showEditorStatus(`🎉 Your video is ready! <a href="${statusResult.video_url}" target="_blank">Click here to view</a>`, 'success');
+                    successHtml += ` <a href="${statusResult.video_url}" target="_blank">Click here to view</a>`;
                 } else {
-                    showEditorStatus('🎉 Success! Your video is ready. Check your email!', 'success');
+                    successHtml += ' Check your email!';
                 }
+                successHtml += '<br><br><button onclick="resetForm()" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Create Another Video</button>';
+                showEditorStatus(successHtml, 'success');
                 
-                // Wait longer before resetting so user can see the link
-                setTimeout(() => {
-                    cachedWorkflowConfig = null;
-                    backToForm();
-                    document.getElementById('adForm').reset();
-                    handleTemplateChange();
-                }, 15000); // 15 seconds to click the link
+                // Keep editor locked but don't auto-reset
                 return;
             } else if (statusResult.status === 'failed') {
                 throw new Error(statusResult.error_message || 'Video generation failed');
