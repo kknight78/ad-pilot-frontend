@@ -785,11 +785,15 @@ async function previewScript() {
             console.log('Job status:', statusResult);
             
             if (statusResult.status === 'script_ready') {
-                // Build the config object UI expects
-                cachedWorkflowConfig = {
-                    ...payload,
-                    script: statusResult.script_data
-                };
+            // Build the config object UI expects
+            cachedWorkflowConfig = {
+                ...payload,
+                script: statusResult.script_data,
+                // Capture cached API responses for test mode
+                api_claude_script_generation: statusResult.api_claude_script_generation,
+                api_claude_categorize_photos: statusResult.api_claude_categorize_photos,
+                api_claude_feature_identification: statusResult.api_claude_feature_identification
+            };
                 
                 // Populate the editor
                 populateScriptEditor(cachedWorkflowConfig);
@@ -943,7 +947,10 @@ async function regenerateScript() {
             if (statusResult.status === 'script_ready') {
                 cachedWorkflowConfig = {
                     ...payload,
-                    script: statusResult.script_data
+                    script: statusResult.script_data,
+                    api_claude_script_generation: statusResult.api_claude_script_generation,
+                    api_claude_categorize_photos: statusResult.api_claude_categorize_photos,
+                    api_claude_feature_identification: statusResult.api_claude_feature_identification
                 };
                 populateScriptEditor(cachedWorkflowConfig);
                 showEditorStatus('Script regenerated! ✨', 'success');
