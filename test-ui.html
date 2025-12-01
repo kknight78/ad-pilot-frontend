@@ -333,10 +333,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>
-      🧪 Ad Pilot Dev Testing
-      <span class="badge">DEV ONLY</span>
-    </h1>
+    <h1>✏️ Ad Pilot Dev Testing <span class="badge">DEV ONLY</span> <span style="font-size: 12px; color: var(--text-muted);">v1.0</span></h1>
     <p class="subtitle">Skip expensive API calls and resume from any workflow point</p>
     
     <div class="instructions">
@@ -446,8 +443,6 @@
       webhookUrl: 'https://kelly-ads.app.n8n.cloud/webhook/ad-pilot'
     };
     
-    const CORS_PROXY = 'https://corsproxy.io/?';
-
     // Load saved config from localStorage
     function loadConfig() {
       const saved = localStorage.getItem('adPilotDevConfig');
@@ -632,10 +627,8 @@
       showStatus('Sending to workflow...', 'loading');
 
       try {
-        // Use CORS proxy for cross-origin requests
-        const proxyUrl = CORS_PROXY + encodeURIComponent(webhookUrl);
         
-        const response = await fetch(proxyUrl, {
+        const response = await fetch(webhookUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
