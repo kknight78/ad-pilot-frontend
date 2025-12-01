@@ -666,7 +666,8 @@ color: #667eea;
 // CONFIGURATION
 // =====================
 const WEBHOOK_URL = 'https://kelly-ads.app.n8n.cloud/webhook/ad-pilot';
-const TOPIC_SUGGEST_URL = 'https://kelly-ads.app.n8n.cloud/webhook/suggest-topics';
+// CORS proxy needed - n8n Cloud doesn't support preflight OPTIONS requests
+const TOPIC_SUGGEST_URL = 'https://corsproxy.io/?' + encodeURIComponent('https://kelly-ads.app.n8n.cloud/webhook/suggest-topics');
 const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1kgSVMgpWVSFeAAz4M2LpNmIbuhaJKds9gnbsvLdP-t4/gviz/tq?tqx=out:json&sheet=Feed';
 
 const MAX_CARS = 5;
