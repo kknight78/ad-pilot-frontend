@@ -148,17 +148,6 @@
             min-height: 80px;
         }
 
-        .checkbox-group {
-            flex-direction: row;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .checkbox-group input {
-            width: 18px;
-            height: 18px;
-        }
-
         .helper-text {
             font-size: 12px;
             color: #888;
@@ -273,8 +262,27 @@
         .badge-compliance { background: #ffebee; color: #c62828; }
         .badge-other { background: #eceff1; color: #546e7a; }
 
-        .badge-active { background: #e8f5e9; color: #2e7d32; }
-        .badge-inactive { background: #fafafa; color: #757575; }
+        .badge-active {
+            background: #e8f5e9;
+            color: #2e7d32;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .badge-active:hover {
+            background: #c8e6c9;
+            transform: scale(1.05);
+        }
+
+        .badge-inactive {
+            background: #fafafa;
+            color: #757575;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .badge-inactive:hover {
+            background: #eeeeee;
+            transform: scale(1.05);
+        }
 
         /* Status Messages */
         .status {
@@ -319,6 +327,15 @@
 
         .action-buttons {
             white-space: nowrap;
+        }
+
+        .status-toggle {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .status-toggle:hover {
+            opacity: 0.8;
         }
     </style>
 </head>
@@ -371,11 +388,6 @@
                             <option value="other">Other</option>
                         </select>
                     </div>
-                    <div class="form-group checkbox-group">
-                        <input type="checkbox" id="active" checked>
-                        <label for="active">Active</label>
-                        <span class="helper-text">Uncheck to temporarily disable without deleting</span>
-                    </div>
                     <div class="form-group full-width">
                         <label for="rule_text">Rule Text</label>
                         <textarea id="rule_text" placeholder="Example: Shad has over 35 years of automotive experience" required></textarea>
@@ -398,7 +410,7 @@
                         <th>Presenter</th>
                         <th>Rule Text</th>
                         <th>Category</th>
-                        <th>Status</th>
+                        <th>Status <span style="font-weight: normal; font-size: 11px; color: #888;">(click to toggle)</span></th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -408,7 +420,7 @@
         </div>
 
         <div class="footer">
-            Ad Pilot Guidance Rules Admin v1.1
+            Ad Pilot Guidance Rules Admin v1.3
         </div>
     </div>
 
@@ -440,6 +452,11 @@
                 'other': 'badge-other'
             };
             return classes[category] || 'badge-other';
+        }
+
+        // Check if rule is active
+        function isRuleActive(rule) {
+            return rule.active === 'TRUE' || rule.active === true;
         }
 
         // Load all rules
@@ -476,7 +493,13 @@
                         <td>${rule.avatar_name === '*' ? '* (All)' : rule.avatar_name || '*'}</td>
                         <td class="rule-text" title="${(rule.rule_text || '').replace(/"/g, '&quot;')}">${rule.rule_text || '-'}</td>
                         <td><span class="badge ${getCategoryBadge(rule.category)}">${rule.category || '-'}</span></td>
-                        <td><span class="badge ${rule.active === 'TRUE' || rule.active === true ? 'badge-active' : 'badge-inactive'}">${rule.active === 'TRUE' || rule.active === true ? 'Active' : 'Inactive'}</span></td>
+                        <td>
+                            <span class="badge status-toggle ${isRuleActive(rule) ? 'badge-active' : 'badge-inactive'}"
+                                  onclick="toggleStatus('${rule.rule_id}')"
+                                  title="Click to toggle status">
+                                ${isRuleActive(rule) ? 'Active' : 'Inactive'}
+                            </span>
+                        </td>
                         <td class="action-buttons">
                             <button class="btn btn-edit" onclick="editRule('${rule.rule_id}')">Edit</button>
                             <button class="btn btn-danger" onclick="deleteRule('${rule.rule_id}')">Delete</button>
@@ -487,6 +510,49 @@
             } catch (error) {
                 loading.style.display = 'none';
                 showStatus('Failed to load rules: ' + error.message, true);
+            }
+        }
+
+        // Toggle rule status (active/inactive)
+        async function toggleStatus(ruleId) {
+            const rule = allRulesCache.find(r => r.rule_id === ruleId);
+            if (!rule) {
+                showStatus('Rule not found', true);
+                return;
+            }
+
+            // Toggle the active status
+            const newActiveState = !isRuleActive(rule);
+
+            // Build the update payload
+            const updatePayload = {
+                rule_id: rule.rule_id,
+                client_id: rule.client_id || 'ccc',
+                avatar_name: rule.avatar_name || '*',
+                rule_text: rule.rule_text || '',
+                category: rule.category || 'facts',
+                active: newActiveState,
+                created_at: rule.created_at
+            };
+
+            try {
+                const response = await fetch(API_BASE, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatePayload)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Update local cache immediately for responsive UI
+                    rule.active = newActiveState ? 'TRUE' : 'FALSE';
+                    loadRules();
+                } else {
+                    showStatus('Failed to toggle status: ' + (data.error || 'Unknown error'), true);
+                }
+            } catch (error) {
+                showStatus('Failed to toggle status: ' + error.message, true);
             }
         }
 
@@ -505,7 +571,6 @@
             // Populate form
             document.getElementById('avatar_name').value = rule.avatar_name || '*';
             document.getElementById('category').value = rule.category || 'facts';
-            document.getElementById('active').checked = rule.active === 'TRUE' || rule.active === true;
             document.getElementById('rule_text').value = rule.rule_text || '';
 
             // Update UI
@@ -530,7 +595,6 @@
             // Reset form
             document.getElementById('avatar_name').value = '*';
             document.getElementById('category').value = 'facts';
-            document.getElementById('active').checked = true;
             document.getElementById('rule_text').value = '';
 
             // Update UI
@@ -546,18 +610,25 @@
         async function handleSubmit(event) {
             event.preventDefault();
 
+            const isEditing = editingRuleId !== null;
+
+            // Get existing rule data if editing (to preserve created_at and current active state)
+            let existingRule = null;
+            if (isEditing) {
+                existingRule = allRulesCache.find(r => r.rule_id === editingRuleId);
+            }
+
             const rule = {
                 client_id: 'ccc',
                 avatar_name: document.getElementById('avatar_name').value || '*',
                 rule_text: document.getElementById('rule_text').value,
                 category: document.getElementById('category').value,
-                active: document.getElementById('active').checked
+                active: existingRule ? isRuleActive(existingRule) : true // Preserve existing status or default to active for new
             };
-
-            const isEditing = editingRuleId !== null;
 
             if (isEditing) {
                 rule.rule_id = editingRuleId;
+                rule.created_at = existingRule?.created_at;
             }
 
             try {
@@ -570,14 +641,7 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    if (isEditing) {
-                        // For edit, we need to delete old and the POST already created new
-                        // Actually, let's delete the old one first
-                        await deleteRuleById(editingRuleId, true);
-                        showStatus('Rule updated successfully!');
-                    } else {
-                        showStatus('Rule added successfully!');
-                    }
+                    showStatus(isEditing ? 'Rule updated successfully!' : 'Rule added successfully!');
                     cancelEdit();
                     loadRules();
                 } else {
