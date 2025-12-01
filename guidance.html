@@ -55,6 +55,44 @@
             text-decoration: underline;
         }
 
+        /* Helper Section */
+        .helper-section {
+            background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+            padding: 20px 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border-left: 4px solid #4caf50;
+        }
+
+        .helper-section h3 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .helper-section p {
+            color: #555;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .helper-section ul {
+            color: #666;
+            margin-left: 20px;
+            font-size: 14px;
+        }
+
+        .helper-section li {
+            margin-bottom: 6px;
+        }
+
+        .helper-section code {
+            background: rgba(0,0,0,0.05);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
         /* Form Styles */
         .add-form {
             background: #f8f9fa;
@@ -121,6 +159,12 @@
             height: 18px;
         }
 
+        .helper-text {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+
         .btn {
             padding: 12px 24px;
             border: none;
@@ -141,6 +185,16 @@
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
 
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            margin-left: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
         .btn-danger {
             background: #dc3545;
             color: white;
@@ -150,6 +204,18 @@
 
         .btn-danger:hover {
             background: #c82333;
+        }
+
+        .btn-edit {
+            background: #667eea;
+            color: white;
+            padding: 6px 12px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        .btn-edit:hover {
+            background: #5a6fd6;
         }
 
         /* Table Styles */
@@ -181,8 +247,12 @@
             background: #f8f9fa;
         }
 
+        tr.editing {
+            background: #fff3cd;
+        }
+
         .rule-text {
-            max-width: 300px;
+            max-width: 400px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -201,6 +271,7 @@
         .badge-pronunciation { background: #fff3e0; color: #f57c00; }
         .badge-style { background: #f3e5f5; color: #7b1fa2; }
         .badge-compliance { background: #ffebee; color: #c62828; }
+        .badge-other { background: #eceff1; color: #546e7a; }
 
         .badge-active { background: #e8f5e9; color: #2e7d32; }
         .badge-inactive { background: #fafafa; color: #757575; }
@@ -245,6 +316,10 @@
             color: #999;
             font-size: 12px;
         }
+
+        .action-buttons {
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
@@ -259,20 +334,32 @@
 
         <div id="status" class="status"></div>
 
-        <!-- Add Rule Form -->
+        <!-- Helper Section -->
+        <div class="helper-section">
+            <h3>📘 How Rules Work</h3>
+            <p>If we get something wrong or there's something you always want us to remember, add it here! Rules help us learn your preferences and create better videos for you.</p>
+            <ul>
+                <li><code>Shad has over 35 years of automotive experience</code> — fact we should mention</li>
+                <li><code>Always say Twenty-Twenty-Four, not Two-Thousand-Twenty-Four</code> — pronunciation preference</li>
+                <li><code>Keep the tone upbeat and energetic</code> — style preference</li>
+            </ul>
+        </div>
+
+        <!-- Add/Edit Rule Form -->
         <div class="add-form">
-            <h2>➕ Add New Rule</h2>
+            <h2 id="formTitle">➕ Add New Rule</h2>
             <form id="addRuleForm">
+                <input type="hidden" id="editing_rule_id" value="">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="client_id">Client ID</label>
-                        <select id="client_id" required>
-                            <option value="ccc" selected>ccc (Capitol Car Credit)</option>
+                        <label for="avatar_name">Presenter</label>
+                        <select id="avatar_name" required>
+                            <option value="*">* (All Presenters)</option>
+                            <option value="Shad">Shad</option>
+                            <option value="Gary">Gary</option>
+                            <option value="Kelly">Kelly</option>
+                            <option value="Hannah">Hannah</option>
                         </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="avatar_name">Avatar Name</label>
-                        <input type="text" id="avatar_name" placeholder="* for all avatars" value="*">
                     </div>
                     <div class="form-group">
                         <label for="category">Category</label>
@@ -281,18 +368,21 @@
                             <option value="pronunciation">Pronunciation</option>
                             <option value="style">Style</option>
                             <option value="compliance">Compliance</option>
+                            <option value="other">Other</option>
                         </select>
                     </div>
                     <div class="form-group checkbox-group">
                         <input type="checkbox" id="active" checked>
                         <label for="active">Active</label>
+                        <span class="helper-text">Uncheck to temporarily disable without deleting</span>
                     </div>
                     <div class="form-group full-width">
                         <label for="rule_text">Rule Text</label>
-                        <textarea id="rule_text" placeholder="Enter the guidance rule text..." required></textarea>
+                        <textarea id="rule_text" placeholder="Example: Shad has over 35 years of automotive experience" required></textarea>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Add Rule</button>
+                <button type="submit" id="submitBtn" class="btn btn-primary">Add Rule</button>
+                <button type="button" id="cancelBtn" class="btn btn-secondary" style="display: none;" onclick="cancelEdit()">Cancel</button>
             </form>
         </div>
 
@@ -305,9 +395,7 @@
             <table id="rulesTable" style="display: none;">
                 <thead>
                     <tr>
-                        <th>Rule ID</th>
-                        <th>Client</th>
-                        <th>Avatar</th>
+                        <th>Presenter</th>
                         <th>Rule Text</th>
                         <th>Category</th>
                         <th>Status</th>
@@ -320,13 +408,17 @@
         </div>
 
         <div class="footer">
-            Ad Pilot Guidance Rules Admin v1.0
+            Ad Pilot Guidance Rules Admin v1.1
         </div>
     </div>
 
     <script>
         // CORS proxy needed - n8n Cloud doesn't support preflight OPTIONS requests
         const API_BASE = 'https://corsproxy.io/?' + encodeURIComponent('https://kelly-ads.app.n8n.cloud/webhook/guidance-rules');
+
+        // Track if we're editing
+        let editingRuleId = null;
+        let allRulesCache = [];
 
         // Show status message
         function showStatus(message, isError = false) {
@@ -344,9 +436,10 @@
                 'facts': 'badge-facts',
                 'pronunciation': 'badge-pronunciation',
                 'style': 'badge-style',
-                'compliance': 'badge-compliance'
+                'compliance': 'badge-compliance',
+                'other': 'badge-other'
             };
-            return classes[category] || 'badge-facts';
+            return classes[category] || 'badge-other';
         }
 
         // Load all rules
@@ -368,6 +461,7 @@
 
                 const data = await response.json();
                 const rules = data.rules || [];
+                allRulesCache = rules;
 
                 loading.style.display = 'none';
 
@@ -378,14 +472,15 @@
 
                 table.style.display = 'table';
                 tbody.innerHTML = rules.map(rule => `
-                    <tr>
-                        <td><code style="font-size: 11px;">${rule.rule_id || '-'}</code></td>
-                        <td>${rule.client_id || '-'}</td>
-                        <td>${rule.avatar_name || '*'}</td>
+                    <tr id="row-${rule.rule_id}" class="${editingRuleId === rule.rule_id ? 'editing' : ''}">
+                        <td>${rule.avatar_name === '*' ? '* (All)' : rule.avatar_name || '*'}</td>
                         <td class="rule-text" title="${(rule.rule_text || '').replace(/"/g, '&quot;')}">${rule.rule_text || '-'}</td>
                         <td><span class="badge ${getCategoryBadge(rule.category)}">${rule.category || '-'}</span></td>
                         <td><span class="badge ${rule.active === 'TRUE' || rule.active === true ? 'badge-active' : 'badge-inactive'}">${rule.active === 'TRUE' || rule.active === true ? 'Active' : 'Inactive'}</span></td>
-                        <td><button class="btn btn-danger" onclick="deleteRule('${rule.rule_id}')">Delete</button></td>
+                        <td class="action-buttons">
+                            <button class="btn btn-edit" onclick="editRule('${rule.rule_id}')">Edit</button>
+                            <button class="btn btn-danger" onclick="deleteRule('${rule.rule_id}')">Delete</button>
+                        </td>
                     </tr>
                 `).join('');
 
@@ -395,17 +490,75 @@
             }
         }
 
-        // Add new rule
-        async function addRule(event) {
+        // Edit rule - populate form
+        function editRule(ruleId) {
+            const rule = allRulesCache.find(r => r.rule_id === ruleId);
+            if (!rule) {
+                showStatus('Rule not found', true);
+                return;
+            }
+
+            // Set editing state
+            editingRuleId = ruleId;
+            document.getElementById('editing_rule_id').value = ruleId;
+
+            // Populate form
+            document.getElementById('avatar_name').value = rule.avatar_name || '*';
+            document.getElementById('category').value = rule.category || 'facts';
+            document.getElementById('active').checked = rule.active === 'TRUE' || rule.active === true;
+            document.getElementById('rule_text').value = rule.rule_text || '';
+
+            // Update UI
+            document.getElementById('formTitle').textContent = '✏️ Edit Rule';
+            document.getElementById('submitBtn').textContent = 'Update Rule';
+            document.getElementById('cancelBtn').style.display = 'inline-block';
+
+            // Highlight the row being edited
+            document.querySelectorAll('tr.editing').forEach(tr => tr.classList.remove('editing'));
+            const row = document.getElementById('row-' + ruleId);
+            if (row) row.classList.add('editing');
+
+            // Scroll to form
+            document.querySelector('.add-form').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Cancel edit mode
+        function cancelEdit() {
+            editingRuleId = null;
+            document.getElementById('editing_rule_id').value = '';
+
+            // Reset form
+            document.getElementById('avatar_name').value = '*';
+            document.getElementById('category').value = 'facts';
+            document.getElementById('active').checked = true;
+            document.getElementById('rule_text').value = '';
+
+            // Update UI
+            document.getElementById('formTitle').textContent = '➕ Add New Rule';
+            document.getElementById('submitBtn').textContent = 'Add Rule';
+            document.getElementById('cancelBtn').style.display = 'none';
+
+            // Remove highlight
+            document.querySelectorAll('tr.editing').forEach(tr => tr.classList.remove('editing'));
+        }
+
+        // Add or update rule
+        async function handleSubmit(event) {
             event.preventDefault();
 
             const rule = {
-                client_id: document.getElementById('client_id').value,
+                client_id: 'ccc',
                 avatar_name: document.getElementById('avatar_name').value || '*',
                 rule_text: document.getElementById('rule_text').value,
                 category: document.getElementById('category').value,
                 active: document.getElementById('active').checked
             };
+
+            const isEditing = editingRuleId !== null;
+
+            if (isEditing) {
+                rule.rule_id = editingRuleId;
+            }
 
             try {
                 const response = await fetch(API_BASE, {
@@ -417,45 +570,60 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    showStatus('Rule added successfully!');
-                    document.getElementById('rule_text').value = '';
+                    if (isEditing) {
+                        // For edit, we need to delete old and the POST already created new
+                        // Actually, let's delete the old one first
+                        await deleteRuleById(editingRuleId, true);
+                        showStatus('Rule updated successfully!');
+                    } else {
+                        showStatus('Rule added successfully!');
+                    }
+                    cancelEdit();
                     loadRules();
                 } else {
-                    showStatus('Failed to add rule: ' + (data.error || 'Unknown error'), true);
+                    showStatus('Failed to save rule: ' + (data.error || 'Unknown error'), true);
                 }
             } catch (error) {
-                showStatus('Failed to add rule: ' + error.message, true);
+                showStatus('Failed to save rule: ' + error.message, true);
             }
         }
 
-        // Delete rule
-        async function deleteRule(ruleId) {
-            if (!confirm('Are you sure you want to delete this rule?')) {
-                return;
-            }
-
+        // Delete rule by ID (internal, no confirm)
+        async function deleteRuleById(ruleId, silent = false) {
             try {
                 const deleteUrl = API_BASE + encodeURIComponent('?rule_id=' + ruleId);
                 const response = await fetch(deleteUrl, {
                     method: 'DELETE',
                     headers: { 'Accept': 'application/json' }
                 });
-
                 const data = await response.json();
-
-                if (data.success) {
-                    showStatus('Rule deleted successfully!');
-                    loadRules();
-                } else {
-                    showStatus('Failed to delete rule: ' + (data.error || 'Unknown error'), true);
-                }
+                return data.success;
             } catch (error) {
-                showStatus('Failed to delete rule: ' + error.message, true);
+                if (!silent) showStatus('Failed to delete rule: ' + error.message, true);
+                return false;
+            }
+        }
+
+        // Delete rule (with confirmation)
+        async function deleteRule(ruleId) {
+            if (!confirm('Are you sure you want to delete this rule?')) {
+                return;
+            }
+
+            const success = await deleteRuleById(ruleId);
+            if (success) {
+                showStatus('Rule deleted successfully!');
+                if (editingRuleId === ruleId) {
+                    cancelEdit();
+                }
+                loadRules();
+            } else {
+                showStatus('Failed to delete rule', true);
             }
         }
 
         // Initialize
-        document.getElementById('addRuleForm').addEventListener('submit', addRule);
+        document.getElementById('addRuleForm').addEventListener('submit', handleSubmit);
         loadRules();
     </script>
 </body>
