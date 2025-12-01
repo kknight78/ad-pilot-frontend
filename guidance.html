@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📝 Guidance Rules - Ad Pilot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .back-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Form Styles */
+        .add-form {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+
+        .add-form h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        input, select, textarea {
+            padding: 10px 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .checkbox-group {
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkbox-group input {
+            width: 18px;
+            height: 18px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .rule-text {
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-facts { background: #e3f2fd; color: #1976d2; }
+        .badge-pronunciation { background: #fff3e0; color: #f57c00; }
+        .badge-style { background: #f3e5f5; color: #7b1fa2; }
+        .badge-compliance { background: #ffebee; color: #c62828; }
+
+        .badge-active { background: #e8f5e9; color: #2e7d32; }
+        .badge-inactive { background: #fafafa; color: #757575; }
+
+        /* Status Messages */
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            display: block;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>📝 Guidance Rules</h1>
+                <p style="color: #666; margin-top: 5px;">Manage script generation rules for Ad Pilot</p>
+            </div>
+            <a href="index-dev.html" class="back-link">← Back to Ad Pilot</a>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <!-- Add Rule Form -->
+        <div class="add-form">
+            <h2>➕ Add New Rule</h2>
+            <form id="addRuleForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="client_id">Client ID</label>
+                        <select id="client_id" required>
+                            <option value="ccc" selected>ccc (Capitol Car Credit)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="avatar_name">Avatar Name</label>
+                        <input type="text" id="avatar_name" placeholder="* for all avatars" value="*">
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select id="category" required>
+                            <option value="facts">Facts</option>
+                            <option value="pronunciation">Pronunciation</option>
+                            <option value="style">Style</option>
+                            <option value="compliance">Compliance</option>
+                        </select>
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="active" checked>
+                        <label for="active">Active</label>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="rule_text">Rule Text</label>
+                        <textarea id="rule_text" placeholder="Enter the guidance rule text..." required></textarea>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Rule</button>
+            </form>
+        </div>
+
+        <!-- Rules Table -->
+        <div class="table-container">
+            <div id="loading" class="loading">Loading rules...</div>
+            <div id="emptyState" class="empty-state" style="display: none;">
+                No guidance rules found. Add one above!
+            </div>
+            <table id="rulesTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Rule ID</th>
+                        <th>Client</th>
+                        <th>Avatar</th>
+                        <th>Rule Text</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="rulesBody">
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            Ad Pilot Guidance Rules Admin v1.0
+        </div>
+    </div>
+
+    <script>
+        // CORS proxy needed - n8n Cloud doesn't support preflight OPTIONS requests
+        const API_BASE = 'https://corsproxy.io/?' + encodeURIComponent('https://kelly-ads.app.n8n.cloud/webhook/guidance-rules');
+
+        // Show status message
+        function showStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + (isError ? 'error' : 'success');
+            setTimeout(() => {
+                status.className = 'status';
+            }, 5000);
+        }
+
+        // Get badge class for category
+        function getCategoryBadge(category) {
+            const classes = {
+                'facts': 'badge-facts',
+                'pronunciation': 'badge-pronunciation',
+                'style': 'badge-style',
+                'compliance': 'badge-compliance'
+            };
+            return classes[category] || 'badge-facts';
+        }
+
+        // Load all rules
+        async function loadRules() {
+            const loading = document.getElementById('loading');
+            const emptyState = document.getElementById('emptyState');
+            const table = document.getElementById('rulesTable');
+            const tbody = document.getElementById('rulesBody');
+
+            loading.style.display = 'block';
+            emptyState.style.display = 'none';
+            table.style.display = 'none';
+
+            try {
+                const response = await fetch(API_BASE, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                const data = await response.json();
+                const rules = data.rules || [];
+
+                loading.style.display = 'none';
+
+                if (rules.length === 0) {
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                table.style.display = 'table';
+                tbody.innerHTML = rules.map(rule => `
+                    <tr>
+                        <td><code style="font-size: 11px;">${rule.rule_id || '-'}</code></td>
+                        <td>${rule.client_id || '-'}</td>
+                        <td>${rule.avatar_name || '*'}</td>
+                        <td class="rule-text" title="${(rule.rule_text || '').replace(/"/g, '&quot;')}">${rule.rule_text || '-'}</td>
+                        <td><span class="badge ${getCategoryBadge(rule.category)}">${rule.category || '-'}</span></td>
+                        <td><span class="badge ${rule.active === 'TRUE' || rule.active === true ? 'badge-active' : 'badge-inactive'}">${rule.active === 'TRUE' || rule.active === true ? 'Active' : 'Inactive'}</span></td>
+                        <td><button class="btn btn-danger" onclick="deleteRule('${rule.rule_id}')">Delete</button></td>
+                    </tr>
+                `).join('');
+
+            } catch (error) {
+                loading.style.display = 'none';
+                showStatus('Failed to load rules: ' + error.message, true);
+            }
+        }
+
+        // Add new rule
+        async function addRule(event) {
+            event.preventDefault();
+
+            const rule = {
+                client_id: document.getElementById('client_id').value,
+                avatar_name: document.getElementById('avatar_name').value || '*',
+                rule_text: document.getElementById('rule_text').value,
+                category: document.getElementById('category').value,
+                active: document.getElementById('active').checked
+            };
+
+            try {
+                const response = await fetch(API_BASE, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(rule)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showStatus('Rule added successfully!');
+                    document.getElementById('rule_text').value = '';
+                    loadRules();
+                } else {
+                    showStatus('Failed to add rule: ' + (data.error || 'Unknown error'), true);
+                }
+            } catch (error) {
+                showStatus('Failed to add rule: ' + error.message, true);
+            }
+        }
+
+        // Delete rule
+        async function deleteRule(ruleId) {
+            if (!confirm('Are you sure you want to delete this rule?')) {
+                return;
+            }
+
+            try {
+                const deleteUrl = API_BASE + encodeURIComponent('?rule_id=' + ruleId);
+                const response = await fetch(deleteUrl, {
+                    method: 'DELETE',
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showStatus('Rule deleted successfully!');
+                    loadRules();
+                } else {
+                    showStatus('Failed to delete rule: ' + (data.error || 'Unknown error'), true);
+                }
+            } catch (error) {
+                showStatus('Failed to delete rule: ' + error.message, true);
+            }
+        }
+
+        // Initialize
+        document.getElementById('addRuleForm').addEventListener('submit', addRule);
+        loadRules();
+    </script>
+</body>
+</html>
