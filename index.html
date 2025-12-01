@@ -149,7 +149,8 @@ opacity: 0.5;
 cursor: not-allowed;
 }
 
-button[type="submit"] {
+button[type="submit"],
+.btn-primary {
 width: 100%;
 padding: 16px;
 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -162,17 +163,54 @@ cursor: pointer;
 transition: transform 0.2s;
 }
 
-button[type="submit"]:hover {
+button[type="submit"]:hover,
+.btn-primary:hover {
 transform: translateY(-2px);
 }
 
-button[type="submit"]:active {
+button[type="submit"]:active,
+.btn-primary:active {
 transform: translateY(0);
 }
 
-button[type="submit"]:disabled {
+button[type="submit"]:disabled,
+.btn-primary:disabled {
 opacity: 0.5;
 cursor: not-allowed;
+transform: none;
+}
+
+.btn-secondary {
+width: 100%;
+padding: 14px;
+background: #f0f0f0;
+color: #333;
+border: 2px solid #ddd;
+border-radius: 8px;
+font-size: 16px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.2s;
+}
+
+.btn-secondary:hover:not(:disabled) {
+background: #e0e0e0;
+border-color: #bbb;
+}
+
+.btn-secondary:disabled {
+opacity: 0.5;
+cursor: not-allowed;
+}
+
+.button-group {
+display: flex;
+gap: 12px;
+margin-top: 20px;
+}
+
+.button-group button {
+flex: 1;
 }
 
 .status {
@@ -200,8 +238,13 @@ color: #0c5460;
 border: 1px solid #bee5eb;
 }
 
+.status a {
+color: inherit;
+font-weight: 600;
+}
+
 .hidden {
-display: none;
+display: none !important;
 }
 
 /* Template badge styling */
@@ -223,13 +266,183 @@ color: #1976d2;
 background: #fff3e0;
 color: #e65100;
 }
+
+/* Script Editor Styles */
+.script-editor {
+background: #f8f9ff;
+border: 2px solid #667eea;
+border-radius: 12px;
+padding: 24px;
+margin-top: 20px;
+}
+
+.script-editor h2 {
+color: #333;
+font-size: 20px;
+margin-bottom: 16px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.script-section {
+margin-bottom: 20px;
+}
+
+.script-section label {
+font-size: 13px;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+color: #667eea;
+margin-bottom: 8px;
+}
+
+.script-section textarea {
+width: 100%;
+padding: 12px;
+border: 2px solid #e0e0e0;
+border-radius: 8px;
+font-size: 15px;
+font-family: inherit;
+line-height: 1.5;
+resize: vertical;
+transition: border-color 0.3s, background-color 0.3s;
+}
+
+.script-section textarea:focus {
+outline: none;
+border-color: #667eea;
+}
+
+.script-section textarea:disabled {
+background-color: #f5f5f5;
+color: #666;
+cursor: not-allowed;
+}
+
+.script-section textarea.hook {
+min-height: 60px;
+}
+
+.script-section textarea.body {
+min-height: 200px;
+}
+
+.script-section textarea.cta {
+min-height: 80px;
+}
+
+.script-meta {
+display: flex;
+gap: 16px;
+margin-bottom: 16px;
+flex-wrap: wrap;
+}
+
+.script-meta-item {
+background: white;
+padding: 8px 14px;
+border-radius: 20px;
+font-size: 13px;
+color: #666;
+border: 1px solid #e0e0e0;
+}
+
+.script-meta-item strong {
+color: #333;
+}
+
+.script-actions {
+display: flex;
+gap: 12px;
+margin-top: 20px;
+}
+
+.script-actions button {
+flex: 1;
+padding: 14px;
+border-radius: 8px;
+font-size: 15px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.2s;
+}
+
+.script-actions button:disabled {
+opacity: 0.5;
+cursor: not-allowed;
+}
+
+.btn-regenerate {
+background: white;
+color: #667eea;
+border: 2px solid #667eea;
+}
+
+.btn-regenerate:hover:not(:disabled) {
+background: #f8f9ff;
+}
+
+.btn-approve {
+background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+color: white;
+border: none;
+}
+
+.btn-approve:hover:not(:disabled) {
+transform: translateY(-1px);
+box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-back {
+background: #f0f0f0;
+color: #666;
+border: none;
+}
+
+.btn-back:hover:not(:disabled) {
+background: #e0e0e0;
+}
+
+.word-count {
+font-size: 12px;
+color: #999;
+text-align: right;
+margin-top: 4px;
+}
+
+/* Timing estimate */
+.timing-estimate {
+background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+border-radius: 8px;
+padding: 12px 16px;
+margin-top: 16px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.timing-estimate .icon {
+font-size: 20px;
+}
+
+.timing-estimate .text {
+font-size: 14px;
+color: #333;
+}
+
+.timing-estimate .duration {
+font-weight: 600;
+color: #667eea;
+}
 </style>
 </head>
 <body>
 <div class="container">
 <h1>🎬 Ad Pilot Video Generator</h1>
-<p class="subtitle">Drive Business, Boost Social Presence</p>
+<p class="subtitle">Drive Business, Boost Social Presence <span style="color: #999; font-size: 12px;">v1.1</span></p>
 
+<!-- FORM VIEW -->
 <form id="adForm">
     <!-- Template Selection -->
     <div class="form-group">
@@ -241,7 +454,7 @@ color: #e65100;
             <option value="">Select template...</option>
             <option value="temp_001">🚗 Multi-Car Showcase (1-5 cars)</option>
             <option value="temp_002">⭐ Single Vehicle Spotlight (premium)</option>
-        <option value="temp_003">💡 Capitol Smarts (Organic / Education)</option>
+            <option value="temp_003">💡 Capitol Smarts (Organic / Education)</option>
         </select>
     </div>
 
@@ -267,9 +480,9 @@ color: #e65100;
         </label>
         <select id="avatar" name="avatar" required>
             <option value="">Select avatar...</option>
-            <option value="229bfc03d4d24d5ab7a5c71ce4b10d4b|bWI0w7QVOZiBvlJQahML|#89be5a|22|Shad">🎭 Awesome Shad</option>
-            <option value="5b9c75a2f13e4d60b09bcfdafa7339dd|eezuv0zKVdVTS0jHdxFa|#6da264|8|Kelly">💃 Sexy Kelly, not Kelly</option>
-            <option value="f9bb73f75160463ea82fe93f71592fce|xvBFrvpBNGBaCHOlL3IP|#7fc741|29|Gary">😌 Calm Gary Knight</option>
+            <option value="229bfc03d4d24d5ab7a5c71ce4b10d4b|4c673743fdab49cd89ae00a44cb552fb|#89be5a|22|Shad">🎭 Awesome Shad</option>
+            <option value="5b9c75a2f13e4d60b09bcfdafa7339dd|91cf853f9a91452486ba8ae00a963160|#6da264|8|Kelly">💃 Sexy Kelly, not Kelly</option>
+            <option value="f9bb73f75160463ea82fe93f71592fce|fb3df83f214e4c95816360f3bd7f9529|#7fc741|29|Gary">😌 Calm Gary Knight</option>
         </select>
     </div>
 
@@ -378,270 +591,507 @@ color: #e65100;
         </button>
     </div>
 
-    <!-- Submit Button -->
-    <button type="submit" id="submitBtn" disabled>
-        🚀 Generate Ad
-    </button>
+    <!-- Action Buttons -->
+    <div id="formButtons">
+        <div class="button-group">
+            <button type="button" id="previewBtn" class="btn-secondary" onclick="previewScript()" disabled>
+                📝 Preview Script
+            </button>
+            <button type="submit" id="submitBtn" class="btn-primary" disabled>
+                🚀 Generate Ad
+            </button>
+        </div>
+    </div>
 
     <!-- Status Messages -->
     <div id="status" class="status"></div>
-    <br>
-    <input type="checkbox" id="testMode" name="test_mode" value="true">
-    <label>Test Mode (reuse cached assets)</label>
+    
+    <div style="margin-top: 20px;">
+        <input type="checkbox" id="testMode" name="test_mode" value="true">
+        <label for="testMode" style="display: inline; font-weight: normal;">Test Mode (cache API responses for debugging)</label>
+    </div>
 </form>
+
+<!-- SCRIPT EDITOR VIEW -->
+<div id="scriptEditor" class="script-editor hidden">
+    <h2>📝 Review Your Script</h2>
+    
+    <div class="script-meta">
+        <div class="script-meta-item">
+            <strong>Template:</strong> <span id="metaTemplate">-</span>
+        </div>
+        <div class="script-meta-item">
+            <strong>Length:</strong> <span id="metaLength">-</span>
+        </div>
+        <div class="script-meta-item">
+            <strong>Presenter:</strong> <span id="metaPresenter">-</span>
+        </div>
+    </div>
+    
+    <div class="script-section">
+        <label for="editHook">HOOK (OPENING)</label>
+        <textarea id="editHook" class="hook" placeholder="Your attention-grabbing opening line..."></textarea>
+        <div class="word-count"><span id="hookWordCount">0 words</span></div>
+    </div>
+    
+    <div class="script-section">
+        <label for="editBody">BODY (MAIN CONTENT)</label>
+        <textarea id="editBody" class="body" placeholder="Main content of your video..."></textarea>
+        <div class="word-count"><span id="bodyWordCount">0 words</span></div>
+    </div>
+    
+    <div class="script-section">
+        <label for="editCta">CALL TO ACTION (CLOSING)</label>
+        <textarea id="editCta" class="cta" placeholder="Your closing call to action..."></textarea>
+        <div class="word-count"><span id="ctaWordCount">0 words</span></div>
+    </div>
+    
+    <div class="timing-estimate">
+        <span class="icon">⏱️</span>
+        <span class="text">Estimated duration: <span class="duration" id="estimatedDuration">~0 seconds</span></span>
+    </div>
+    
+    <div class="script-actions">
+        <button type="button" class="btn-back" onclick="backToForm()">← Back</button>
+        <button type="button" class="btn-regenerate" onclick="regenerateScript()">🔄 Regenerate</button>
+        <button type="button" class="btn-approve" onclick="approveAndGenerate()">✅ Approve & Generate Video</button>
+    </div>
+    
+    <div id="editorStatus" class="status"></div>
+</div>
 </div>
 
 <script>
-const WEBHOOK_URL = 'https://corsproxy.io/?https://kelly-ads.app.n8n.cloud/webhook/ad-pilot';
-const TOPIC_SUGGEST_URL = 'https://corsproxy.io/?https://kelly-ads.app.n8n.cloud/webhook/topic-suggest';
+// =====================
+// CONFIGURATION
+// =====================
+const WEBHOOK_URL = 'https://kelly-ads.app.n8n.cloud/webhook/ad-pilot';
+const TOPIC_SUGGEST_URL = 'https://kelly-ads.app.n8n.cloud/webhook/suggest-topics';
 const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1kgSVMgpWVSFeAAz4M2LpNmIbuhaJKds9gnbsvLdP-t4/gviz/tq?tqx=out:json&sheet=Feed';
-let MAX_CARS = 5; // Will change based on template
 
+const MAX_CARS = 5;
 let vehicleCount = 0;
 let inventory = [];
 let selectedTemplate = '';
+let cachedWorkflowConfig = null;
+let originalTestMode = false;
 
-// Animation option hidden for now - coming soon!
-// (Theme still works to influence the script)
-
+// =====================
+// TEMPLATE HANDLING
+// =====================
 function handleTemplateChange() {
     selectedTemplate = document.getElementById('template').value;
-
-    const themeGroup = document.getElementById('themeGroup');
-    const topicGroup = document.getElementById('topicGroup');
-    const emailGroup = document.getElementById('emailGroup');
     const platformGroup = document.getElementById('platformGroup');
-    const vehiclesGroup = document.getElementById('vehiclesGroup');
-    const lengthGroup = document.getElementById('lengthGroup');
     const avatarGroup = document.getElementById('avatarGroup');
-    const addBtn = document.getElementById('addVehicleBtn');
-    const vehicleLabel = document.getElementById('vehicleLabel');
+    const lengthGroup = document.getElementById('lengthGroup');
+    const vehiclesGroup = document.getElementById('vehiclesGroup');
+    const topicGroup = document.getElementById('topicGroup');
+    const themeGroup = document.getElementById('themeGroup');
+    const emailGroup = document.getElementById('emailGroup');
+    const addVehicleBtn = document.getElementById('addVehicleBtn');
 
-    // First, hide everything
-    themeGroup.classList.add('hidden');
-    topicGroup.classList.add('hidden');
-    vehiclesGroup.classList.add('hidden');
-
-    // common
-    emailGroup.classList.add('hidden');
+    // Reset visibility
     platformGroup.classList.add('hidden');
-    lengthGroup.classList.add('hidden');
     avatarGroup.classList.add('hidden');
+    lengthGroup.classList.add('hidden');
+    vehiclesGroup.classList.add('hidden');
+    topicGroup.classList.add('hidden');
+    themeGroup.classList.add('hidden');
+    emailGroup.classList.add('hidden');
 
-    // If no template selected, stop here
-    if (!template) return;
-
-    // Show common fields for all templates
-    emailGroup.classList.remove('hidden');
-    platformGroup.classList.remove('hidden');
-    lengthGroup.classList.remove('hidden');
-    avatarGroup.classList.remove('hidden');
-
-    if (selectedTemplate === 'temp_002') {
-        // Template 2: Single vehicle only
-        MAX_CARS = 1;
-        vehicleLabel.textContent = 'Vehicle (1)';
-        addBtn.textContent = '+ Add 1 Vehicle';
-        addBtn.disabled = true;
-
-        // Remove extra vehicles if any
-        while (vehicleCount > 1) {
-        const lastGroup = document.querySelector(`[data-vehicle-num="${vehicleCount}"]`);
-        if (lastGroup) lastGroup.remove();
-            vehicleCount--;
-        }
-        themeGroup.classList.remove('hidden');
-        vehiclesGroup.classList.remove('hidden');
-
-        // Remove require for topic
-        document.getElementById('topic').required = false;
-
-        // Make vehicle selects required again
-        const vehicleSelects = document.querySelectorAll('#vehicleContainer select');
-        vehicleSelects.forEach(select => select.required = true);
-
-    } else if (selectedTemplate === 'temp_001') {
-        // Template 1: 1-5 vehicles
-        MAX_CARS = 5;
-        vehicleLabel.textContent = 'Vehicles (1-5)';
-        addBtn.textContent = '+ Add Vehicle (max 5)';
-        addBtn.disabled = vehicleCount >= MAX_CARS || vehicleCount === 0;
-
-        themeGroup.classList.remove('hidden');
-        vehiclesGroup.classList.remove('hidden');
-
-        // Remove require for topic
-        document.getElementById('topic').required = false;
-
-        // Make vehicle selects required again
-        const vehicleSelects = document.querySelectorAll('#vehicleContainer select');
-        vehicleSelects.forEach(select => select.required = true);
-
-    } else if (selectedTemplate == 'temp_003') {
-        // Template 3: Organic/Education - no vehicles needed
-
-        vehiclesGroup.classList.add('hidden');
-
-        // If length is already selected, show topic section
-        if (document.getElementById('scriptLength').value) {
-            topicGroup.classList.remove('hidden');
-        }
-        // Require topic
-        document.getElementById('topic').required = true;
-
-        // Remove required from any existing vehicle selects
-        const vehicleSelects = document.querySelectorAll('#vehicleContainer select');
-        vehicleSelects.forEach(select => select.required = false);
+    if (!selectedTemplate) {
+        checkFormValidity();
+        return;
     }
 
-    // Enable submit button check
+    // Show common fields for all templates
+    platformGroup.classList.remove('hidden');
+    avatarGroup.classList.remove('hidden');
+    lengthGroup.classList.remove('hidden');
+    emailGroup.classList.remove('hidden');
+
+    if (selectedTemplate === 'temp_001') {
+        vehiclesGroup.classList.remove('hidden');
+        themeGroup.classList.remove('hidden');
+        document.getElementById('vehicleLabel').textContent = 'Vehicles (1-5)';
+        addVehicleBtn.style.display = 'block';
+        addVehicleBtn.disabled = vehicleCount >= MAX_CARS;
+    } else if (selectedTemplate === 'temp_002') {
+        vehiclesGroup.classList.remove('hidden');
+        themeGroup.classList.remove('hidden');
+        document.getElementById('vehicleLabel').textContent = 'Vehicle (single spotlight)';
+        addVehicleBtn.style.display = 'none';
+        
+        // Reset to 1 vehicle for temp_002
+        while (vehicleCount > 1) {
+            removeVehicle(vehicleCount);
+        }
+    } else if (selectedTemplate === 'temp_003') {
+        // Show topic group only after length is selected
+        const scriptLength = document.getElementById('scriptLength').value;
+        const avatar = document.getElementById('avatar').value;
+        if (scriptLength && avatar) {
+            topicGroup.classList.remove('hidden');
+        }
+    }
+
     checkFormValidity();
 }
 
-async function loadInventory() {
+// =====================
+// PREVIEW & EDITOR FUNCTIONS
+// =====================
+async function previewScript() {
+    const payload = buildPayload();
+    if (!payload) return;
+    
+    // Save test_mode setting before we hide the form
+    originalTestMode = document.getElementById('testMode').checked;
+    
+    // Add preview_mode flag
+    payload.preview_mode = true;
+    
+    console.log('Previewing script with payload:', payload);
+    
+    showStatus('Generating script preview... ✍️', 'loading');
+    document.getElementById('previewBtn').disabled = true;
+    document.getElementById('submitBtn').disabled = true;
+    
     try {
-        const response = await fetch(INVENTORY_SHEET);
-        const text = await response.text();
-        const json = JSON.parse(text.substr(47).slice(0, -2));
+        // Step 1: Start the job
+        const startResponse = await fetch(WEBHOOK_URL + '/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        const startResult = await startResponse.json();
+        console.log('Job started:', startResult);
+        
+        if (!startResponse.ok || !startResult.job_id) {
+            throw new Error(startResult.message || 'Failed to start job');
+        }
+        
+        // Step 2: Poll for completion
+        const jobId = startResult.job_id;
+        let attempts = 0;
+        const maxAttempts = 40; // 2 minutes max (40 * 3 seconds)
+        
+        while (attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 3000)); // Wait 3 seconds
+            
+            const statusResponse = await fetch(WEBHOOK_URL + '/status?job_id=' + jobId);
+            const statusResult = await statusResponse.json();
+            console.log('Job status:', statusResult);
+            
+            if (statusResult.status === 'script_ready') {
+            // Build the config object UI expects
+            cachedWorkflowConfig = {
+                ...payload,
+                script: statusResult.script_data,
+                // Capture cached API responses for test mode
+                api_claude_script_generation: statusResult.api_claude_script_generation,
+                api_claude_categorize_photos: statusResult.api_claude_categorize_photos,
+                api_claude_feature_identification: statusResult.api_claude_feature_identification
+            };
+                
+                // Populate the editor
+                populateScriptEditor(cachedWorkflowConfig);
+                
+                // Switch views
+                document.getElementById('adForm').classList.add('hidden');
+                document.getElementById('scriptEditor').classList.remove('hidden');
+                hideStatus();
+                return;
+            } else if (statusResult.status === 'failed') {
+                throw new Error(statusResult.error_message || 'Job failed');
+            }
+            
+            // Update status message with elapsed time
+            const elapsed = (attempts + 1) * 3;
+            showStatus(`Generating script preview... ✍️ (${elapsed}s)`, 'loading');
+            attempts++;
+        }
+        
+        throw new Error('Timeout waiting for script generation');
+        
+    } catch (error) {
+        console.error('Preview error:', error);
+        showStatus(`Error: ${error.message}`, 'error');
+    } finally {
+        document.getElementById('previewBtn').disabled = false;
+        document.getElementById('submitBtn').disabled = false;
+    }
+}
 
-        inventory = json.table.rows.slice(1).map(row => {
-        const cells = row.c;
-        return {
-        // Corrected Indices
-        vin: cells[1]?.v || '',      // Column B
-        make: cells[4]?.v || '',     // Column E
-        model: cells[5]?.v || '',    // Column F
-        year: cells[6]?.v || '',     // Column G
-        price: cells[14]?.v || ''    // Assumes price is in Column O
+function populateScriptEditor(config) {
+    const script = config.script || {};
+    
+    // Set meta info
+    document.getElementById('metaTemplate').textContent = config.template_id || '-';
+    document.getElementById('metaLength').textContent = config.script_length || '-';
+    document.getElementById('metaPresenter').textContent = config.avatar_name || '-';
+    
+    // Set script content
+    document.getElementById('editHook').value = script.hook || '';
+    
+    // Body could be segments array or full_script minus hook/cta
+    let bodyText = '';
+    if (script.segments && Array.isArray(script.segments)) {
+        bodyText = script.segments.join('\n\n');
+    } else if (script.body) {
+        bodyText = script.body;
+    } else if (script.full_script) {
+        // Extract body from full script (remove hook and cta)
+        bodyText = script.full_script
+            .replace(script.hook || '', '')
+            .replace(script.cta || '', '')
+            .trim();
+    }
+    document.getElementById('editBody').value = bodyText;
+    
+    document.getElementById('editCta').value = script.cta || '';
+    
+    // Update word counts
+    updateWordCounts();
+    updateDurationEstimate();
+}
+
+function updateWordCounts() {
+    const hook = document.getElementById('editHook').value;
+    const body = document.getElementById('editBody').value;
+    const cta = document.getElementById('editCta').value;
+    
+    document.getElementById('hookWordCount').textContent = countWords(hook) + ' words';
+    document.getElementById('bodyWordCount').textContent = countWords(body) + ' words';
+    document.getElementById('ctaWordCount').textContent = countWords(cta) + ' words';
+}
+
+function countWords(text) {
+    return text.trim().split(/\s+/).filter(w => w.length > 0).length;
+}
+
+function updateDurationEstimate() {
+    const hook = document.getElementById('editHook').value;
+    const body = document.getElementById('editBody').value;
+    const cta = document.getElementById('editCta').value;
+    
+    const totalWords = countWords(hook) + countWords(body) + countWords(cta);
+    // Average speaking rate: ~150 words per minute = 2.5 words per second
+    const seconds = Math.round(totalWords / 2.5);
+    
+    document.getElementById('estimatedDuration').textContent = `~${seconds} seconds`;
+}
+
+function backToForm() {
+    document.getElementById('scriptEditor').classList.add('hidden');
+    document.getElementById('adForm').classList.remove('hidden');
+    hideStatus();
+}
+
+function resetForm() {
+    cachedWorkflowConfig = null;
+    lockEditor(false);
+    backToForm();
+    document.getElementById('adForm').reset();
+    handleTemplateChange();
+}
+
+function lockEditor(locked) {
+    // Lock/unlock textareas
+    document.getElementById('editHook').disabled = locked;
+    document.getElementById('editBody').disabled = locked;
+    document.getElementById('editCta').disabled = locked;
+    
+    // Lock/unlock buttons
+    document.querySelectorAll('.script-actions button').forEach(btn => btn.disabled = locked);
+}
+
+async function regenerateScript() {
+    showEditorStatus('Regenerating script... ✍️', 'loading');
+    
+    // Lock the editor
+    lockEditor(true);
+    
+    try {
+        // Re-send original form data with preview_mode
+        const payload = buildPayload();
+        payload.preview_mode = true;
+        
+        // Step 1: Start the job
+        const startResponse = await fetch(WEBHOOK_URL + '/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        const startResult = await startResponse.json();
+        console.log('Regenerate job started:', startResult);
+        
+        if (!startResponse.ok || !startResult.job_id) {
+            throw new Error(startResult.message || 'Failed to start job');
+        }
+        
+        // Step 2: Poll for completion
+        const jobId = startResult.job_id;
+        let attempts = 0;
+        const maxAttempts = 40; // 2 minutes max
+        
+        while (attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            
+            const statusResponse = await fetch(WEBHOOK_URL + '/status?job_id=' + jobId);
+            const statusResult = await statusResponse.json();
+            console.log('Regenerate status:', statusResult);
+            
+            if (statusResult.status === 'script_ready') {
+                cachedWorkflowConfig = {
+                    ...payload,
+                    script: statusResult.script_data,
+                    api_claude_script_generation: statusResult.api_claude_script_generation,
+                    api_claude_categorize_photos: statusResult.api_claude_categorize_photos,
+                    api_claude_feature_identification: statusResult.api_claude_feature_identification
+                };
+                populateScriptEditor(cachedWorkflowConfig);
+                showEditorStatus('Script regenerated! ✨', 'success');
+                return;
+            } else if (statusResult.status === 'failed') {
+                throw new Error(statusResult.error_message || 'Job failed');
+            }
+            
+            const elapsed = (attempts + 1) * 3;
+            showEditorStatus(`Regenerating script... ✍️ (${elapsed}s)`, 'loading');
+            attempts++;
+        }
+        
+        throw new Error('Timeout waiting for script generation');
+        
+    } catch (error) {
+        console.error('Regenerate error:', error);
+        showEditorStatus(`Error: ${error.message}`, 'error');
+    } finally {
+        lockEditor(false);
+    }
+}
+
+async function approveAndGenerate() {
+    if (!cachedWorkflowConfig) {
+        showEditorStatus('No cached config found. Please regenerate the script.', 'error');
+        return;
+    }
+    
+    // Lock the editor immediately
+    lockEditor(true);
+    
+    // Get the edited script values
+    const editedHook = document.getElementById('editHook').value.trim();
+    const editedBody = document.getElementById('editBody').value.trim();
+    const editedCta = document.getElementById('editCta').value.trim();
+    
+    // Update the cached config with edited script
+    const cleanText = (text) => text.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
+    
+    cachedWorkflowConfig.script = {
+        ...cachedWorkflowConfig.script,
+        hook: cleanText(editedHook),
+        body: cleanText(editedBody),
+        cta: cleanText(editedCta),
+        segments: editedBody.split(/\n\n+/).map(s => cleanText(s)).filter(s => s),
+        full_script: cleanText([editedHook, editedBody, editedCta].filter(s => s).join(' '))
     };
-}).filter(car => car.vin && car.year && car.make && car.model);
-
-// Sort by year descending (newest first)
-inventory.sort((a, b) => b.year - a.year);
-
-console.log(`Loaded ${inventory.length} vehicles from inventory`);
-
-// Add first vehicle dropdown
-addVehicle();
-
-} catch (error) {
-console.error('Error loading inventory:', error);
-showStatus('Error loading vehicle inventory. Please refresh the page.', 'error');
-}
-}
-
-function addVehicle() {
-if (vehicleCount >= MAX_CARS) return;
-
-vehicleCount++;
-const container = document.getElementById('vehicleContainer');
-const vehicleGroup = document.createElement('div');
-vehicleGroup.className = 'vehicle-group';
-vehicleGroup.dataset.vehicleNum = vehicleCount;
-
-const select = document.createElement('select');
-select.name = `vehicle${vehicleCount}`;
-select.required = selectedTemplate !== 'temp_003'; // Only required if NOT organic/education
-select.onchange = checkFormValidity;
-
-const defaultOption = document.createElement('option');
-defaultOption.value = '';
-defaultOption.textContent = 'Select vehicle...';
-select.appendChild(defaultOption);
-
-vehicleGroup.appendChild(select);
-
-// Add remove button (hide for first vehicle)
-if (vehicleCount > 1) {
-const removeBtn = document.createElement('button');
-removeBtn.type = 'button';
-removeBtn.className = 'remove-vehicle';
-removeBtn.textContent = '−';
-removeBtn.onclick = () => removeVehicle(vehicleCount);
-vehicleGroup.appendChild(removeBtn);
-}
-
-container.appendChild(vehicleGroup);
-populateVehicleDropdowns();
-checkFormValidity();
-}
-
-function populateVehicleDropdowns() {
-const selects = document.querySelectorAll('#vehicleContainer select');
-const selectedVins = Array.from(selects).map(s => s.value).filter(v => v);
-
-selects.forEach(select => {
-const currentValue = select.value;
-select.innerHTML = '<option value="">Select vehicle...</option>';
-
-inventory.forEach(car => {
-if (!selectedVins.includes(car.vin) || car.vin === currentValue) {
-const option = document.createElement('option');
-option.value = car.vin;
-option.textContent = `${car.year} ${car.make} ${car.model}, ${car.price} - ${car.vin}`;
-select.appendChild(option);
-}
-});
-
-if (currentValue) {
-select.value = currentValue;
-}
-});
-
-const addBtn = document.getElementById('addVehicleBtn');
-    if (selectedTemplate === 'temp_002') {
-        addBtn.disabled = true; // Always disabled for Template 2
-    } else {
-        addBtn.disabled = vehicleCount >= MAX_CARS;
+    
+    cachedWorkflowConfig.script_edited = true;
+    delete cachedWorkflowConfig.preview_mode;
+    cachedWorkflowConfig.test_mode = originalTestMode;
+    
+    // Clear old API caches
+    delete cachedWorkflowConfig.api_elevenlabs_tts;
+    delete cachedWorkflowConfig.api_elevenlabs_forced_alignment;
+    delete cachedWorkflowConfig.api_heygen_tts;
+    delete cachedWorkflowConfig.audio_url;
+    delete cachedWorkflowConfig.api_cloudinary_upload;
+    
+    console.log('Submitting approved config:', cachedWorkflowConfig);
+    
+    showEditorStatus('Starting video generation... ⏱️', 'loading');
+    
+    try {
+        // Step 1: Start the job
+        const startResponse = await fetch(WEBHOOK_URL + '/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cachedWorkflowConfig)
+        });
+        
+        const startResult = await startResponse.json();
+        console.log('Video job started:', startResult);
+        
+        if (!startResponse.ok || !startResult.job_id) {
+            throw new Error(startResult.message || 'Failed to start video job');
+        }
+        
+        // Step 2: Poll for completion
+        const jobId = startResult.job_id;
+        let attempts = 0;
+        const maxAttempts = 45; // 15 minutes max (45 * 20 seconds)
+        
+        while (attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 20000)); // Wait 20 seconds
+            
+            const statusResponse = await fetch(WEBHOOK_URL + '/status?job_id=' + jobId);
+            const statusResult = await statusResponse.json();
+            console.log('Video job status:', statusResult);
+            
+            if (statusResult.status === 'complete') {
+                // Show success with video link and reset button
+                let successHtml = '🎉 Your video is ready!';
+                if (statusResult.video_url) {
+                    successHtml += ` <a href="${statusResult.video_url}" target="_blank">Click here to view</a>`;
+                } else {
+                    successHtml += ' Check your email!';
+                }
+                successHtml += '<br><br><button onclick="resetForm()" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Create Another Video</button>';
+                showEditorStatus(successHtml, 'success');
+                
+                // Keep editor locked but don't auto-reset
+                return;
+            } else if (statusResult.status === 'failed') {
+                throw new Error(statusResult.error_message || 'Video generation failed');
+            }
+            
+            // Show generic progress message with elapsed time
+            const elapsed = Math.round((attempts + 1) * 20 / 60);
+            showEditorStatus(`Generating video... This may take a few minutes ⏳ (~${elapsed} min)`, 'loading');
+            attempts++;
+        }
+        
+        throw new Error('Timeout waiting for video generation');
+        
+    } catch (error) {
+        console.error('Generation error:', error);
+        showEditorStatus(`Error: ${error.message}`, 'error');
+        lockEditor(false); // Unlock on error so user can try again
     }
 }
 
-function removeVehicle(num) {
-if (vehicleCount <= 1) return;
-
-const vehicleGroup = document.querySelector(`[data-vehicle-num="${num}"]`);
-vehicleGroup.remove();
-vehicleCount--;
-
-// Renumber remaining vehicles
-const groups = document.querySelectorAll('.vehicle-group');
-groups.forEach((group, index) => {
-const newNum = index + 1;
-group.dataset.vehicleNum = newNum;
-const select = group.querySelector('select');
-select.name = `vehicle${newNum}`;
-const button = group.querySelector('.remove-vehicle');
-if (button) {
-button.onclick = () => removeVehicle(newNum);
-}
-});
-
-vehicleCount = groups.length;
-populateVehicleDropdowns();
+function showEditorStatus(message, type) {
+    const statusDiv = document.getElementById('editorStatus');
+    statusDiv.innerHTML = message; // Use innerHTML to support links
+    statusDiv.className = `status ${type}`;
+    statusDiv.style.display = 'block';
 }
 
-function checkFormValidity() {
-    const template = document.getElementById('template').value;
-    const topic = document.getElementById('topic').value;
-    const avatar = document.getElementById('avatar').value;
-    const platform = document.getElementById('platform').value;
-    const scriptLength = document.getElementById('scriptLength').value;
-    const email = document.getElementById('email').value;
-    const selects = document.querySelectorAll('#vehicleContainer select');
-    const hasVehicles = Array.from(selects).some(s => s.value);
-    const submitBtn = document.getElementById('submitBtn');
-    // Different validation for temp_003 vs others
-    if (template === 'temp_003') {
-        submitBtn.disabled = !(template && topic && platform && scriptLength && avatar && email);
-    } else {
-        submitBtn.disabled = !(template && platform && scriptLength && avatar && email && hasVehicles);
-    }
-}
+// Add event listeners for word count updates
+document.getElementById('editHook').addEventListener('input', () => { updateWordCounts(); updateDurationEstimate(); });
+document.getElementById('editBody').addEventListener('input', () => { updateWordCounts(); updateDurationEstimate(); });
+document.getElementById('editCta').addEventListener('input', () => { updateWordCounts(); updateDurationEstimate(); });
 
-document.getElementById('adForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
+// =====================
+// ORIGINAL FORM FUNCTIONS
+// =====================
 
-    const formData = new FormData(e.target);
+function buildPayload() {
+    const formData = new FormData(document.getElementById('adForm'));
     const template = formData.get('template');
     const topic = formData.get('topic');
     const platform = formData.get('platform');
@@ -651,9 +1101,8 @@ document.getElementById('adForm').addEventListener('submit', async (e) => {
     const email = formData.get('email');
     const scriptLength = formData.get('script_length');
     const testMode = document.getElementById('testMode').checked;
-    formData.set('test_mode', testMode);
 
-    // Parse avatar (format: avatar_id|voice_id|chromakey_color|chromakey_sensitivity)
+    // Parse avatar (format: avatar_id|voice_id|chromakey_color|chromakey_sensitivity|avatar_name)
     const [avatar_id, voice_id, chromakey_color, chromakey_sensitivity, avatar_name] = avatarValue.split('|');
 
     const vins = [];
@@ -662,21 +1111,21 @@ document.getElementById('adForm').addEventListener('submit', async (e) => {
         if (vin) vins.push(vin);
     }
 
-    // Only validate vehicles if NOT temp_003
+    // Validate vehicles if NOT temp_003
     if (template !== 'temp_003') {
         if (vins.length === 0) {
             showStatus('Please select at least one vehicle', 'error');
-            return;
+            return null;
         }
     }
 
     if (template === 'temp_002' && vins.length > 1) {
         showStatus('Template 2 only supports 1 vehicle', 'error');
-        return;
+        return null;
     }
 
-    const payload = {
-        template_id: template.toUpperCase(), // TEMP_001, TEMP_002, or TEMP_003
+    return {
+        template_id: template.toUpperCase(),
         theme: theme,
         topic: topic,
         platform: platform,
@@ -691,53 +1140,207 @@ document.getElementById('adForm').addEventListener('submit', async (e) => {
         vins: vins,
         test_mode: testMode
     };
-
-console.log('Submitting payload:', payload);
-
-showStatus(`Generating your ad... This will take 10 minutes or less. ⏱️`, 'loading');
-
-// Disable submit button
-document.getElementById('submitBtn').disabled = true;
-
-try {
-    const response = await fetch(WEBHOOK_URL, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload)
-});
-
-const result = await response.json();
-
-if (response.ok) {
-    showStatus(`Success! Your ad is being generated. Check your email in a few minutes. 🎬`, 'success');
-    // Re-enable submit after 5 seconds
-    setTimeout(() => {
-    document.getElementById('submitBtn').disabled = false;
-}, 5000);
-} else {
-showStatus(`Error: ${result.message || 'Something went wrong'}`, 'error');
-document.getElementById('submitBtn').disabled = false;
 }
-} catch (error) {
-console.error('Submission error:', error);
-showStatus(`Error: ${error.message}`, 'error');
-document.getElementById('submitBtn').disabled = false;
+
+async function loadInventory() {
+    try {
+        const response = await fetch(INVENTORY_SHEET);
+        const text = await response.text();
+        const json = JSON.parse(text.substr(47).slice(0, -2));
+
+        inventory = json.table.rows.slice(1).map(row => {
+            const cells = row.c;
+            return {
+                vin: cells[1]?.v || '',
+                make: cells[4]?.v || '',
+                model: cells[5]?.v || '',
+                year: cells[6]?.v || '',
+                price: cells[14]?.v || ''
+            };
+        }).filter(car => car.vin && car.year && car.make && car.model);
+
+        inventory.sort((a, b) => b.year - a.year);
+
+        console.log(`Loaded ${inventory.length} vehicles from inventory`);
+
+        addVehicle();
+
+    } catch (error) {
+        console.error('Error loading inventory:', error);
+        showStatus('Error loading vehicle inventory. Please refresh the page.', 'error');
+    }
 }
+
+function addVehicle() {
+    if (vehicleCount >= MAX_CARS) return;
+
+    vehicleCount++;
+    const container = document.getElementById('vehicleContainer');
+    const vehicleGroup = document.createElement('div');
+    vehicleGroup.className = 'vehicle-group';
+    vehicleGroup.dataset.vehicleNum = vehicleCount;
+
+    const select = document.createElement('select');
+    select.name = `vehicle${vehicleCount}`;
+    select.required = selectedTemplate !== 'temp_003';
+    select.onchange = checkFormValidity;
+
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Select vehicle...';
+    select.appendChild(defaultOption);
+
+    vehicleGroup.appendChild(select);
+
+    if (vehicleCount > 1) {
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'remove-vehicle';
+        removeBtn.textContent = '−';
+        removeBtn.onclick = () => removeVehicle(vehicleCount);
+        vehicleGroup.appendChild(removeBtn);
+    }
+
+    container.appendChild(vehicleGroup);
+    populateVehicleDropdowns();
+    checkFormValidity();
+}
+
+function populateVehicleDropdowns() {
+    const selects = document.querySelectorAll('#vehicleContainer select');
+    const selectedVins = Array.from(selects).map(s => s.value).filter(v => v);
+
+    selects.forEach(select => {
+        const currentValue = select.value;
+        select.innerHTML = '<option value="">Select vehicle...</option>';
+
+        inventory.forEach(car => {
+            if (!selectedVins.includes(car.vin) || car.vin === currentValue) {
+                const option = document.createElement('option');
+                option.value = car.vin;
+                option.textContent = `${car.year} ${car.make} ${car.model}, ${car.price} - ${car.vin}`;
+                select.appendChild(option);
+            }
+        });
+
+        if (currentValue) {
+            select.value = currentValue;
+        }
+    });
+
+    const addBtn = document.getElementById('addVehicleBtn');
+    if (selectedTemplate === 'temp_002') {
+        addBtn.disabled = true;
+    } else {
+        addBtn.disabled = vehicleCount >= MAX_CARS;
+    }
+}
+
+function removeVehicle(num) {
+    if (vehicleCount <= 1) return;
+
+    const vehicleGroup = document.querySelector(`[data-vehicle-num="${num}"]`);
+    vehicleGroup.remove();
+    vehicleCount--;
+
+    const groups = document.querySelectorAll('.vehicle-group');
+    groups.forEach((group, index) => {
+        const newNum = index + 1;
+        group.dataset.vehicleNum = newNum;
+        const select = group.querySelector('select');
+        select.name = `vehicle${newNum}`;
+        const button = group.querySelector('.remove-vehicle');
+        if (button) {
+            button.onclick = () => removeVehicle(newNum);
+        }
+    });
+
+    vehicleCount = groups.length;
+    populateVehicleDropdowns();
+}
+
+function checkFormValidity() {
+    const template = document.getElementById('template').value;
+    const topic = document.getElementById('topic').value;
+    const avatar = document.getElementById('avatar').value;
+    const platform = document.getElementById('platform').value;
+    const scriptLength = document.getElementById('scriptLength').value;
+    const email = document.getElementById('email').value;
+    const selects = document.querySelectorAll('#vehicleContainer select');
+    const hasVehicles = Array.from(selects).some(s => s.value);
+    
+    const submitBtn = document.getElementById('submitBtn');
+    const previewBtn = document.getElementById('previewBtn');
+    
+    let isValid = false;
+    
+    if (template === 'temp_003') {
+        isValid = !!(template && topic && platform && scriptLength && avatar && email);
+    } else {
+        isValid = !!(template && platform && scriptLength && avatar && email && hasVehicles);
+    }
+    
+    submitBtn.disabled = !isValid;
+    previewBtn.disabled = !isValid;
+}
+
+document.getElementById('adForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const payload = buildPayload();
+    if (!payload) return;
+
+    console.log('Submitting payload:', payload);
+
+    showStatus(`Generating your ad... This will take 10 minutes or less. ⏱️`, 'loading');
+
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('previewBtn').disabled = true;
+
+    try {
+        const response = await fetch(WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            showStatus(`Success! Your ad is being generated. Check your email in a few minutes. 🎬`, 'success');
+            setTimeout(() => {
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('previewBtn').disabled = false;
+            }, 5000);
+        } else {
+            showStatus(`Error: ${result.message || 'Something went wrong'}`, 'error');
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('previewBtn').disabled = false;
+        }
+    } catch (error) {
+        console.error('Submission error:', error);
+        showStatus(`Error: ${error.message}`, 'error');
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('previewBtn').disabled = false;
+    }
 });
 
 function showStatus(message, type) {
-const statusDiv = document.getElementById('status');
-statusDiv.textContent = message;
-statusDiv.className = `status ${type}`;
-statusDiv.style.display = 'block';
+    const statusDiv = document.getElementById('status');
+    statusDiv.textContent = message;
+    statusDiv.className = `status ${type}`;
+    statusDiv.style.display = 'block';
 
-if (type !== 'loading') {
-setTimeout(() => {
-statusDiv.style.display = 'none';
-}, 5000);
+    if (type !== 'loading') {
+        setTimeout(() => {
+            statusDiv.style.display = 'none';
+        }, 5000);
+    }
 }
+
+function hideStatus() {
+    document.getElementById('status').style.display = 'none';
+    document.getElementById('editorStatus').style.display = 'none';
 }
 
 async function suggestTopics() {
@@ -749,7 +1352,6 @@ async function suggestTopics() {
     const suggestionsDiv = document.getElementById('topicSuggestions');
     const suggestionsList = document.getElementById('suggestionsList');
 
-    // Map UI values to API values
     const lengthMap = {
         'quick': 'brief_15_30',
         'standard': 'standard_30_45',
@@ -757,20 +1359,15 @@ async function suggestTopics() {
     };
 
     const targetLength = lengthMap[scriptLength];
-
-    // Only use guidance if in "guided" mode
     const guidanceText = suggestionMode === 'guided' ? topicGuidance : '';
 
-    // Disable button and show loading
     suggestBtn.disabled = true;
     suggestBtn.textContent = '⏳ Generating...';
 
     try {
         const response = await fetch(TOPIC_SUGGEST_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 target_length: targetLength,
                 topic_guidance: guidanceText,
@@ -781,12 +1378,10 @@ async function suggestTopics() {
         const result = await response.json();
 
         if (response.ok && result.success) {
-            // Display suggestions
             suggestionsList.innerHTML = result.suggestions.map(topic => 
                 `<div style="padding: 10px; margin-bottom: 8px; background: white; border-radius: 6px; cursor: pointer; border: 2px solid #e0e0e0; transition: all 0.2s;" 
                      onmouseover="this.style.borderColor='#667eea'; this.style.background='#f8f9ff';" 
                      onmouseout="this.style.borderColor='#e0e0e0'; this.style.background='white';"
-                     onclick="document.getElementById('topic').value = '${topic.replace(/'/g, "\\'")}'; document.getElementById('topicSuggestions').style.display='none';">
                      onclick="document.getElementById('topic').value = '${topic.replace(/'/g, "\\'")}'; checkFormValidity(); document.getElementById('topicSuggestions').style.display='none';">
                     ${topic}
                 </div>`
@@ -800,7 +1395,6 @@ async function suggestTopics() {
         console.error('Suggestion error:', error);
         showStatus('Error generating suggestions. Please try again.', 'error');
     } finally {
-        // Re-enable button
         suggestBtn.disabled = false;
         if (topicGuidance.length > 1) {
             suggestBtn.textContent = '💡 Suggest more topics related to ' + topicGuidance;
@@ -836,10 +1430,8 @@ function handleLengthChange() {
     const template = document.getElementById('template').value;
     const scriptLength = document.getElementById('scriptLength').value;
     const topicGroup = document.getElementById('topicGroup');
-
     const avatar = document.getElementById('avatar').value;
 
-    // Only show topic group for temp_003 after length is selected
     if (template === 'temp_003' && scriptLength && avatar) {
         topicGroup.classList.remove('hidden');
     } else if (template === 'temp_003') {
