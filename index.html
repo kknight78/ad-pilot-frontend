@@ -440,21 +440,34 @@ color: #667eea;
 <body>
 <div class="container">
 <h1>🎬 Ad Pilot Video Generator</h1>
-<p class="subtitle">Drive Business, Boost Social Presence <span style="color: #999; font-size: 12px;">v1.1</span></p>
+<p class="subtitle">Drive Business, Boost Social Presence <span style="color: #999; font-size: 12px;">v1.7</span> | <a href="guidance.html" target="_blank" style="color: #667eea; text-decoration: none;">📝 Guidance Rules</a></p>
 
 <!-- FORM VIEW -->
 <form id="adForm">
-    <!-- Template Selection -->
+    <!-- Client Selection -->
     <div class="form-group">
+        <label for="client">
+            Client
+            <span class="label-description">Select the client</span>
+        </label>
+        <select id="client" name="client" required onchange="handleClientChange()">
+            <option value="">Select client...</option>
+            <option value="ccc">Capitol Car Credit</option>
+            <option value="adpilot" disabled>Ad Pilot (coming soon)</option>
+        </select>
+    </div>
+
+    <!-- Template Selection -->
+    <div class="form-group hidden" id="templateGroup">
         <label for="template">
             Template
             <span class="label-description">Choose your video style</span>
         </label>
         <select id="template" name="template" required onchange="handleTemplateChange()">
             <option value="">Select template...</option>
-            <option value="temp_001">🚗 Multi-Car Showcase (1-5 cars)</option>
-            <option value="temp_002">⭐ Single Vehicle Spotlight (premium)</option>
-            <option value="temp_003">💡 Capitol Smarts (Organic / Education)</option>
+            <option value="ad-multi-item-1">🚗 Ad - Multiple Inventory Item 1 (1-5 items)</option>
+            <option value="ad-single-item-spotlight-1">⭐ Ad - Single Inventory Item Spotlight 1</option>
+            <option value="social-educational-1">💡 Social - Educational 1</option>
         </select>
     </div>
 
@@ -466,10 +479,19 @@ color: #667eea;
         </label>
         <select id="platform" name="platform" required onchange="checkFormValidity()">
             <option value="">Select platform...</option>
-            <option value="tiktok">TikTok</option>
-            <option value="youtube">YouTube Shorts</option>
-            <option value="instagram">Instagram Reels</option>
-            <option value="facebook">Facebook Reels</option>
+            <optgroup label="Vertical (9:16)">
+                <option value="tiktok_9:16">TikTok (9:16)</option>
+                <option value="youtube-shorts_9:16">YouTube Shorts (9:16)</option>
+                <option value="instagram-reels_9:16">Instagram Reels (9:16)</option>
+                <option value="facebook-reels_9:16">Facebook Reels (9:16)</option>
+            </optgroup>
+            <optgroup label="Feed (4:5)">
+                <option value="facebook-feed_4:5">Facebook Feed (4:5)</option>
+                <option value="instagram-feed_4:5">Instagram Feed (4:5)</option>
+            </optgroup>
+            <optgroup label="Landscape (16:9)">
+                <option value="youtube_16:9">YouTube (16:9)</option>
+            </optgroup>
         </select>
     </div>
 
@@ -650,7 +672,13 @@ color: #667eea;
         <span class="icon">⏱️</span>
         <span class="text">Estimated duration: <span class="duration" id="estimatedDuration">~0 seconds</span></span>
     </div>
-    
+
+    <div class="guidance-hint" style="text-align: right; margin: 12px 0 8px 0;">
+        <a href="guidance.html" target="_blank" style="color: #666; font-size: 13px; text-decoration: none;">
+            📝 See something wrong? <span style="text-decoration: underline;">Add a guidance rule</span> so we remember next time →
+        </a>
+    </div>
+
     <div class="script-actions">
         <button type="button" class="btn-back" onclick="backToForm()">← Back</button>
         <button type="button" class="btn-regenerate" onclick="regenerateScript()">🔄 Regenerate</button>
@@ -666,7 +694,8 @@ color: #667eea;
 // CONFIGURATION
 // =====================
 const WEBHOOK_URL = 'https://kelly-ads.app.n8n.cloud/webhook/ad-pilot';
-const TOPIC_SUGGEST_URL = 'https://kelly-ads.app.n8n.cloud/webhook/suggest-topics';
+// CORS proxy needed - n8n Cloud doesn't support preflight OPTIONS requests
+const TOPIC_SUGGEST_URL = 'https://corsproxy.io/?' + encodeURIComponent('https://kelly-ads.app.n8n.cloud/webhook/topic-suggest');
 const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1kgSVMgpWVSFeAAz4M2LpNmIbuhaJKds9gnbsvLdP-t4/gviz/tq?tqx=out:json&sheet=Feed';
 
 const MAX_CARS = 5;
@@ -679,6 +708,22 @@ let originalTestMode = false;
 // =====================
 // TEMPLATE HANDLING
 // =====================
+function handleClientChange() {
+    const client = document.getElementById('client').value;
+    const templateGroup = document.getElementById('templateGroup');
+    
+    if (client) {
+        templateGroup.classList.remove('hidden');
+    } else {
+        templateGroup.classList.add('hidden');
+        // Reset template and hide all dependent fields
+        document.getElementById('template').value = '';
+        handleTemplateChange();
+    }
+    
+    checkFormValidity();
+}
+
 function handleTemplateChange() {
     selectedTemplate = document.getElementById('template').value;
     const platformGroup = document.getElementById('platformGroup');
@@ -710,23 +755,23 @@ function handleTemplateChange() {
     lengthGroup.classList.remove('hidden');
     emailGroup.classList.remove('hidden');
 
-    if (selectedTemplate === 'temp_001') {
+    if (selectedTemplate === 'ad-multi-item-1') {
         vehiclesGroup.classList.remove('hidden');
         themeGroup.classList.remove('hidden');
         document.getElementById('vehicleLabel').textContent = 'Vehicles (1-5)';
         addVehicleBtn.style.display = 'block';
         addVehicleBtn.disabled = vehicleCount >= MAX_CARS;
-    } else if (selectedTemplate === 'temp_002') {
+    } else if (selectedTemplate === 'ad-single-item-spotlight-1') {
         vehiclesGroup.classList.remove('hidden');
         themeGroup.classList.remove('hidden');
         document.getElementById('vehicleLabel').textContent = 'Vehicle (single spotlight)';
         addVehicleBtn.style.display = 'none';
         
-        // Reset to 1 vehicle for temp_002
+        // Reset to 1 vehicle for single item spotlight
         while (vehicleCount > 1) {
             removeVehicle(vehicleCount);
         }
-    } else if (selectedTemplate === 'temp_003') {
+    } else if (selectedTemplate === 'social-educational-1') {
         // Show topic group only after length is selected
         const scriptLength = document.getElementById('scriptLength').value;
         const avatar = document.getElementById('avatar').value;
@@ -1092,15 +1137,19 @@ document.getElementById('editCta').addEventListener('input', () => { updateWordC
 
 function buildPayload() {
     const formData = new FormData(document.getElementById('adForm'));
+    const client = formData.get('client');
     const template = formData.get('template');
     const topic = formData.get('topic');
-    const platform = formData.get('platform');
+    const platformValue = formData.get('platform');
     const theme = formData.get('theme') || '';
     const includeAnimation = formData.get('include_animation') === 'true';
     const avatarValue = formData.get('avatar');
     const email = formData.get('email');
     const scriptLength = formData.get('script_length');
     const testMode = document.getElementById('testMode').checked;
+
+    // Parse platform value to extract platform and ratio (format: platform_ratio)
+    const [platform, ratio] = platformValue.split('_');
 
     // Parse avatar (format: avatar_id|voice_id|chromakey_color|chromakey_sensitivity|avatar_name)
     const [avatar_id, voice_id, chromakey_color, chromakey_sensitivity, avatar_name] = avatarValue.split('|');
@@ -1111,21 +1160,23 @@ function buildPayload() {
         if (vin) vins.push(vin);
     }
 
-    // Validate vehicles if NOT temp_003
-    if (template !== 'temp_003') {
+    // Validate vehicles if NOT educational template
+    if (template !== 'social-educational-1') {
         if (vins.length === 0) {
             showStatus('Please select at least one vehicle', 'error');
             return null;
         }
     }
 
-    if (template === 'temp_002' && vins.length > 1) {
-        showStatus('Template 2 only supports 1 vehicle', 'error');
+    if (template === 'ad-single-item-spotlight-1' && vins.length > 1) {
+        showStatus('Single Item Spotlight only supports 1 vehicle', 'error');
         return null;
     }
 
     return {
-        template_id: template.toUpperCase(),
+        client: client,
+        template_id: template,
+        ratio: ratio,
         theme: theme,
         topic: topic,
         platform: platform,
@@ -1182,7 +1233,7 @@ function addVehicle() {
 
     const select = document.createElement('select');
     select.name = `vehicle${vehicleCount}`;
-    select.required = selectedTemplate !== 'temp_003';
+    select.required = selectedTemplate !== 'social-educational-1';
     select.onchange = checkFormValidity;
 
     const defaultOption = document.createElement('option');
@@ -1229,7 +1280,7 @@ function populateVehicleDropdowns() {
     });
 
     const addBtn = document.getElementById('addVehicleBtn');
-    if (selectedTemplate === 'temp_002') {
+    if (selectedTemplate === 'ad-single-item-spotlight-1') {
         addBtn.disabled = true;
     } else {
         addBtn.disabled = vehicleCount >= MAX_CARS;
@@ -1260,6 +1311,7 @@ function removeVehicle(num) {
 }
 
 function checkFormValidity() {
+    const client = document.getElementById('client').value;
     const template = document.getElementById('template').value;
     const topic = document.getElementById('topic').value;
     const avatar = document.getElementById('avatar').value;
@@ -1274,10 +1326,10 @@ function checkFormValidity() {
     
     let isValid = false;
     
-    if (template === 'temp_003') {
-        isValid = !!(template && topic && platform && scriptLength && avatar && email);
+    if (template === 'social-educational-1') {
+        isValid = !!(client && template && topic && platform && scriptLength && avatar && email);
     } else {
-        isValid = !!(template && platform && scriptLength && avatar && email && hasVehicles);
+        isValid = !!(client && template && platform && scriptLength && avatar && email && hasVehicles);
     }
     
     submitBtn.disabled = !isValid;
@@ -1432,9 +1484,9 @@ function handleLengthChange() {
     const topicGroup = document.getElementById('topicGroup');
     const avatar = document.getElementById('avatar').value;
 
-    if (template === 'temp_003' && scriptLength && avatar) {
+    if (template === 'social-educational-1' && scriptLength && avatar) {
         topicGroup.classList.remove('hidden');
-    } else if (template === 'temp_003') {
+    } else if (template === 'social-educational-1') {
         topicGroup.classList.add('hidden');
     }
 
@@ -1442,6 +1494,7 @@ function handleLengthChange() {
 }
 
 // Add event listeners for form validation
+document.getElementById('client').addEventListener('change', checkFormValidity);
 document.getElementById('avatar').addEventListener('change', checkFormValidity);
 document.getElementById('platform').addEventListener('change', checkFormValidity);
 document.getElementById('email').addEventListener('input', checkFormValidity);
