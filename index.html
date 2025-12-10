@@ -440,7 +440,7 @@ color: #667eea;
 <body>
 <div class="container">
 <h1>🎬 Ad Pilot Video Generator</h1>
-<p class="subtitle">Drive Business, Boost Social Presence <span style="color: #999; font-size: 12px;">v1.8</span> | <a href="guidance.html" target="_blank" style="color: #667eea; text-decoration: none;">📝 Guidance Rules</a></p>
+<p class="subtitle">Drive Business, Boost Social Presence <span style="color: #999; font-size: 12px;">v1.9</span> | <a href="guidance.html" target="_blank" style="color: #667eea; text-decoration: none;">📝 Guidance Rules</a></p>
 
 <!-- FORM VIEW -->
 <form id="adForm">
@@ -747,20 +747,40 @@ function handleTemplateChange() {
 
     // Reset platform selection and filter options based on template
     platformSelect.value = '';
-    const allOptions = platformSelect.querySelectorAll('option, optgroup');
-    allOptions.forEach(el => {
-        if (el.tagName === 'OPTGROUP') {
-            const label = el.getAttribute('label');
-            const isVertical = label.includes('9:16');
-            if (selectedTemplate === 'social-educational-1') {
-                // Social template: 9:16 only - hide non-vertical groups
-                el.hidden = !isVertical;
-            } else {
-                // Ad templates: show all ratios
-                el.hidden = false;
-            }
-        }
-    });
+    
+    // Rebuild platform options based on template
+    const allPlatformOptions = `
+        <option value="">Select platform...</option>
+        <optgroup label="Vertical (9:16)">
+            <option value="tiktok_9:16">TikTok (9:16)</option>
+            <option value="youtube-shorts_9:16">YouTube Shorts (9:16)</option>
+            <option value="instagram-reels_9:16">Instagram Reels (9:16)</option>
+            <option value="facebook-reels_9:16">Facebook Reels (9:16)</option>
+        </optgroup>
+        <optgroup label="Feed (4:5)">
+            <option value="facebook-feed_4:5">Facebook Feed (4:5)</option>
+            <option value="instagram-feed_4:5">Instagram Feed (4:5)</option>
+        </optgroup>
+        <optgroup label="Landscape (16:9)">
+            <option value="youtube_16:9">YouTube (16:9)</option>
+        </optgroup>
+    `;
+    
+    const verticalOnlyOptions = `
+        <option value="">Select platform...</option>
+        <optgroup label="Vertical (9:16)">
+            <option value="tiktok_9:16">TikTok (9:16)</option>
+            <option value="youtube-shorts_9:16">YouTube Shorts (9:16)</option>
+            <option value="instagram-reels_9:16">Instagram Reels (9:16)</option>
+            <option value="facebook-reels_9:16">Facebook Reels (9:16)</option>
+        </optgroup>
+    `;
+    
+    if (selectedTemplate === 'social-educational-1') {
+        platformSelect.innerHTML = verticalOnlyOptions;
+    } else {
+        platformSelect.innerHTML = allPlatformOptions;
+    }
 
     if (!selectedTemplate) {
         checkFormValidity();
