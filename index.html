@@ -440,7 +440,7 @@ color: #667eea;
 <body>
 <div class="container">
 <h1>🎬 Ad Pilot Video Generator</h1>
-<p class="subtitle">Drive Business, Boost Social Presence <span style="color: #999; font-size: 12px;">v1.7</span> | <a href="guidance.html" target="_blank" style="color: #667eea; text-decoration: none;">📝 Guidance Rules</a></p>
+<p class="subtitle">Drive Business, Boost Social Presence <span style="color: #999; font-size: 12px;">v1.8</span> | <a href="guidance.html" target="_blank" style="color: #667eea; text-decoration: none;">📝 Guidance Rules</a></p>
 
 <!-- FORM VIEW -->
 <form id="adForm">
@@ -747,15 +747,18 @@ function handleTemplateChange() {
 
     // Reset platform selection and filter options based on template
     platformSelect.value = '';
-    const optgroups = platformSelect.querySelectorAll('optgroup');
-    optgroups.forEach(group => {
-        const label = group.getAttribute('label');
-        if (selectedTemplate === 'social-educational-1') {
-            // Social template: 9:16 only
-            group.style.display = label.includes('9:16') ? '' : 'none';
-        } else {
-            // Ad templates: show all ratios
-            group.style.display = '';
+    const allOptions = platformSelect.querySelectorAll('option, optgroup');
+    allOptions.forEach(el => {
+        if (el.tagName === 'OPTGROUP') {
+            const label = el.getAttribute('label');
+            const isVertical = label.includes('9:16');
+            if (selectedTemplate === 'social-educational-1') {
+                // Social template: 9:16 only - hide non-vertical groups
+                el.hidden = !isVertical;
+            } else {
+                // Ad templates: show all ratios
+                el.hidden = false;
+            }
         }
     });
 
