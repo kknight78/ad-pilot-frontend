@@ -727,6 +727,7 @@ function handleClientChange() {
 function handleTemplateChange() {
     selectedTemplate = document.getElementById('template').value;
     const platformGroup = document.getElementById('platformGroup');
+    const platformSelect = document.getElementById('platform');
     const avatarGroup = document.getElementById('avatarGroup');
     const lengthGroup = document.getElementById('lengthGroup');
     const vehiclesGroup = document.getElementById('vehiclesGroup');
@@ -743,6 +744,20 @@ function handleTemplateChange() {
     topicGroup.classList.add('hidden');
     themeGroup.classList.add('hidden');
     emailGroup.classList.add('hidden');
+
+    // Reset platform selection and filter options based on template
+    platformSelect.value = '';
+    const optgroups = platformSelect.querySelectorAll('optgroup');
+    optgroups.forEach(group => {
+        const label = group.getAttribute('label');
+        if (selectedTemplate === 'social-educational-1') {
+            // Social template: 9:16 only
+            group.style.display = label.includes('9:16') ? '' : 'none';
+        } else {
+            // Ad templates: show all ratios
+            group.style.display = '';
+        }
+    });
 
     if (!selectedTemplate) {
         checkFormValidity();
