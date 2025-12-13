@@ -693,9 +693,9 @@ color: #667eea;
 // =====================
 // CONFIGURATION
 // =====================
-const WEBHOOK_URL = 'https://kelly-ads.app.n8n.cloud/webhook/ad-pilot';
+const WEBHOOK_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/ad-pilot';
 // CORS proxy needed - n8n Cloud doesn't support preflight OPTIONS requests
-const TOPIC_SUGGEST_URL = 'https://corsproxy.io/?' + encodeURIComponent('https://kelly-ads.app.n8n.cloud/webhook/topic-suggest');
+const TOPIC_SUGGEST_URL = 'https://corsproxy.io/?' + encodeURIComponent('https://ad-pilot-n8n-production.up.railway.app/webhook/topic-suggest');
 const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1kgSVMgpWVSFeAAz4M2LpNmIbuhaJKds9gnbsvLdP-t4/gviz/tq?tqx=out:json&sheet=Feed';
 
 const MAX_CARS = 5;
@@ -1543,4 +1543,5 @@ loadInventory();
 </script>
 </body>
 </html>
+
 
