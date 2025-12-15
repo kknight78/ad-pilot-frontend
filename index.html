@@ -1272,7 +1272,8 @@ function addVehicle() {
 
     const select = document.createElement('select');
     select.name = `vehicle${vehicleCount}`;
-    select.required = selectedTemplate !== 'social-educational-1';
+    // Don't use HTML required - we handle validation in checkFormValidity()
+    select.required = false;
     select.onchange = checkFormValidity;
 
     const defaultOption = document.createElement('option');
