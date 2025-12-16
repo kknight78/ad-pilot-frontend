@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avatar Photo Capture - Ad Pilot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: white;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 8px;
+            font-size: 24px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+
+        .capture-area {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        #webcam {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1); /* Mirror for selfie view */
+        }
+
+        #canvas {
+            display: none;
+        }
+
+        /* Target silhouette overlay */
+        .target-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .target-silhouette {
+            width: 70%;
+            height: 85%;
+            border: 4px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 50% 50% 45% 45%;
+            position: relative;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .target-silhouette.aligned {
+            border-color: #22c55e;
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.5);
+        }
+
+        .target-silhouette.misaligned {
+            border-color: #ef4444;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Segmentation canvas overlay */
+        #segmentationCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.3;
+            display: none; /* Hidden by default, enable for debugging */
+        }
+
+        /* Status indicator */
+        .status-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            text-align: center;
+        }
+
+        .status-text {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .status-text.success {
+            color: #22c55e;
+        }
+
+        .status-text.error {
+            color: #ef4444;
+        }
+
+        .status-text.info {
+            color: #3b82f6;
+        }
+
+        .alignment-meter {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .alignment-fill {
+            height: 100%;
+            background: #ef4444;
+            transition: width 0.1s, background 0.3s;
+            border-radius: 3px;
+        }
+
+        .alignment-fill.good {
+            background: #22c55e;
+        }
+
+        /* Countdown overlay */
+        .countdown-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .countdown-overlay.visible {
+            opacity: 1;
+        }
+
+        .countdown-number {
+            font-size: 120px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 40px rgba(34, 197, 94, 0.8);
+        }
+
+        /* Captured preview */
+        .preview-container {
+            display: none;
+        }
+
+        .preview-container.visible {
+            display: block;
+        }
+
+        #previewImage {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 16px;
+            margin-bottom: 16px;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            margin-bottom: 12px;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: #22c55e;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .btn-start {
+            background: #3b82f6;
+            color: white;
+        }
+
+        /* Instructions */
+        .instructions {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .instructions h3 {
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: #888;
+        }
+
+        .instructions ul {
+            list-style: none;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            padding-left: 24px;
+            position: relative;
+        }
+
+        .instructions li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #22c55e;
+        }
+
+        /* Loading state */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255,255,255,0.2);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Debug info */
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-family: monospace;
+            display: none;
+        }
+
+        .debug-info.visible {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Create Your Avatar</h1>
+        <p class="subtitle">Position yourself in the frame for the perfect photo</p>
+
+        <!-- Initial state: Instructions -->
+        <div id="instructionsState">
+            <div class="capture-area" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);">
+                <div style="text-align: center; padding: 40px;">
+                    <div style="font-size: 64px; margin-bottom: 16px;">📸</div>
+                    <p style="color: #94a3b8; font-size: 14px;">We'll guide you to the perfect position</p>
+                </div>
+            </div>
+
+            <div class="instructions">
+                <h3>FOR BEST RESULTS:</h3>
+                <ul>
+                    <li>Find good, even lighting (face a window)</li>
+                    <li>Use a plain background if possible</li>
+                    <li>Keep your head and shoulders in frame</li>
+                    <li>Look directly at the camera</li>
+                </ul>
+            </div>
+
+            <button class="btn btn-start" onclick="startCapture()">Start Camera</button>
+        </div>
+
+        <!-- Capture state -->
+        <div id="captureState" style="display: none;">
+            <div class="capture-area">
+                <video id="webcam" autoplay playsinline></video>
+                <canvas id="canvas"></canvas>
+                <canvas id="segmentationCanvas"></canvas>
+
+                <div class="target-overlay">
+                    <div class="target-silhouette" id="targetSilhouette"></div>
+                </div>
+
+                <div class="countdown-overlay" id="countdownOverlay">
+                    <span class="countdown-number" id="countdownNumber">3</span>
+                </div>
+
+                <div class="status-bar">
+                    <div class="status-text" id="statusText">Initializing camera...</div>
+                    <div class="alignment-meter">
+                        <div class="alignment-fill" id="alignmentFill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+                    <div class="spinner"></div>
+                    <span>Loading AI model...</span>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary" onclick="cancelCapture()">Cancel</button>
+        </div>
+
+        <!-- Preview state -->
+        <div id="previewState" class="preview-container">
+            <img id="previewImage" src="" alt="Captured photo">
+
+            <button class="btn btn-primary" onclick="usePhoto()">Use This Photo</button>
+            <button class="btn btn-secondary" onclick="retakePhoto()">Retake</button>
+        </div>
+
+        <!-- Success state -->
+        <div id="successState" style="display: none;">
+            <div class="capture-area" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #065f46 0%, #064e3b 100%);">
+                <div style="text-align: center; padding: 40px;">
+                    <div style="font-size: 64px; margin-bottom: 16px;">✅</div>
+                    <h2 style="margin-bottom: 8px;">Photo Captured!</h2>
+                    <p style="color: #6ee7b7; font-size: 14px;">Your avatar photo is ready</p>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="downloadPhoto()">Download Photo</button>
+            <button class="btn btn-secondary" onclick="resetAll()">Take Another</button>
+        </div>
+    </div>
+
+    <div class="debug-info" id="debugInfo">
+        <div>Alignment: <span id="debugAlignment">0%</span></div>
+        <div>Coverage: <span id="debugCoverage">0%</span></div>
+        <div>Centered: <span id="debugCentered">No</span></div>
+        <div>FPS: <span id="debugFps">0</span></div>
+    </div>
+
+    <!-- MediaPipe Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+
+    <script>
+        // State
+        let webcamStream = null;
+        let selfieSegmentation = null;
+        let camera = null;
+        let isCapturing = false;
+        let alignmentScore = 0;
+        let alignedFrames = 0;
+        let countdownActive = false;
+        let capturedImageData = null;
+        let lastFrameTime = 0;
+        let frameCount = 0;
+        let fps = 0;
+
+        // Config
+        const ALIGNMENT_THRESHOLD = 75; // Percentage needed to be "aligned"
+        const FRAMES_TO_HOLD = 30; // ~1 second at 30fps
+        const COUNTDOWN_SECONDS = 3;
+        const DEBUG_MODE = false; // Set to true to see segmentation overlay
+
+        // Elements
+        const webcamEl = document.getElementById('webcam');
+        const canvasEl = document.getElementById('canvas');
+        const segCanvasEl = document.getElementById('segmentationCanvas');
+        const targetSilhouette = document.getElementById('targetSilhouette');
+        const statusText = document.getElementById('statusText');
+        const alignmentFill = document.getElementById('alignmentFill');
+        const countdownOverlay = document.getElementById('countdownOverlay');
+        const countdownNumber = document.getElementById('countdownNumber');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        // Debug elements
+        const debugInfo = document.getElementById('debugInfo');
+        const debugAlignment = document.getElementById('debugAlignment');
+        const debugCoverage = document.getElementById('debugCoverage');
+        const debugCentered = document.getElementById('debugCentered');
+        const debugFps = document.getElementById('debugFps');
+
+        if (DEBUG_MODE) {
+            debugInfo.classList.add('visible');
+            segCanvasEl.style.display = 'block';
+        }
+
+        async function startCapture() {
+            document.getElementById('instructionsState').style.display = 'none';
+            document.getElementById('captureState').style.display = 'block';
+            loadingOverlay.style.display = 'flex';
+
+            try {
+                // Initialize MediaPipe Selfie Segmentation
+                selfieSegmentation = new SelfieSegmentation({
+                    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
+                });
+
+                selfieSegmentation.setOptions({
+                    modelSelection: 1, // 0 = general, 1 = landscape (better for close-up)
+                    selfieMode: true,
+                });
+
+                selfieSegmentation.onResults(onSegmentationResults);
+
+                // Start webcam
+                webcamStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 640 },
+                        height: { ideal: 640 },
+                        facingMode: 'user'
+                    }
+                });
+
+                webcamEl.srcObject = webcamStream;
+                await webcamEl.play();
+
+                // Set canvas sizes
+                canvasEl.width = webcamEl.videoWidth;
+                canvasEl.height = webcamEl.videoHeight;
+                segCanvasEl.width = webcamEl.videoWidth;
+                segCanvasEl.height = webcamEl.videoHeight;
+
+                // Start processing
+                isCapturing = true;
+                loadingOverlay.style.display = 'none';
+                statusText.textContent = 'Position yourself in the frame';
+
+                processFrame();
+
+            } catch (err) {
+                console.error('Error starting capture:', err);
+                statusText.textContent = 'Camera access denied';
+                statusText.classList.add('error');
+                loadingOverlay.style.display = 'none';
+            }
+        }
+
+        async function processFrame() {
+            if (!isCapturing || countdownActive) {
+                if (isCapturing) requestAnimationFrame(processFrame);
+                return;
+            }
+
+            // FPS calculation
+            frameCount++;
+            const now = performance.now();
+            if (now - lastFrameTime >= 1000) {
+                fps = frameCount;
+                frameCount = 0;
+                lastFrameTime = now;
+                if (DEBUG_MODE) debugFps.textContent = fps;
+            }
+
+            // Send frame to MediaPipe
+            await selfieSegmentation.send({ image: webcamEl });
+
+            requestAnimationFrame(processFrame);
+        }
+
+        function onSegmentationResults(results) {
+            if (!isCapturing || countdownActive) return;
+
+            const segCtx = segCanvasEl.getContext('2d');
+            const width = segCanvasEl.width;
+            const height = segCanvasEl.height;
+
+            // Clear canvas
+            segCtx.clearRect(0, 0, width, height);
+
+            // Get segmentation mask
+            const mask = results.segmentationMask;
+
+            // Draw mask for debugging
+            if (DEBUG_MODE) {
+                segCtx.drawImage(mask, 0, 0, width, height);
+            }
+
+            // Analyze the mask for alignment
+            const alignment = analyzeAlignment(mask, width, height);
+
+            // Update UI
+            updateAlignmentUI(alignment);
+
+            // Check if aligned long enough to trigger capture
+            if (alignment.score >= ALIGNMENT_THRESHOLD) {
+                alignedFrames++;
+                if (alignedFrames >= FRAMES_TO_HOLD && !countdownActive) {
+                    startCountdown();
+                }
+            } else {
+                alignedFrames = 0;
+            }
+        }
+
+        function analyzeAlignment(mask, width, height) {
+            // Create a temporary canvas to read mask pixels
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = width;
+            tempCanvas.height = height;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(mask, 0, 0, width, height);
+
+            const imageData = tempCtx.getImageData(0, 0, width, height);
+            const data = imageData.data;
+
+            // Define target region (where we want the person to be)
+            // This is roughly head and shoulders, centered
+            const targetLeft = width * 0.15;
+            const targetRight = width * 0.85;
+            const targetTop = height * 0.05;
+            const targetBottom = height * 0.95;
+
+            let personPixels = 0;
+            let personInTarget = 0;
+            let totalTargetPixels = 0;
+            let sumX = 0;
+            let sumY = 0;
+
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const i = (y * width + x) * 4;
+                    const alpha = data[i]; // Mask value (0-255)
+
+                    const isPerson = alpha > 128;
+                    const inTarget = x >= targetLeft && x <= targetRight &&
+                                    y >= targetTop && y <= targetBottom;
+
+                    if (inTarget) totalTargetPixels++;
+
+                    if (isPerson) {
+                        personPixels++;
+                        sumX += x;
+                        sumY += y;
+
+                        if (inTarget) {
+                            personInTarget++;
+                        }
+                    }
+                }
+            }
+
+            // Calculate metrics
+            const coverage = personPixels / (width * height) * 100;
+            const targetCoverage = personInTarget / totalTargetPixels * 100;
+
+            // Center of mass
+            const centerX = personPixels > 0 ? sumX / personPixels : width / 2;
+            const centerY = personPixels > 0 ? sumY / personPixels : height / 2;
+
+            // How centered is the person?
+            const idealCenterX = width / 2;
+            const idealCenterY = height * 0.45; // Slightly above center
+            const centerOffsetX = Math.abs(centerX - idealCenterX) / width;
+            const centerOffsetY = Math.abs(centerY - idealCenterY) / height;
+            const centerScore = Math.max(0, 100 - (centerOffsetX + centerOffsetY) * 200);
+
+            // Size check (person should fill 20-60% of frame)
+            const sizeScore = coverage >= 20 && coverage <= 60 ? 100 :
+                             coverage < 20 ? coverage / 20 * 100 :
+                             Math.max(0, 100 - (coverage - 60) * 2);
+
+            // Combined score
+            const score = (targetCoverage * 0.4 + centerScore * 0.4 + sizeScore * 0.2);
+
+            // Debug
+            if (DEBUG_MODE) {
+                debugAlignment.textContent = score.toFixed(1) + '%';
+                debugCoverage.textContent = coverage.toFixed(1) + '%';
+                debugCentered.textContent = centerScore > 70 ? 'Yes' : 'No';
+            }
+
+            // Generate feedback
+            let feedback = '';
+            if (coverage < 15) {
+                feedback = 'Move closer to the camera';
+            } else if (coverage > 65) {
+                feedback = 'Move back a bit';
+            } else if (centerScore < 50) {
+                if (centerX < idealCenterX - width * 0.1) {
+                    feedback = 'Move right';
+                } else if (centerX > idealCenterX + width * 0.1) {
+                    feedback = 'Move left';
+                } else if (centerY < idealCenterY - height * 0.1) {
+                    feedback = 'Move down';
+                } else {
+                    feedback = 'Move up';
+                }
+            } else if (score >= ALIGNMENT_THRESHOLD) {
+                feedback = 'Perfect! Hold still...';
+            } else {
+                feedback = 'Almost there...';
+            }
+
+            return { score, coverage, centerScore, feedback };
+        }
+
+        function updateAlignmentUI(alignment) {
+            alignmentScore = alignment.score;
+
+            // Update meter
+            alignmentFill.style.width = alignment.score + '%';
+            alignmentFill.classList.toggle('good', alignment.score >= ALIGNMENT_THRESHOLD);
+
+            // Update silhouette border
+            if (alignment.score >= ALIGNMENT_THRESHOLD) {
+                targetSilhouette.classList.add('aligned');
+                targetSilhouette.classList.remove('misaligned');
+            } else {
+                targetSilhouette.classList.remove('aligned');
+                targetSilhouette.classList.add('misaligned');
+            }
+
+            // Update status text
+            statusText.textContent = alignment.feedback;
+            statusText.className = 'status-text';
+            if (alignment.score >= ALIGNMENT_THRESHOLD) {
+                statusText.classList.add('success');
+            } else if (alignment.score < 40) {
+                statusText.classList.add('error');
+            } else {
+                statusText.classList.add('info');
+            }
+        }
+
+        function startCountdown() {
+            countdownActive = true;
+            countdownOverlay.classList.add('visible');
+
+            let count = COUNTDOWN_SECONDS;
+            countdownNumber.textContent = count;
+
+            const interval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownNumber.textContent = count;
+                } else {
+                    clearInterval(interval);
+                    capturePhoto();
+                }
+            }, 1000);
+        }
+
+        function capturePhoto() {
+            // Draw current frame to canvas
+            const ctx = canvasEl.getContext('2d');
+            ctx.save();
+            ctx.scale(-1, 1); // Mirror to match video
+            ctx.drawImage(webcamEl, -canvasEl.width, 0, canvasEl.width, canvasEl.height);
+            ctx.restore();
+
+            // Get image data
+            capturedImageData = canvasEl.toDataURL('image/jpeg', 0.95);
+
+            // Stop capture
+            stopCapture();
+
+            // Show preview
+            document.getElementById('captureState').style.display = 'none';
+            document.getElementById('previewState').classList.add('visible');
+            document.getElementById('previewImage').src = capturedImageData;
+        }
+
+        function stopCapture() {
+            isCapturing = false;
+            countdownActive = false;
+            countdownOverlay.classList.remove('visible');
+
+            if (webcamStream) {
+                webcamStream.getTracks().forEach(track => track.stop());
+                webcamStream = null;
+            }
+        }
+
+        function cancelCapture() {
+            stopCapture();
+            document.getElementById('captureState').style.display = 'none';
+            document.getElementById('instructionsState').style.display = 'block';
+        }
+
+        function retakePhoto() {
+            document.getElementById('previewState').classList.remove('visible');
+            alignedFrames = 0;
+            startCapture();
+        }
+
+        function usePhoto() {
+            document.getElementById('previewState').classList.remove('visible');
+            document.getElementById('successState').style.display = 'block';
+
+            // Here you would normally send the photo to your backend
+            console.log('Photo ready for upload:', capturedImageData.substring(0, 100) + '...');
+        }
+
+        function downloadPhoto() {
+            const link = document.createElement('a');
+            link.download = 'avatar-photo.jpg';
+            link.href = capturedImageData;
+            link.click();
+        }
+
+        function resetAll() {
+            document.getElementById('successState').style.display = 'none';
+            document.getElementById('instructionsState').style.display = 'block';
+            capturedImageData = null;
+            alignedFrames = 0;
+        }
+
+        // Keyboard shortcut for debug mode
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'd' && e.ctrlKey) {
+                debugInfo.classList.toggle('visible');
+                segCanvasEl.style.display = segCanvasEl.style.display === 'block' ? 'none' : 'block';
+            }
+        });
+    </script>
+</body>
+</html>
