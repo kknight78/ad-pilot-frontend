@@ -502,9 +502,9 @@ color: #667eea;
         </label>
         <select id="avatar" name="avatar" required>
             <option value="">Select avatar...</option>
-            <option value="b78147e0391e4d12a6d5834a1e854700|c7f8975058a44e47b0352d581704e65f|#89be5a|22|Shad">Shad</option>
-            <option value="5101c02dc2204172b51af4c87d6e9390|f6d15141c0f74f99b855786e6c964b48|#7fc741|29|Gary">Gary</option>
-            <!--<option value="5b9c75a2f13e4d60b09bcfdafa7339dd|91cf853f9a91452486ba8ae00a963160|#6da264|8|Kelly">Kelly</option>-->
+            <option value="b78147e0391e4d12a6d5834a1e854700|c7f8975058a44e47b0352d581704e65f|Shad">Shad</option>
+            <option value="5101c02dc2204172b51af4c87d6e9390|f6d15141c0f74f99b855786e6c964b48|Gary">Gary</option>
+            <option value="813b07ac06bf4fea89b13dca04317080|91cf853f9a91452486ba8ae00a963160|Kelly">Kelly</option>
         </select>
     </div>
 
@@ -1189,8 +1189,8 @@ function buildPayload() {
     // Parse platform value to extract platform and ratio (format: platform_ratio)
     const [platform, ratio] = platformValue.split('_');
 
-    // Parse avatar (format: avatar_id|voice_id|chromakey_color|chromakey_sensitivity|avatar_name)
-    const [avatar_id, voice_id, chromakey_color, chromakey_sensitivity, avatar_name] = avatarValue.split('|');
+    // Parse avatar (format: avatar_id|voice_id|avatar_name)
+    const [avatar_id, voice_id, avatar_name] = avatarValue.split('|');
 
     const vins = [];
     for (let i = 1; i <= vehicleCount; i++) {
@@ -1221,8 +1221,6 @@ function buildPayload() {
         include_animation: includeAnimation,
         avatar_id: avatar_id,
         voice_id: voice_id,
-        chromakey_color: chromakey_color,
-        chromakey_sensitivity: chromakey_sensitivity,
         avatar_name: avatar_name,
         script_length: scriptLength,
         email: email,
@@ -1544,6 +1542,7 @@ loadInventory();
 </script>
 </body>
 </html>
+
 
 
 
