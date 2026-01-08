@@ -440,7 +440,7 @@ color: #667eea;
 <body>
 <div class="container">
 <h1>🎬 Ad Pilot Video Generator</h1>
-<p class="subtitle">Drive Business, Boost Social Presence <span style="color: #999; font-size: 12px;">v2.3</span> | <a href="guidance.html" target="_blank" style="color: #667eea; text-decoration: none;">📝 Guidance Rules</a></p>
+<p class="subtitle">Drive Business, Boost Social Presence <span style="color: #999; font-size: 12px;">v2.4</span> | <a href="guidance.html" target="_blank" style="color: #667eea; text-decoration: none;">📝 Guidance Rules</a></p>
 
 <!-- FORM VIEW -->
 <form id="adForm">
@@ -663,6 +663,10 @@ color: #667eea;
         <input type="checkbox" id="testMode" name="test_mode" value="true">
         <label for="testMode" style="display: inline; font-weight: normal;">Test Mode (cache API responses for debugging)</label>
     </div>
+    <div style="margin-top: 10px;">
+        <input type="checkbox" id="useTestVoice" name="use_test_voice" value="true">
+        <label for="useTestVoice" style="display: inline; font-weight: normal;">Use Test Voice (save 11Labs credits during development)</label>
+    </div>
 </form>
 
 <!-- SCRIPT EDITOR VIEW -->
@@ -735,6 +739,7 @@ let inventory = [];
 let selectedTemplate = '';
 let cachedWorkflowConfig = null;
 let originalTestMode = false;
+let originalUseTestVoice = false;
 
 // =====================
 // TEMPLATE HANDLING
@@ -861,9 +866,10 @@ async function previewScript() {
     const payload = buildPayload();
     if (!payload) return;
     
-    // Save test_mode setting before we hide the form
+    // Save test_mode and use_test_voice settings before we hide the form
     originalTestMode = document.getElementById('testMode').checked;
-    
+    originalUseTestVoice = document.getElementById('useTestVoice').checked;
+
     // Add preview_mode flag
     payload.preview_mode = true;
     
@@ -1119,7 +1125,8 @@ async function approveAndGenerate() {
     cachedWorkflowConfig.script_edited = true;
     delete cachedWorkflowConfig.preview_mode;
     cachedWorkflowConfig.test_mode = originalTestMode;
-    
+    cachedWorkflowConfig.use_test_voice = originalUseTestVoice;
+
     // Clear old API caches
     delete cachedWorkflowConfig.api_elevenlabs_tts;
     delete cachedWorkflowConfig.api_elevenlabs_forced_alignment;
@@ -1217,6 +1224,7 @@ function buildPayload() {
     const email = formData.get('email');
     const scriptLength = formData.get('script_length');
     const testMode = document.getElementById('testMode').checked;
+    const useTestVoice = document.getElementById('useTestVoice').checked;
 
     // Check if AD or ORGANIC template
     const isAdTemplate = template.startsWith('ad-');
@@ -1271,7 +1279,8 @@ function buildPayload() {
         script_length: scriptLength,
         email: email,
         vins: vins,
-        test_mode: testMode
+        test_mode: testMode,
+        use_test_voice: useTestVoice
     };
 }
 
