@@ -532,10 +532,18 @@ color: #667eea;
         Avatar Presenter
         </label>
         <select id="avatar" name="avatar" required>
-            <option value="">Select avatar...</option>
-            <option value="7a69f8f3b1994d9f9111c6a6dab78e73|U4fSqTaQnUkjmN6zAJ5M|Shad">Shad</option>
-            <option value="4d75066423634a8aa5adc148095323f1|BeHWq4sQLsXCMP34hpoF|Gary">Gary</option>
-            <option value="26188fea061144098337fccfa920dcd2|eezuv0zKVdVTS0jHdxFa|Kelly">Kelly</option>
+            <option value="">Loading avatars...</option>
+        </select>
+    </div>
+
+    <!-- Background Selection -->
+    <div class="form-group hidden" id="backgroundGroup">
+        <label for="background">
+            Background
+            <span class="label-description">Choose the scene background</span>
+        </label>
+        <select id="background" name="background" required onchange="checkFormValidity()">
+            <option value="">Loading backgrounds...</option>
         </select>
     </div>
 
@@ -731,11 +739,15 @@ color: #667eea;
 const WEBHOOK_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/ad-pilot';
 // CORS proxy needed - n8n Cloud doesn't support preflight OPTIONS requests
 const TOPIC_SUGGEST_URL = 'https://corsproxy.io/?' + encodeURIComponent('https://ad-pilot-n8n-production.up.railway.app/webhook/topic-suggest');
+const AVATARS_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/avatars';
+const BACKGROUNDS_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/backgrounds';
 const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1kgSVMgpWVSFeAAz4M2LpNmIbuhaJKds9gnbsvLdP-t4/gviz/tq?tqx=out:json&sheet=Feed';
 
 const MAX_CARS = 5;
 let vehicleCount = 0;
 let inventory = [];
+let avatars = [];
+let backgrounds = [];
 let selectedTemplate = '';
 let cachedWorkflowConfig = null;
 let originalTestMode = false;
@@ -765,6 +777,7 @@ function handleTemplateChange() {
     const ratioGroup = document.getElementById('ratioGroup');
     const platformGroup = document.getElementById('platformGroup');
     const avatarGroup = document.getElementById('avatarGroup');
+    const backgroundGroup = document.getElementById('backgroundGroup');
     const lengthGroup = document.getElementById('lengthGroup');
     const vehiclesGroup = document.getElementById('vehiclesGroup');
     const topicGroup = document.getElementById('topicGroup');
@@ -776,6 +789,7 @@ function handleTemplateChange() {
     ratioGroup.classList.add('hidden');
     platformGroup.classList.add('hidden');
     avatarGroup.classList.add('hidden');
+    backgroundGroup.classList.add('hidden');
     lengthGroup.classList.add('hidden');
     vehiclesGroup.classList.add('hidden');
     topicGroup.classList.add('hidden');
@@ -793,6 +807,7 @@ function handleTemplateChange() {
 
     // Show common fields for all templates
     avatarGroup.classList.remove('hidden');
+    backgroundGroup.classList.remove('hidden');
     lengthGroup.classList.remove('hidden');
     emailGroup.classList.remove('hidden');
 
@@ -907,9 +922,14 @@ async function previewScript() {
             console.log('Job status:', statusResult);
             
             if (statusResult.status === 'script_ready') {
+            // Look up avatar name from loaded avatars
+            const selectedAvatar = avatars.find(a => a.avatar_id === payload.avatar_id);
+            const avatarName = selectedAvatar ? selectedAvatar.display_name : '';
+
             // Build the config object UI expects
             cachedWorkflowConfig = {
                 ...payload,
+                avatar_name: avatarName,  // Add for UI display
                 script: statusResult.script_data,
                 // Capture cached API responses for test mode
                 api_claude_script_generation: statusResult.api_claude_script_generation,
@@ -1067,8 +1087,13 @@ async function regenerateScript() {
             console.log('Regenerate status:', statusResult);
             
             if (statusResult.status === 'script_ready') {
+                // Look up avatar name from loaded avatars
+                const selectedAvatar = avatars.find(a => a.avatar_id === payload.avatar_id);
+                const avatarName = selectedAvatar ? selectedAvatar.display_name : '';
+
                 cachedWorkflowConfig = {
                     ...payload,
+                    avatar_name: avatarName,  // Add for UI display
                     script: statusResult.script_data,
                     api_claude_script_generation: statusResult.api_claude_script_generation,
                     api_claude_categorize_photos: statusResult.api_claude_categorize_photos,
@@ -1221,6 +1246,7 @@ function buildPayload() {
     const theme = formData.get('theme') || '';
     const includeAnimation = formData.get('include_animation') === 'true';
     const avatarValue = formData.get('avatar');
+    const backgroundUrl = formData.get('background');
     const email = formData.get('email');
     const scriptLength = formData.get('script_length');
     const testMode = document.getElementById('testMode').checked;
@@ -1243,8 +1269,8 @@ function buildPayload() {
         platforms = [];
     }
 
-    // Parse avatar (format: avatar_id|voice_id|avatar_name)
-    const [avatar_id, voice_id, avatar_name] = avatarValue.split('|');
+    // Avatar ID - workflow looks up voice_id and name from database
+    const avatar_id = avatarValue;
 
     const vins = [];
     for (let i = 1; i <= vehicleCount; i++) {
@@ -1273,9 +1299,8 @@ function buildPayload() {
         theme: theme,
         topic: topic,
         include_animation: includeAnimation,
-        avatar_id: avatar_id,
-        voice_id: voice_id,
-        avatar_name: avatar_name,
+        avatar_id: avatar_id,     // Workflow looks up voice_id, voice_settings, and name from database
+        background_image_url: backgroundUrl,  // Cloudinary URL for background
         script_length: scriptLength,
         email: email,
         vins: vins,
@@ -1310,6 +1335,81 @@ async function loadInventory() {
     } catch (error) {
         console.error('Error loading inventory:', error);
         showStatus('Error loading vehicle inventory. Please refresh the page.', 'error');
+    }
+}
+
+async function loadAvatars() {
+    try {
+        const response = await fetch(AVATARS_URL);
+        const data = await response.json();
+
+        if (data.success && data.avatars) {
+            avatars = data.avatars;
+
+            // Populate avatar dropdown
+            const select = document.getElementById('avatar');
+            select.innerHTML = '<option value="">Select avatar...</option>';
+
+            avatars.forEach(avatar => {
+                const option = document.createElement('option');
+                option.value = avatar.avatar_id;
+                option.textContent = avatar.label || avatar.display_name;
+                select.appendChild(option);
+            });
+
+            console.log(`Loaded ${avatars.length} avatars`);
+        } else {
+            throw new Error('Invalid response from avatars API');
+        }
+    } catch (error) {
+        console.error('Error loading avatars:', error);
+        const select = document.getElementById('avatar');
+        select.innerHTML = '<option value="">Error loading avatars</option>';
+    }
+}
+
+async function loadBackgrounds() {
+    try {
+        const response = await fetch(BACKGROUNDS_URL);
+        const data = await response.json();
+
+        if (data.success && data.backgrounds) {
+            backgrounds = data.backgrounds;
+
+            // Populate background dropdown
+            const select = document.getElementById('background');
+            select.innerHTML = '<option value="">Select background...</option>';
+
+            // Group by category
+            const categories = { exterior: [], interior: [], themed: [] };
+            backgrounds.forEach(bg => {
+                const cat = bg.category || 'exterior';
+                if (categories[cat]) categories[cat].push(bg);
+            });
+
+            // Add options by category
+            Object.entries(categories).forEach(([category, bgs]) => {
+                if (bgs.length > 0) {
+                    const optgroup = document.createElement('optgroup');
+                    optgroup.label = category.charAt(0).toUpperCase() + category.slice(1);
+                    bgs.forEach(bg => {
+                        const option = document.createElement('option');
+                        option.value = bg.cloudinary_url;
+                        option.textContent = bg.label || bg.name;
+                        optgroup.appendChild(option);
+                    });
+                    select.appendChild(optgroup);
+                }
+            });
+
+            console.log(`Loaded ${backgrounds.length} backgrounds`);
+        } else {
+            throw new Error('Invalid response from backgrounds API');
+        }
+    } catch (error) {
+        console.error('Error loading backgrounds:', error);
+        const select = document.getElementById('background');
+        select.innerHTML = '<option value="">Error loading backgrounds</option>';
     }
 }
 
@@ -1407,6 +1507,7 @@ function checkFormValidity() {
     const template = document.getElementById('template').value;
     const topic = document.getElementById('topic').value;
     const avatar = document.getElementById('avatar').value;
+    const background = document.getElementById('background').value;
     const scriptLength = document.getElementById('scriptLength').value;
     const email = document.getElementById('email').value;
     const selects = document.querySelectorAll('#vehicleContainer select');
@@ -1426,10 +1527,10 @@ function checkFormValidity() {
 
     if (isOrganicTemplate) {
         // Organic: need topic, no ratios/platforms needed (auto 9:16, no banner)
-        isValid = !!(client && template && topic && scriptLength && avatar && email);
+        isValid = !!(client && template && topic && scriptLength && avatar && background && email);
     } else if (isAdTemplate) {
         // Ad templates: need ratios, platforms, and vehicles
-        isValid = !!(client && template && ratios.length > 0 && platforms.length > 0 && scriptLength && avatar && email && hasVehicles);
+        isValid = !!(client && template && ratios.length > 0 && platforms.length > 0 && scriptLength && avatar && background && email && hasVehicles);
     }
 
     submitBtn.disabled = !isValid;
@@ -1500,7 +1601,9 @@ function hideStatus() {
 
 async function suggestTopics() {
     const scriptLength = document.getElementById('scriptLength').value;
-    const avatarName = document.getElementById('avatar').value.split("|").pop();
+    const avatarId = document.getElementById('avatar').value;
+    const selectedAvatar = avatars.find(a => a.avatar_id === avatarId);
+    const avatarName = selectedAvatar ? selectedAvatar.display_name : '';
     const suggestionMode = document.querySelector('input[name="suggestionMode"]:checked').value;
     const topicGuidance = document.getElementById('topicGuidance').value.trim();
     const suggestBtn = document.getElementById('suggestTopicsBtn');
@@ -1609,6 +1712,8 @@ document.getElementById('topic').addEventListener('input', checkFormValidity);
 
 // Initialize on page load
 loadInventory();
+loadAvatars();
+loadBackgrounds();
 </script>
 </body>
 </html>
