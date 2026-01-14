@@ -547,6 +547,22 @@ color: #667eea;
         </select>
     </div>
 
+    <!-- Music Selection -->
+    <div class="form-group hidden" id="musicGroup">
+        <label for="music">
+            Background Music
+            <span class="label-description">Choose background music for your video</span>
+        </label>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <select id="music" name="music" style="flex: 1;" onchange="handleMusicChange()">
+                <option value="">Loading music...</option>
+            </select>
+            <button type="button" id="previewMusicBtn" onclick="toggleMusicPreview()" style="padding: 10px 16px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; display: none;">
+                ▶️ Preview
+            </button>
+        </div>
+    </div>
+
     <!-- Target Length (show early for temp_003) -->
     <div class="form-group hidden" id="lengthGroup">
         <label for="scriptLength" title="TikTok: 15-30s | Instagram Reels: 20-40s | YouTube Shorts: 30-60s | Facebook Reels: 30-60s" style="cursor: help;">
@@ -741,6 +757,7 @@ const WEBHOOK_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/ad-p
 const TOPIC_SUGGEST_URL = 'https://corsproxy.io/?' + encodeURIComponent('https://ad-pilot-n8n-production.up.railway.app/webhook/topic-suggest');
 const AVATARS_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/avatars';
 const BACKGROUNDS_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/backgrounds';
+const MUSIC_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/music';
 const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1kgSVMgpWVSFeAAz4M2LpNmIbuhaJKds9gnbsvLdP-t4/gviz/tq?tqx=out:json&sheet=Feed';
 
 const MAX_CARS = 5;
@@ -748,6 +765,8 @@ let vehicleCount = 0;
 let inventory = [];
 let avatars = [];
 let backgrounds = [];
+let musicTracks = [];
+let currentAudio = null;
 let selectedTemplate = '';
 let cachedWorkflowConfig = null;
 let originalTestMode = false;
@@ -790,11 +809,19 @@ function handleTemplateChange() {
     platformGroup.classList.add('hidden');
     avatarGroup.classList.add('hidden');
     backgroundGroup.classList.add('hidden');
+    document.getElementById('musicGroup').classList.add('hidden');
     lengthGroup.classList.add('hidden');
     vehiclesGroup.classList.add('hidden');
     topicGroup.classList.add('hidden');
     themeGroup.classList.add('hidden');
     emailGroup.classList.add('hidden');
+
+    // Stop any playing audio preview
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+        updateMusicPreviewButton(false);
+    }
 
     // Reset checkboxes
     document.querySelectorAll('input[name="ratios"]').forEach(cb => cb.checked = false);
@@ -808,6 +835,7 @@ function handleTemplateChange() {
     // Show common fields for all templates
     avatarGroup.classList.remove('hidden');
     backgroundGroup.classList.remove('hidden');
+    document.getElementById('musicGroup').classList.remove('hidden');
     lengthGroup.classList.remove('hidden');
     emailGroup.classList.remove('hidden');
 
@@ -1291,6 +1319,9 @@ function buildPayload() {
         return null;
     }
 
+    // Get background music URL (optional)
+    const musicUrl = document.getElementById('music').value || null;
+
     return {
         client: client,
         template_id: template,
@@ -1301,6 +1332,7 @@ function buildPayload() {
         include_animation: includeAnimation,
         avatar_id: avatar_id,     // Workflow looks up voice_id, voice_settings, and name from database
         background_image_url: backgroundUrl,  // Cloudinary URL for background
+        "background-music": musicUrl,  // Artlist audio URL for background music
         script_length: scriptLength,
         email: email,
         vins: vins,
@@ -1411,6 +1443,86 @@ async function loadBackgrounds() {
         const select = document.getElementById('background');
         select.innerHTML = '<option value="">Error loading backgrounds</option>';
     }
+}
+
+async function loadMusic() {
+    try {
+        const response = await fetch(MUSIC_URL);
+        const data = await response.json();
+
+        if (data.success && data.tracks) {
+            musicTracks = data.tracks;
+
+            // Populate music dropdown
+            const select = document.getElementById('music');
+            select.innerHTML = '<option value="">No music (optional)</option>';
+
+            musicTracks.forEach(track => {
+                const option = document.createElement('option');
+                option.value = track.audio_url;
+                option.textContent = track.label || track.name;
+                option.dataset.songId = track.song_id;
+                select.appendChild(option);
+            });
+
+            console.log(`Loaded ${musicTracks.length} music tracks`);
+        } else {
+            throw new Error('Invalid response from music API');
+        }
+    } catch (error) {
+        console.error('Error loading music:', error);
+        const select = document.getElementById('music');
+        select.innerHTML = '<option value="">Error loading music</option>';
+    }
+}
+
+function handleMusicChange() {
+    const select = document.getElementById('music');
+    const previewBtn = document.getElementById('previewMusicBtn');
+
+    // Stop any currently playing audio
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+    }
+
+    // Show/hide preview button
+    if (select.value) {
+        previewBtn.style.display = 'block';
+        updateMusicPreviewButton(false);
+    } else {
+        previewBtn.style.display = 'none';
+    }
+
+    checkFormValidity();
+}
+
+function toggleMusicPreview() {
+    const select = document.getElementById('music');
+    const audioUrl = select.value;
+
+    if (!audioUrl) return;
+
+    if (currentAudio && !currentAudio.paused) {
+        // Pause if playing
+        currentAudio.pause();
+        updateMusicPreviewButton(false);
+    } else {
+        // Play
+        if (!currentAudio || currentAudio.src !== audioUrl) {
+            currentAudio = new Audio(audioUrl);
+            currentAudio.addEventListener('ended', () => {
+                updateMusicPreviewButton(false);
+            });
+        }
+        currentAudio.play();
+        updateMusicPreviewButton(true);
+    }
+}
+
+function updateMusicPreviewButton(isPlaying) {
+    const btn = document.getElementById('previewMusicBtn');
+    btn.textContent = isPlaying ? '⏸️ Pause' : '▶️ Preview';
 }
 
 function addVehicle() {
@@ -1714,6 +1826,7 @@ document.getElementById('topic').addEventListener('input', checkFormValidity);
 loadInventory();
 loadAvatars();
 loadBackgrounds();
+loadMusic();
 </script>
 </body>
 </html>
