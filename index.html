@@ -542,11 +542,13 @@ color: #667eea;
             Background
             <span class="label-description">Choose the scene background</span>
         </label>
-        <select id="background" name="background" required onchange="handleBackgroundChange()">
-            <option value="">Loading backgrounds...</option>
-        </select>
-        <div id="backgroundPreview" style="display: none; margin-top: 12px; border-radius: 8px; overflow: hidden; border: 2px solid #e0e0e0;">
-            <img id="backgroundPreviewImg" src="" alt="Background preview" style="width: 100%; height: auto; display: block;">
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <select id="background" name="background" required onchange="handleBackgroundChange()" style="flex: 1;">
+                <option value="">Loading backgrounds...</option>
+            </select>
+            <div id="backgroundPreview" style="display: none; width: 80px; height: 45px; border-radius: 6px; overflow: hidden; border: 2px solid #e0e0e0; flex-shrink: 0;">
+                <img id="backgroundPreviewImg" src="" alt="Background preview" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
         </div>
     </div>
 
@@ -1392,7 +1394,12 @@ async function loadAvatars() {
             avatars.forEach(avatar => {
                 const option = document.createElement('option');
                 option.value = avatar.avatar_id;
-                option.textContent = avatar.label || avatar.display_name;
+                // Show motion preset after name if available
+                let displayText = avatar.label || avatar.display_name;
+                if (avatar.motion_preset) {
+                    displayText += ` (${avatar.motion_preset})`;
+                }
+                option.textContent = displayText;
                 select.appendChild(option);
             });
 
