@@ -528,12 +528,23 @@ color: #667eea;
 
     <!-- Avatar Selection -->
     <div class="form-group hidden" id="avatarGroup">
-        <label for="avatar">
-        Avatar Presenter
+        <label>
+            Avatar Presenter
+            <span class="label-description">Select person, then choose their avatar style</span>
         </label>
-        <select id="avatar" name="avatar" required>
-            <option value="">Loading avatars...</option>
-        </select>
+        <div style="display: flex; gap: 12px; align-items: flex-start;">
+            <div style="flex: 2; display: flex; flex-direction: column; gap: 10px;">
+                <select id="avatarPerson" onchange="handleAvatarPersonChange()">
+                    <option value="">Select person...</option>
+                </select>
+                <select id="avatar" name="avatar" required onchange="handleAvatarChange()" disabled>
+                    <option value="">Select person first...</option>
+                </select>
+            </div>
+            <div id="avatarPreview" style="display: none; flex: 1; aspect-ratio: 9/16; border-radius: 8px; overflow: hidden; border: 2px solid #e0e0e0;">
+                <img id="avatarPreviewImg" src="" alt="Avatar preview" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+        </div>
     </div>
 
     <!-- Background Selection -->
@@ -831,6 +842,14 @@ function handleTemplateChange() {
     // Hide background preview
     document.getElementById('backgroundPreview').style.display = 'none';
     document.getElementById('backgroundPreviewImg').src = '';
+
+    // Hide avatar preview and reset dropdowns
+    document.getElementById('avatarPreview').style.display = 'none';
+    document.getElementById('avatarPreviewImg').src = '';
+    document.getElementById('avatarPerson').value = '';
+    document.getElementById('avatar').value = '';
+    document.getElementById('avatar').disabled = true;
+    document.getElementById('avatar').innerHTML = '<option value="">Select person first...</option>';
 
     // Reset checkboxes
     document.querySelectorAll('input[name="ratios"]').forEach(cb => cb.checked = false);
@@ -1387,31 +1406,99 @@ async function loadAvatars() {
         if (data.success && data.avatars) {
             avatars = data.avatars;
 
-            // Populate avatar dropdown
-            const select = document.getElementById('avatar');
-            select.innerHTML = '<option value="">Select avatar...</option>';
-
+            // Get unique persons from avatars
+            const persons = [];
+            const seenPersons = new Set();
             avatars.forEach(avatar => {
-                const option = document.createElement('option');
-                option.value = avatar.avatar_id;
-                // Show motion preset after name if available
-                let displayText = avatar.label || avatar.display_name;
-                if (avatar.motion_preset) {
-                    displayText += ` (${avatar.motion_preset})`;
+                const personKey = avatar.display_name;
+                if (!seenPersons.has(personKey)) {
+                    seenPersons.add(personKey);
+                    persons.push({
+                        display_name: avatar.display_name,
+                        full_name: avatar.full_name
+                    });
                 }
-                option.textContent = displayText;
-                select.appendChild(option);
             });
 
-            console.log(`Loaded ${avatars.length} avatars`);
+            // Populate person dropdown
+            const personSelect = document.getElementById('avatarPerson');
+            personSelect.innerHTML = '<option value="">Select person...</option>';
+            persons.forEach(person => {
+                const option = document.createElement('option');
+                option.value = person.display_name;
+                option.textContent = person.full_name || person.display_name;
+                personSelect.appendChild(option);
+            });
+
+            // Avatar dropdown starts disabled
+            const avatarSelect = document.getElementById('avatar');
+            avatarSelect.innerHTML = '<option value="">Select person first...</option>';
+            avatarSelect.disabled = true;
+
+            console.log(`Loaded ${avatars.length} avatars for ${persons.length} persons`);
         } else {
             throw new Error('Invalid response from avatars API');
         }
     } catch (error) {
         console.error('Error loading avatars:', error);
-        const select = document.getElementById('avatar');
-        select.innerHTML = '<option value="">Error loading avatars</option>';
+        const personSelect = document.getElementById('avatarPerson');
+        personSelect.innerHTML = '<option value="">Error loading avatars</option>';
     }
+}
+
+function handleAvatarPersonChange() {
+    const personSelect = document.getElementById('avatarPerson');
+    const avatarSelect = document.getElementById('avatar');
+    const selectedPerson = personSelect.value;
+
+    // Hide preview when person changes
+    document.getElementById('avatarPreview').style.display = 'none';
+    document.getElementById('avatarPreviewImg').src = '';
+
+    if (!selectedPerson) {
+        avatarSelect.innerHTML = '<option value="">Select person first...</option>';
+        avatarSelect.disabled = true;
+        checkFormValidity();
+        return;
+    }
+
+    // Filter avatars for selected person
+    const personAvatars = avatars.filter(a => a.display_name === selectedPerson);
+
+    avatarSelect.innerHTML = '<option value="">Select avatar style...</option>';
+    personAvatars.forEach(avatar => {
+        const option = document.createElement('option');
+        option.value = avatar.avatar_id;
+        // Show style name and motion preset
+        let displayText = avatar.style_name || 'Default';
+        if (avatar.motion_preset) {
+            displayText += ` (${avatar.motion_preset})`;
+        }
+        option.textContent = displayText;
+        option.dataset.previewUrl = avatar.preview_image_url || '';
+        avatarSelect.appendChild(option);
+    });
+
+    avatarSelect.disabled = false;
+    checkFormValidity();
+}
+
+function handleAvatarChange() {
+    const avatarSelect = document.getElementById('avatar');
+    const previewDiv = document.getElementById('avatarPreview');
+    const previewImg = document.getElementById('avatarPreviewImg');
+    const selectedOption = avatarSelect.options[avatarSelect.selectedIndex];
+
+    if (avatarSelect.value && selectedOption.dataset.previewUrl) {
+        previewImg.src = selectedOption.dataset.previewUrl;
+        previewDiv.style.display = 'block';
+    } else {
+        previewDiv.style.display = 'none';
+        previewImg.src = '';
+    }
+
+    handleLengthChange(); // Re-check if topic should show for organic templates
+    checkFormValidity();
 }
 
 async function loadBackgrounds() {
@@ -1847,10 +1934,7 @@ function handleLengthChange() {
 
 // Add event listeners for form validation
 document.getElementById('client').addEventListener('change', checkFormValidity);
-document.getElementById('avatar').addEventListener('change', () => {
-    handleLengthChange(); // Re-check if topic should show for organic templates
-    checkFormValidity();
-});
+// Avatar change is handled by onchange="handleAvatarChange()" on the element
 document.getElementById('email').addEventListener('input', checkFormValidity);
 document.getElementById('scriptLength').addEventListener('change', checkFormValidity);
 document.getElementById('topic').addEventListener('input', checkFormValidity);
