@@ -542,9 +542,12 @@ color: #667eea;
             Background
             <span class="label-description">Choose the scene background</span>
         </label>
-        <select id="background" name="background" required onchange="checkFormValidity()">
+        <select id="background" name="background" required onchange="handleBackgroundChange()">
             <option value="">Loading backgrounds...</option>
         </select>
+        <div id="backgroundPreview" style="display: none; margin-top: 12px; border-radius: 8px; overflow: hidden; border: 2px solid #e0e0e0;">
+            <img id="backgroundPreviewImg" src="" alt="Background preview" style="width: 100%; height: auto; display: block;">
+        </div>
     </div>
 
     <!-- Music Selection -->
@@ -822,6 +825,10 @@ function handleTemplateChange() {
         currentAudio = null;
         updateMusicPreviewButton(false);
     }
+
+    // Hide background preview
+    document.getElementById('backgroundPreview').style.display = 'none';
+    document.getElementById('backgroundPreviewImg').src = '';
 
     // Reset checkboxes
     document.querySelectorAll('input[name="ratios"]').forEach(cb => cb.checked = false);
@@ -1523,6 +1530,25 @@ function toggleMusicPreview() {
 function updateMusicPreviewButton(isPlaying) {
     const btn = document.getElementById('previewMusicBtn');
     btn.textContent = isPlaying ? '⏸️ Pause' : '▶️ Preview';
+}
+
+function handleBackgroundChange() {
+    const select = document.getElementById('background');
+    const previewDiv = document.getElementById('backgroundPreview');
+    const previewImg = document.getElementById('backgroundPreviewImg');
+    const backgroundUrl = select.value;
+
+    if (backgroundUrl) {
+        // Show preview with the selected background image
+        previewImg.src = backgroundUrl;
+        previewDiv.style.display = 'block';
+    } else {
+        // Hide preview when no background selected
+        previewDiv.style.display = 'none';
+        previewImg.src = '';
+    }
+
+    checkFormValidity();
 }
 
 function addVehicle() {
