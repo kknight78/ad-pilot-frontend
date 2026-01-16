@@ -1359,7 +1359,7 @@ function buildPayload() {
         topic: topic,
         include_animation: includeAnimation,
         avatar_id: avatar_id,     // Workflow looks up voice_id, voice_settings, and name from database
-        background_image_url: backgroundUrl,  // Cloudinary URL for background
+        background_id: backgroundUrl,  // Background ID (workflow looks up URL + crop_data from DB)
         "background-music": musicUrl,  // Artlist audio URL for background music
         script_length: scriptLength,
         email: email,
@@ -1527,8 +1527,9 @@ async function loadBackgrounds() {
                     optgroup.label = category.charAt(0).toUpperCase() + category.slice(1);
                     bgs.forEach(bg => {
                         const option = document.createElement('option');
-                        option.value = bg.cloudinary_url;
+                        option.value = bg.id;  // Send ID, workflow looks up URL + crop_data
                         option.textContent = bg.label || bg.name;
+                        option.dataset.url = bg.cloudinary_url;  // Keep URL for preview
                         optgroup.appendChild(option);
                     });
                     select.appendChild(optgroup);
@@ -1630,7 +1631,8 @@ function handleBackgroundChange() {
     const select = document.getElementById('background');
     const previewDiv = document.getElementById('backgroundPreview');
     const previewImg = document.getElementById('backgroundPreviewImg');
-    const backgroundUrl = select.value;
+    const selectedOption = select.options[select.selectedIndex];
+    const backgroundUrl = selectedOption?.dataset?.url;  // Get URL from data attribute
 
     if (backgroundUrl) {
         // Show preview with the selected background image
