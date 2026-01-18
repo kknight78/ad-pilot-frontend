@@ -1347,8 +1347,10 @@ function buildPayload() {
         return null;
     }
 
-    // Get background music URL (optional)
-    const musicUrl = document.getElementById('music').value || null;
+    // Get background music URL (optional) - use cloudinary_url for full audio
+    const musicSelect = document.getElementById('music');
+    const selectedMusicOption = musicSelect.options[musicSelect.selectedIndex];
+    const musicCloudinaryUrl = selectedMusicOption?.dataset?.cloudinaryUrl || null;
 
     return {
         client: client,
@@ -1360,7 +1362,7 @@ function buildPayload() {
         include_animation: includeAnimation,
         avatar_id: avatar_id,     // Workflow looks up voice_id, voice_settings, and name from database
         background_id: backgroundUrl,  // Background ID (workflow looks up URL + crop_data from DB)
-        "background-music": musicUrl,  // Artlist audio URL for background music
+        media: { music_url: musicCloudinaryUrl },  // Cloudinary full audio URL for video
         script_length: scriptLength,
         email: email,
         vins: vins,
@@ -1561,9 +1563,10 @@ async function loadMusic() {
 
             musicTracks.forEach(track => {
                 const option = document.createElement('option');
-                option.value = track.audio_url;
+                option.value = track.audio_url;  // Preview URL for playback
                 option.textContent = track.label || track.name;
                 option.dataset.songId = track.song_id;
+                option.dataset.cloudinaryUrl = track.cloudinary_url || '';  // Full audio URL for video
                 select.appendChild(option);
             });
 
