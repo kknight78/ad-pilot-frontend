@@ -647,10 +647,26 @@ color: #667eea;
 
     <div class="form-group hidden" id="themeGroup">
         <label for="theme">
-            Theme (Optional)
-            <span class="label-description">e.g., Summer Blowout, Back to School, Harvest Deals</span>
+            Theme
+            <span class="label-description">Generate a timely, locally-resonant theme for your ad</span>
         </label>
-        <input type="text" id="theme" name="theme" placeholder="Leave blank for generic ad">
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <input type="text" id="theme" name="theme" placeholder="Enter a local topic or event..." style="flex: 1;">
+            <button type="button" id="generateThemeBtn" onclick="generateTheme()" style="padding: 12px 16px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; white-space: nowrap;" title="Generate new theme">
+                🔄
+            </button>
+        </div>
+        <p id="themeHelperText" style="font-size: 12px; color: #666; margin-top: 8px;">
+            Want us to build the theme around a local topic or event? Type it in the box and press enter!<br>
+            Just want us to generate a new theme? Press the regenerate button.
+        </p>
+        <div id="themePackInfo" style="display: none; margin-top: 10px; padding: 12px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #667eea;">
+            <div style="font-size: 13px; color: #333;">
+                <strong id="themePackName"></strong>
+                <span id="themePackEmoji" style="margin-left: 4px;"></span>
+            </div>
+            <div id="themePackTension" style="font-size: 12px; color: #666; margin-top: 4px;"></div>
+        </div>
     </div>
 
     <!-- Include Animation Checkbox (HIDDEN - coming soon!) -->
@@ -771,6 +787,7 @@ color: #667eea;
 const WEBHOOK_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/ad-pilot';
 // CORS proxy needed - n8n Cloud doesn't support preflight OPTIONS requests
 const TOPIC_SUGGEST_URL = 'https://corsproxy.io/?' + encodeURIComponent('https://ad-pilot-n8n-production.up.railway.app/webhook/topic-suggest');
+const THEMATIC_PACK_URL = 'https://corsproxy.io/?' + encodeURIComponent('https://ad-pilot-n8n-production.up.railway.app/webhook/thematic-pack-generate');
 const AVATARS_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/avatars';
 const BACKGROUNDS_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/backgrounds';
 const MUSIC_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/music';
@@ -787,6 +804,7 @@ let selectedTemplate = '';
 let cachedWorkflowConfig = null;
 let originalTestMode = false;
 let originalUseTestVoice = false;
+let currentThemePack = null;  // Store the generated theme pack
 
 // Template configuration from database
 const TEMPLATE_CONFIG = {
@@ -888,6 +906,11 @@ function handleTemplateChange() {
     // Reset checkboxes
     document.querySelectorAll('input[name="ratios"]').forEach(cb => cb.checked = false);
     document.querySelectorAll('input[name="platforms"]').forEach(cb => cb.checked = false);
+
+    // Reset theme pack
+    document.getElementById('theme').value = '';
+    document.getElementById('themePackInfo').style.display = 'none';
+    currentThemePack = null;
 
     if (!selectedTemplate || !templateConfig) {
         checkFormValidity();
@@ -1188,9 +1211,11 @@ function backToForm() {
 
 function resetForm() {
     cachedWorkflowConfig = null;
+    currentThemePack = null;
     lockEditor(false);
     backToForm();
     document.getElementById('adForm').reset();
+    document.getElementById('themePackInfo').style.display = 'none';
     handleTemplateChange();
 }
 
@@ -1464,6 +1489,7 @@ function buildPayload() {
         ratios: ratios,           // Array of ratios
         platforms: platforms,     // Array of platforms (empty for organic)
         theme: theme,
+        theme_pack: currentThemePack,  // Include full theme pack if generated
         topic: topic,
         include_animation: includeAnimation,
         avatar_id: avatar_id,     // Workflow looks up voice_id, voice_settings, and name from database
@@ -2047,6 +2073,66 @@ function handleLengthChange() {
 
     checkFormValidity();
 }
+
+// =====================
+// THEME PACK GENERATION
+// =====================
+async function generateTheme() {
+    const themeInput = document.getElementById('theme');
+    const generateBtn = document.getElementById('generateThemeBtn');
+    const themePackInfo = document.getElementById('themePackInfo');
+    const userInput = themeInput.value.trim();
+
+    // Show loading state
+    generateBtn.disabled = true;
+    generateBtn.textContent = '⏳';
+
+    try {
+        const response = await fetch(THEMATIC_PACK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                location: 'Rantoul, IL',
+                local_event_override: userInput || undefined
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.theme_name) {
+            // Store the theme pack
+            currentThemePack = data;
+
+            // Update the input with the generated theme name
+            themeInput.value = data.theme_name;
+
+            // Show the theme pack info
+            document.getElementById('themePackName').textContent = data.theme_name;
+            document.getElementById('themePackEmoji').textContent = data.emoji || '';
+            document.getElementById('themePackTension').textContent = data.core_tension || '';
+            themePackInfo.style.display = 'block';
+
+            console.log('Generated theme pack:', data);
+        } else {
+            console.error('Theme pack generation failed:', data);
+            showStatus('Failed to generate theme. Please try again.', 'error');
+        }
+    } catch (error) {
+        console.error('Error generating theme:', error);
+        showStatus('Error generating theme. Please try again.', 'error');
+    } finally {
+        generateBtn.disabled = false;
+        generateBtn.textContent = '🔄';
+    }
+}
+
+// Handle Enter key on theme input
+document.getElementById('theme').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        generateTheme();
+    }
+});
 
 // Add event listeners for form validation
 document.getElementById('client').addEventListener('change', checkFormValidity);
