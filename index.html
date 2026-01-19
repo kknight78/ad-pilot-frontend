@@ -452,7 +452,7 @@ color: #667eea;
         </label>
         <select id="client" name="client" required onchange="handleClientChange()">
             <option value="">Select client...</option>
-            <option value="ccc">Capitol Car Credit</option>
+            <option value="ccc" data-client-id="a1b2c3d4-e5f6-7890-abcd-ef1234567890">Capitol Car Credit</option>
             <option value="adpilot" disabled>Ad Pilot (coming soon)</option>
         </select>
     </div>
@@ -1396,6 +1396,8 @@ document.getElementById('editCta').addEventListener('input', () => { updateWordC
 function buildPayload() {
     const formData = new FormData(document.getElementById('adForm'));
     const client = formData.get('client');
+    const clientSelect = document.getElementById('client');
+    const clientId = clientSelect.options[clientSelect.selectedIndex]?.dataset?.clientId || null;
     const template = formData.get('template');
     const templateConfig = TEMPLATE_CONFIG[template] || null;
     const topic = formData.get('topic');
@@ -1457,6 +1459,7 @@ function buildPayload() {
 
     return {
         client: client,
+        client_id: clientId,
         template_id: template,
         ratios: ratios,           // Array of ratios
         platforms: platforms,     // Array of platforms (empty for organic)
