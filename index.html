@@ -788,6 +788,34 @@ let cachedWorkflowConfig = null;
 let originalTestMode = false;
 let originalUseTestVoice = false;
 
+// Template configuration from database
+const TEMPLATE_CONFIG = {
+    'organic-educational-1': {
+        code: 'EDUCATIONAL-1',
+        has_background: true,
+        has_music: false,
+        bg_categories: ['interior'],
+        bg_wide_override: null,
+        available_ratios: ['9:16']
+    },
+    'ad-multi-item-1': {
+        code: 'MULTI-ITEM-1',
+        has_background: true,
+        has_music: true,
+        bg_categories: ['exterior', 'themed'],
+        bg_wide_override: null,
+        available_ratios: ['9:16', '4:5', '16:9']
+    },
+    'ad-single-item-spotlight-1': {
+        code: 'SINGLE-ITEM-SPOTLIGHT-1',
+        has_background: true,
+        has_music: true,
+        bg_categories: [],  // Empty = hide selector, workflow uses default
+        bg_wide_override: 'interior',
+        available_ratios: ['9:16', '4:5', '16:9']
+    }
+};
+
 // =====================
 // TEMPLATE HANDLING
 // =====================
@@ -809,10 +837,13 @@ function handleClientChange() {
 
 function handleTemplateChange() {
     selectedTemplate = document.getElementById('template').value;
+    const templateConfig = TEMPLATE_CONFIG[selectedTemplate] || null;
+
     const ratioGroup = document.getElementById('ratioGroup');
     const platformGroup = document.getElementById('platformGroup');
     const avatarGroup = document.getElementById('avatarGroup');
     const backgroundGroup = document.getElementById('backgroundGroup');
+    const musicGroup = document.getElementById('musicGroup');
     const lengthGroup = document.getElementById('lengthGroup');
     const vehiclesGroup = document.getElementById('vehiclesGroup');
     const topicGroup = document.getElementById('topicGroup');
@@ -825,23 +856,26 @@ function handleTemplateChange() {
     platformGroup.classList.add('hidden');
     avatarGroup.classList.add('hidden');
     backgroundGroup.classList.add('hidden');
-    document.getElementById('musicGroup').classList.add('hidden');
+    musicGroup.classList.add('hidden');
     lengthGroup.classList.add('hidden');
     vehiclesGroup.classList.add('hidden');
     topicGroup.classList.add('hidden');
     themeGroup.classList.add('hidden');
     emailGroup.classList.add('hidden');
 
-    // Stop any playing audio preview
+    // Stop any playing audio preview and reset music selection
     if (currentAudio) {
         currentAudio.pause();
         currentAudio = null;
         updateMusicPreviewButton(false);
     }
+    document.getElementById('music').value = '';
+    document.getElementById('previewMusicBtn').style.display = 'none';
 
-    // Hide background preview
+    // Hide background preview and reset
     document.getElementById('backgroundPreview').style.display = 'none';
     document.getElementById('backgroundPreviewImg').src = '';
+    document.getElementById('background').value = '';
 
     // Hide avatar preview and reset dropdowns
     document.getElementById('avatarPreview').style.display = 'none';
@@ -855,17 +889,29 @@ function handleTemplateChange() {
     document.querySelectorAll('input[name="ratios"]').forEach(cb => cb.checked = false);
     document.querySelectorAll('input[name="platforms"]').forEach(cb => cb.checked = false);
 
-    if (!selectedTemplate) {
+    if (!selectedTemplate || !templateConfig) {
         checkFormValidity();
         return;
     }
 
     // Show common fields for all templates
     avatarGroup.classList.remove('hidden');
-    backgroundGroup.classList.remove('hidden');
-    document.getElementById('musicGroup').classList.remove('hidden');
     lengthGroup.classList.remove('hidden');
     emailGroup.classList.remove('hidden');
+
+    // Show/hide background based on bg_categories (empty = hide, workflow handles default)
+    if (templateConfig.bg_categories && templateConfig.bg_categories.length > 0) {
+        backgroundGroup.classList.remove('hidden');
+        filterBackgroundsByTemplate(templateConfig.bg_categories);
+    }
+
+    // Show/hide music based on has_music
+    if (templateConfig.has_music) {
+        musicGroup.classList.remove('hidden');
+    }
+
+    // Filter available ratios
+    updateAvailableRatios(templateConfig.available_ratios);
 
     // Check if it's an AD template or ORGANIC template
     const isAdTemplate = selectedTemplate.startsWith('ad-');
@@ -904,6 +950,59 @@ function handleTemplateChange() {
 
     checkFormValidity();
     updateVideoCountEstimate();
+}
+
+// Filter backgrounds dropdown based on template's allowed categories
+function filterBackgroundsByTemplate(allowedCategories) {
+    const select = document.getElementById('background');
+    select.innerHTML = '<option value="">Select background...</option>';
+
+    if (!backgrounds.length || !allowedCategories.length) return;
+
+    // Group backgrounds by category, but only include allowed categories
+    const categories = {};
+    allowedCategories.forEach(cat => categories[cat] = []);
+
+    backgrounds.forEach(bg => {
+        const cat = bg.category || 'exterior';
+        if (categories[cat]) {
+            categories[cat].push(bg);
+        }
+    });
+
+    // Add options by category
+    Object.entries(categories).forEach(([category, bgs]) => {
+        if (bgs.length > 0) {
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = category.charAt(0).toUpperCase() + category.slice(1);
+            bgs.forEach(bg => {
+                const option = document.createElement('option');
+                option.value = bg.id;
+                option.textContent = bg.label || bg.name;
+                option.dataset.url = bg.cloudinary_url;
+                option.dataset.category = category;
+                optgroup.appendChild(option);
+            });
+            select.appendChild(optgroup);
+        }
+    });
+}
+
+// Update ratio checkboxes based on template's available ratios
+function updateAvailableRatios(availableRatios) {
+    const ratioCheckboxes = document.querySelectorAll('input[name="ratios"]');
+
+    ratioCheckboxes.forEach(checkbox => {
+        const ratioLabel = checkbox.closest('label');
+        if (availableRatios.includes(checkbox.value)) {
+            ratioLabel.style.display = 'flex';
+            checkbox.disabled = false;
+        } else {
+            ratioLabel.style.display = 'none';
+            checkbox.disabled = true;
+            checkbox.checked = false;
+        }
+    });
 }
 
 function updateVideoCountEstimate() {
@@ -1298,11 +1397,12 @@ function buildPayload() {
     const formData = new FormData(document.getElementById('adForm'));
     const client = formData.get('client');
     const template = formData.get('template');
+    const templateConfig = TEMPLATE_CONFIG[template] || null;
     const topic = formData.get('topic');
     const theme = formData.get('theme') || '';
     const includeAnimation = formData.get('include_animation') === 'true';
     const avatarValue = formData.get('avatar');
-    const backgroundUrl = formData.get('background');
+    const backgroundId = formData.get('background') || null;  // May be null for spotlight
     const email = formData.get('email');
     const scriptLength = formData.get('script_length');
     const testMode = document.getElementById('testMode').checked;
@@ -1347,10 +1447,13 @@ function buildPayload() {
         return null;
     }
 
-    // Get background music URL (optional) - use cloudinary_url for full audio
-    const musicSelect = document.getElementById('music');
-    const selectedMusicOption = musicSelect.options[musicSelect.selectedIndex];
-    const musicCloudinaryUrl = selectedMusicOption?.dataset?.cloudinaryUrl || null;
+    // Get background music URL (optional) - only if template has music
+    let musicCloudinaryUrl = null;
+    if (templateConfig && templateConfig.has_music) {
+        const musicSelect = document.getElementById('music');
+        const selectedMusicOption = musicSelect.options[musicSelect.selectedIndex];
+        musicCloudinaryUrl = selectedMusicOption?.dataset?.cloudinaryUrl || null;
+    }
 
     return {
         client: client,
@@ -1361,8 +1464,8 @@ function buildPayload() {
         topic: topic,
         include_animation: includeAnimation,
         avatar_id: avatar_id,     // Workflow looks up voice_id, voice_settings, and name from database
-        background_id: backgroundUrl,  // Background ID (workflow looks up URL + crop_data from DB)
-        media: { music_url: musicCloudinaryUrl },  // Cloudinary full audio URL for video
+        background_id: backgroundId,  // Background ID or null (workflow handles default for spotlight)
+        media: { music_url: musicCloudinaryUrl },  // Cloudinary full audio URL for video (null if no music)
         script_length: scriptLength,
         email: email,
         vins: vins,
@@ -1742,6 +1845,7 @@ function removeVehicle(num) {
 function checkFormValidity() {
     const client = document.getElementById('client').value;
     const template = document.getElementById('template').value;
+    const templateConfig = TEMPLATE_CONFIG[template] || null;
     const topic = document.getElementById('topic').value;
     const avatar = document.getElementById('avatar').value;
     const background = document.getElementById('background').value;
@@ -1760,14 +1864,18 @@ function checkFormValidity() {
     const isAdTemplate = template.startsWith('ad-');
     const isOrganicTemplate = template.startsWith('organic-');
 
+    // Background is only required if template has bg_categories (not empty)
+    const backgroundRequired = templateConfig && templateConfig.bg_categories && templateConfig.bg_categories.length > 0;
+    const backgroundValid = !backgroundRequired || background;
+
     let isValid = false;
 
     if (isOrganicTemplate) {
         // Organic: need topic, no ratios/platforms needed (auto 9:16, no banner)
-        isValid = !!(client && template && topic && scriptLength && avatar && background && email);
+        isValid = !!(client && template && topic && scriptLength && avatar && backgroundValid && email);
     } else if (isAdTemplate) {
         // Ad templates: need ratios, platforms, and vehicles
-        isValid = !!(client && template && ratios.length > 0 && platforms.length > 0 && scriptLength && avatar && background && email && hasVehicles);
+        isValid = !!(client && template && ratios.length > 0 && platforms.length > 0 && scriptLength && avatar && backgroundValid && email && hasVehicles);
     }
 
     submitBtn.disabled = !isValid;
