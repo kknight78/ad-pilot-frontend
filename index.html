@@ -1987,7 +1987,9 @@ async function generateTheme() {
     generateBtn.textContent = '⏳';
 
     try {
-        const response = await fetch(THEMATIC_PACK_URL, {
+        // Add cache buster to prevent CORS proxy caching
+        const cacheBuster = `?_=${Date.now()}`;
+        const response = await fetch(THEMATIC_PACK_URL + cacheBuster, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -2057,7 +2059,9 @@ async function generateEduTheme() {
     generateBtn.textContent = '⏳';
 
     try {
-        const response = await fetch(THEMATIC_PACK_URL, {
+        // Add cache buster to prevent CORS proxy caching
+        const cacheBuster = `?_=${Date.now()}`;
+        const response = await fetch(THEMATIC_PACK_URL + cacheBuster, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
