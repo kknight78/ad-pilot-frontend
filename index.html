@@ -777,6 +777,8 @@ let cachedWorkflowConfig = null;
 let originalTestMode = false;
 let originalUseTestVoice = false;
 let currentThemePack = null;  // Store the generated theme pack
+let lastGeneratedTheme = '';  // Track what was last generated (to detect user edits)
+let lastGeneratedEduTheme = '';  // Track what was last generated for edu template
 
 // Template configuration from database
 const TEMPLATE_CONFIG = {
@@ -885,6 +887,8 @@ function handleTemplateChange() {
     document.getElementById('topic').value = '';
     document.getElementById('eduThemePackInfo').style.display = 'none';
     currentThemePack = null;
+    lastGeneratedTheme = '';
+    lastGeneratedEduTheme = '';
 
     if (!selectedTemplate || !templateConfig) {
         checkFormValidity();
@@ -1186,6 +1190,8 @@ function backToForm() {
 function resetForm() {
     cachedWorkflowConfig = null;
     currentThemePack = null;
+    lastGeneratedTheme = '';
+    lastGeneratedEduTheme = '';
     lockEditor(false);
     backToForm();
     document.getElementById('adForm').reset();
@@ -1973,6 +1979,9 @@ async function generateTheme() {
     const themePackInfo = document.getElementById('themePackInfo');
     const userInput = themeInput.value.trim();
 
+    // Only use input as override if user has changed it from what we last generated
+    const userProvidedOverride = userInput && userInput !== lastGeneratedTheme ? userInput : undefined;
+
     // Show loading state
     generateBtn.disabled = true;
     generateBtn.textContent = '⏳';
@@ -1983,7 +1992,7 @@ async function generateTheme() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 location: 'Rantoul, IL',
-                local_event_override: userInput || undefined
+                local_event_override: userProvidedOverride
             })
         });
 
@@ -1993,8 +2002,9 @@ async function generateTheme() {
             // Store the theme pack
             currentThemePack = data;
 
-            // Update the input with the generated theme name
+            // Update the input with the generated theme name and track it
             themeInput.value = data.theme_name;
+            lastGeneratedTheme = data.theme_name;
 
             // Show the theme pack info
             document.getElementById('themePackName').textContent = data.theme_name;
@@ -2039,6 +2049,9 @@ async function generateEduTheme() {
     const eduThemePackInfo = document.getElementById('eduThemePackInfo');
     const userInput = topicInput.value.trim();
 
+    // Only use input as override if user has changed it from what we last generated
+    const userProvidedOverride = userInput && userInput !== lastGeneratedEduTheme ? userInput : undefined;
+
     // Show loading state
     generateBtn.disabled = true;
     generateBtn.textContent = '⏳';
@@ -2049,7 +2062,7 @@ async function generateEduTheme() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 location: 'Rantoul, IL',
-                local_event_override: userInput || undefined
+                local_event_override: userProvidedOverride
             })
         });
 
@@ -2059,8 +2072,9 @@ async function generateEduTheme() {
             // Store the theme pack (reuse same variable)
             currentThemePack = data;
 
-            // Update the input with the generated theme name
+            // Update the input with the generated theme name and track it
             topicInput.value = data.theme_name;
+            lastGeneratedEduTheme = data.theme_name;
 
             // Show the theme pack info
             document.getElementById('eduThemePackName').textContent = data.theme_name;
