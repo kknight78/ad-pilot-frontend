@@ -593,55 +593,28 @@ color: #667eea;
         </select>
     </div>
 
-    <!-- Educational Topic Section (only shows after length selected for temp_003) -->
+    <!-- Educational Theme Section (only shows after length selected for organic template) -->
     <div class="form-group hidden" id="topicGroup">
-        <label>Capitol Smarts Topic
-            <span class="label-description">What should the video be about?</span>
+        <label>Capitol Smarts Theme
+            <span class="label-description">Generate a timely, locally-resonant theme for your educational video</span>
         </label>
-        <fieldset style="padding:20px;background-color:#f8f8f8">
-            <label for="topic">
-                Create your own
-                <span class="label-description">Specify a topic.</span>
-            </label>
-            <input type="text" id="topic" name="topic" placeholder="e.g., What to check before buying a used car">
-
-            <div style="text-align: left; margin: 15px; color: #000; font-weight: 600; font-size: 18px;">OR</div>
-
-            <label>
-                Let us help
-                <span class="label-description">We make suggestions for you.</span>
-            </label>
-
-            <!-- Radio buttons for suggestion mode -->
-            <div style="margin-top: 10px; margin-bottom: 15px;">
-                <label style="display: flex; align-items: center; margin-bottom: 10px; cursor: pointer; font-weight: 400;">
-                    <input type="radio" name="suggestionMode" value="lucky" checked onchange="handleSuggestionModeChange()" style="margin-right: 8px;">
-                    <span>I'm feeling lucky</span>
-                </label>
-                <label style="display: flex; align-items: center; cursor: pointer; font-weight: 400;">
-                    <input type="radio" name="suggestionMode" value="guided" onchange="handleSuggestionModeChange()" style="margin-right: 8px;">
-                    <span>Give me topics about...</span>
-                </label>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <input type="text" id="topic" name="topic" placeholder="Enter a local topic or event..." style="flex: 1;">
+            <button type="button" id="generateEduThemeBtn" onclick="generateEduTheme()" style="padding: 12px 16px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; white-space: nowrap;" title="Generate new theme">
+                🔄
+            </button>
+        </div>
+        <p style="font-size: 12px; color: #666; margin-top: 8px;">
+            Want us to build the theme around a local topic or event? Type it in the box and press enter!<br>
+            Just want us to generate a new theme? Press the regenerate button.
+        </p>
+        <div id="eduThemePackInfo" style="display: none; margin-top: 10px; padding: 12px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #667eea;">
+            <div style="font-size: 13px; color: #333;">
+                <strong id="eduThemePackName"></strong>
+                <span id="eduThemePackEmoji" style="margin-left: 4px;"></span>
             </div>
-
-            <!-- Topic Guidance input (hidden unless "guided" mode selected) -->
-            <div id="topicGuidanceContainer" style="display: none; margin-bottom: 15px;">
-                <input type="text" id="topicGuidance" name="topic_guidance" oninput="handleGuidanceChange()" placeholder="e.g., winter driving, Thanksgiving travel, financing" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
-            </div>
-
-            <!-- Suggest Topics Button -->
-            <div style="margin-bottom: 15px;">
-                <button type="button" id="suggestTopicsBtn" onclick="suggestTopics()" style="padding: 5px 12px 7px 12px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">
-                    💡 Suggest Topics
-                </button>
-            </div>
-
-            <!-- Suggestions Display -->
-            <div id="topicSuggestions" style="display: none; margin-top: 15px; padding: 15px; background: #f8f9ff; border-radius: 8px; border-left: 4px solid #667eea;">
-                <div style="font-size: 13px; color: #666; margin-bottom: 10px; font-weight: 600;">Click a suggestion to use it:</div>
-                <div id="suggestionsList"></div>
-            </div>
-        </fieldset>
+            <div id="eduThemePackAngle" style="font-size: 12px; color: #666; margin-top: 4px;"></div>
+        </div>
     </div>
 
 
@@ -786,7 +759,6 @@ color: #667eea;
 // =====================
 const WEBHOOK_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/ad-pilot';
 // CORS proxy needed - n8n Cloud doesn't support preflight OPTIONS requests
-const TOPIC_SUGGEST_URL = 'https://corsproxy.io/?' + encodeURIComponent('https://ad-pilot-n8n-production.up.railway.app/webhook/topic-suggest');
 const THEMATIC_PACK_URL = 'https://corsproxy.io/?' + encodeURIComponent('https://ad-pilot-n8n-production.up.railway.app/webhook/thematic-pack-generate');
 const AVATARS_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/avatars';
 const BACKGROUNDS_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/backgrounds';
@@ -907,9 +879,11 @@ function handleTemplateChange() {
     document.querySelectorAll('input[name="ratios"]').forEach(cb => cb.checked = false);
     document.querySelectorAll('input[name="platforms"]').forEach(cb => cb.checked = false);
 
-    // Reset theme pack
+    // Reset theme pack (both ad and edu)
     document.getElementById('theme').value = '';
     document.getElementById('themePackInfo').style.display = 'none';
+    document.getElementById('topic').value = '';
+    document.getElementById('eduThemePackInfo').style.display = 'none';
     currentThemePack = null;
 
     if (!selectedTemplate || !templateConfig) {
@@ -1216,6 +1190,7 @@ function resetForm() {
     backToForm();
     document.getElementById('adForm').reset();
     document.getElementById('themePackInfo').style.display = 'none';
+    document.getElementById('eduThemePackInfo').style.display = 'none';
     handleTemplateChange();
 }
 
@@ -1973,91 +1948,6 @@ function hideStatus() {
     document.getElementById('editorStatus').style.display = 'none';
 }
 
-async function suggestTopics() {
-    const scriptLength = document.getElementById('scriptLength').value;
-    const avatarId = document.getElementById('avatar').value;
-    const selectedAvatar = avatars.find(a => a.avatar_id === avatarId);
-    const avatarName = selectedAvatar ? selectedAvatar.display_name : '';
-    const suggestionMode = document.querySelector('input[name="suggestionMode"]:checked').value;
-    const topicGuidance = document.getElementById('topicGuidance').value.trim();
-    const suggestBtn = document.getElementById('suggestTopicsBtn');
-    const suggestionsDiv = document.getElementById('topicSuggestions');
-    const suggestionsList = document.getElementById('suggestionsList');
-
-    const lengthMap = {
-        'quick': 'brief_15_30',
-        'standard': 'standard_30_45',
-        'detailed': 'detailed_45_60'
-    };
-
-    const targetLength = lengthMap[scriptLength];
-    const guidanceText = suggestionMode === 'guided' ? topicGuidance : '';
-
-    suggestBtn.disabled = true;
-    suggestBtn.textContent = '⏳ Generating...';
-
-    try {
-        const response = await fetch(TOPIC_SUGGEST_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                target_length: targetLength,
-                topic_guidance: guidanceText,
-                avatar_name: avatarName
-            })
-        });
-
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-            suggestionsList.innerHTML = result.suggestions.map(topic => 
-                `<div style="padding: 10px; margin-bottom: 8px; background: white; border-radius: 6px; cursor: pointer; border: 2px solid #e0e0e0; transition: all 0.2s;" 
-                     onmouseover="this.style.borderColor='#667eea'; this.style.background='#f8f9ff';" 
-                     onmouseout="this.style.borderColor='#e0e0e0'; this.style.background='white';"
-                     onclick="document.getElementById('topic').value = '${topic.replace(/'/g, "\\'")}'; checkFormValidity(); document.getElementById('topicSuggestions').style.display='none';">
-                    ${topic}
-                </div>`
-            ).join('');
-
-            suggestionsDiv.style.display = 'block';
-        } else {
-            showStatus('Failed to generate suggestions. Please try again.', 'error');
-        }
-    } catch (error) {
-        console.error('Suggestion error:', error);
-        showStatus('Error generating suggestions. Please try again.', 'error');
-    } finally {
-        suggestBtn.disabled = false;
-        if (topicGuidance.length > 1) {
-            suggestBtn.textContent = '💡 Suggest more topics related to ' + topicGuidance;
-        } else {
-            suggestBtn.textContent = '💡 Suggest more topics';
-        }
-    }
-}
-
-function handleSuggestionModeChange() {
-    const mode = document.querySelector('input[name="suggestionMode"]:checked').value;
-    const guidanceContainer = document.getElementById('topicGuidanceContainer');
-
-    if (mode === 'guided') {
-        guidanceContainer.style.display = 'block';
-    } else {
-        guidanceContainer.style.display = 'none';
-    }
-}
-
-function handleGuidanceChange() {
-    const topicGuidance = document.getElementById('topicGuidance').value.trim();
-    const suggestBtn = document.getElementById('suggestTopicsBtn');
-
-    if (topicGuidance.length > 0) {
-        suggestBtn.textContent = '💡 Suggest topics related to ' + topicGuidance;
-    } else {
-        suggestBtn.textContent = '💡 Suggest topics';
-    }
-}
-
 function handleLengthChange() {
     const template = document.getElementById('template').value;
     const scriptLength = document.getElementById('scriptLength').value;
@@ -2133,6 +2023,65 @@ document.getElementById('theme').addEventListener('keydown', (e) => {
         generateTheme();
     }
 });
+
+// Handle Enter key on educational topic input
+document.getElementById('topic').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        generateEduTheme();
+    }
+});
+
+// Generate theme for educational template
+async function generateEduTheme() {
+    const topicInput = document.getElementById('topic');
+    const generateBtn = document.getElementById('generateEduThemeBtn');
+    const eduThemePackInfo = document.getElementById('eduThemePackInfo');
+    const userInput = topicInput.value.trim();
+
+    // Show loading state
+    generateBtn.disabled = true;
+    generateBtn.textContent = '⏳';
+
+    try {
+        const response = await fetch(THEMATIC_PACK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                location: 'Rantoul, IL',
+                local_event_override: userInput || undefined
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.theme_name) {
+            // Store the theme pack (reuse same variable)
+            currentThemePack = data;
+
+            // Update the input with the generated theme name
+            topicInput.value = data.theme_name;
+
+            // Show the theme pack info
+            document.getElementById('eduThemePackName').textContent = data.theme_name;
+            document.getElementById('eduThemePackEmoji').textContent = data.emoji || '';
+            document.getElementById('eduThemePackAngle').textContent = data.education_angle || '';
+            eduThemePackInfo.style.display = 'block';
+
+            console.log('Generated edu theme pack:', data);
+            checkFormValidity();
+        } else {
+            console.error('Edu theme pack generation failed:', data);
+            showStatus('Failed to generate theme. Please try again.', 'error');
+        }
+    } catch (error) {
+        console.error('Error generating edu theme:', error);
+        showStatus('Error generating theme. Please try again.', 'error');
+    } finally {
+        generateBtn.disabled = false;
+        generateBtn.textContent = '🔄';
+    }
+}
 
 // Add event listeners for form validation
 document.getElementById('client').addEventListener('change', checkFormValidity);
