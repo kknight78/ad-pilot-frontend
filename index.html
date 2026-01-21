@@ -759,8 +759,8 @@ color: #667eea;
 // CONFIGURATION
 // =====================
 const WEBHOOK_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/ad-pilot';
-// CORS proxy needed - n8n Cloud doesn't support preflight OPTIONS requests
-const THEMATIC_PACK_URL = 'https://corsproxy.io/?' + encodeURIComponent('https://ad-pilot-n8n-production.up.railway.app/webhook/thematic-pack-generate');
+// Direct call - CORS headers now configured on webhook
+const THEMATIC_PACK_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/thematic-pack-generate';
 const AVATARS_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/avatars';
 const BACKGROUNDS_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/backgrounds';
 const MUSIC_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/music';
