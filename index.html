@@ -1995,7 +1995,7 @@ async function generateTheme() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 location: 'Rantoul, IL',
-                local_event_override: userProvidedOverride
+                local_override_text: userProvidedOverride
             })
         });
 
@@ -2070,7 +2070,7 @@ async function generateEduTheme() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 location: 'Rantoul, IL',
-                local_event_override: userProvidedOverride
+                local_override_text: userProvidedOverride
             })
         });
 
