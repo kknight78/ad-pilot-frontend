@@ -2076,18 +2076,21 @@ async function generateEduTheme() {
 
         const data = await response.json();
 
-        if (data.success && data.theme_name) {
+        // Handle both seed mode (theme_seed) and full pack mode (theme_name)
+        const themeName = data.theme_name || data.theme_seed;
+
+        if (data.success && themeName) {
             // Store the theme pack (reuse same variable)
             currentThemePack = data;
 
             // Update the input with the generated theme name and track it
-            topicInput.value = data.theme_name;
-            lastGeneratedEduTheme = data.theme_name;
+            topicInput.value = themeName;
+            lastGeneratedEduTheme = themeName;
 
             // Show the theme pack info
-            document.getElementById('eduThemePackName').textContent = data.theme_name;
+            document.getElementById('eduThemePackName').textContent = themeName;
             document.getElementById('eduThemePackEmoji').textContent = data.emoji || '';
-            document.getElementById('eduThemePackAngle').textContent = data.education_angle || '';
+            document.getElementById('eduThemePackAngle').textContent = data.education_angle || data.direction || '';
             eduThemePackInfo.style.display = 'block';
 
             console.log('Generated edu theme pack:', data);
