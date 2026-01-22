@@ -2001,18 +2001,21 @@ async function generateTheme() {
 
         const data = await response.json();
 
-        if (data.success && data.theme_name) {
+        // Handle both seed mode (theme_seed) and full pack mode (theme_name)
+        const themeName = data.theme_name || data.theme_seed;
+
+        if (data.success && themeName) {
             // Store the theme pack
             currentThemePack = data;
 
             // Update the input with the generated theme name and track it
-            themeInput.value = data.theme_name;
-            lastGeneratedTheme = data.theme_name;
+            themeInput.value = themeName;
+            lastGeneratedTheme = themeName;
 
             // Show the theme pack info
-            document.getElementById('themePackName').textContent = data.theme_name;
+            document.getElementById('themePackName').textContent = themeName;
             document.getElementById('themePackEmoji').textContent = data.emoji || '';
-            document.getElementById('themePackTension').textContent = data.core_tension || '';
+            document.getElementById('themePackTension').textContent = data.core_tension || data.direction || '';
             themePackInfo.style.display = 'block';
 
             console.log('Generated theme pack:', data);
