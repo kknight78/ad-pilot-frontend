@@ -439,9 +439,14 @@ color: #667eea;
 </style>
 </head>
 <body>
+<!-- DEV ENVIRONMENT BANNER -->
+<div style="background: #ff6b35; color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 14px; position: sticky; top: 0; z-index: 9999;">
+  🚧 DEV ENVIRONMENT — Changes here won't affect production
+</div>
+
 <div class="container">
 <h1>🎬 Ad Pilot Video Generator</h1>
-<p class="subtitle">Drive Business, Boost Social Presence <span style="color: #999; font-size: 12px;">v2.4</span> | <a href="guidance.html" target="_blank" style="color: #667eea; text-decoration: none;">📝 Guidance Rules</a></p>
+<p class="subtitle">Drive Business, Boost Social Presence <span style="color: #999; font-size: 12px;">v2.5-dev</span> | <a href="guidance.html" target="_blank" style="color: #667eea; text-decoration: none;">📝 Guidance Rules</a></p>
 
 <!-- FORM VIEW -->
 <form id="adForm">
@@ -758,12 +763,12 @@ color: #667eea;
 // =====================
 // CONFIGURATION
 // =====================
-const WEBHOOK_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/ad-pilot';
+const WEBHOOK_URL = 'https://ad-pilot-n8n-development.up.railway.app/webhook/ad-pilot';
 // Direct call - CORS headers now configured on webhook
-const THEMATIC_PACK_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/thematic-pack-generate';
-const AVATARS_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/avatars';
-const BACKGROUNDS_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/backgrounds';
-const MUSIC_URL = 'https://ad-pilot-n8n-production.up.railway.app/webhook/music';
+const THEMATIC_PACK_URL = 'https://ad-pilot-n8n-development.up.railway.app/webhook/thematic-pack-generate';
+const AVATARS_URL = 'https://ad-pilot-n8n-development.up.railway.app/webhook/avatars';
+const BACKGROUNDS_URL = 'https://ad-pilot-n8n-development.up.railway.app/webhook/backgrounds';
+const MUSIC_URL = 'https://ad-pilot-n8n-development.up.railway.app/webhook/music';
 const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1kgSVMgpWVSFeAAz4M2LpNmIbuhaJKds9gnbsvLdP-t4/gviz/tq?tqx=out:json&sheet=Feed';
 
 const MAX_CARS = 5;
