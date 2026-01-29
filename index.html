@@ -436,6 +436,117 @@ color: #333;
 font-weight: 600;
 color: #667eea;
 }
+
+/* Platform Copy Editor Styles */
+.copy-editor-section {
+margin-top: 20px;
+}
+
+.platform-copy-section {
+background: white;
+border: 1px solid #e0e0e0;
+border-radius: 8px;
+padding: 16px;
+margin-bottom: 16px;
+}
+
+.platform-copy-header {
+font-weight: 600;
+font-size: 14px;
+color: #333;
+margin-bottom: 12px;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.platform-icon {
+font-size: 16px;
+}
+
+.copy-field {
+margin-bottom: 12px;
+}
+
+.copy-field label {
+font-size: 12px;
+color: #666;
+margin-bottom: 4px;
+display: block;
+}
+
+.copy-field-row {
+display: flex;
+gap: 12px;
+}
+
+.copy-field.half {
+flex: 1;
+}
+
+.copy-textarea {
+width: 100%;
+padding: 10px;
+border: 1px solid #e0e0e0;
+border-radius: 6px;
+font-size: 14px;
+font-family: inherit;
+line-height: 1.4;
+resize: vertical;
+min-height: 80px;
+transition: border-color 0.2s;
+}
+
+.copy-textarea.short {
+min-height: 60px;
+}
+
+.copy-textarea:focus {
+outline: none;
+border-color: #667eea;
+}
+
+.copy-textarea:disabled {
+background-color: #f5f5f5;
+color: #666;
+cursor: not-allowed;
+}
+
+.copy-input {
+width: 100%;
+padding: 10px;
+border: 1px solid #e0e0e0;
+border-radius: 6px;
+font-size: 14px;
+font-family: inherit;
+transition: border-color 0.2s;
+}
+
+.copy-input:focus {
+outline: none;
+border-color: #667eea;
+}
+
+.copy-input:disabled {
+background-color: #f5f5f5;
+color: #666;
+cursor: not-allowed;
+}
+
+.char-count {
+font-size: 11px;
+color: #999;
+text-align: right;
+margin-top: 4px;
+}
+
+.char-count.warning {
+color: #e65100;
+}
+
+.char-count.error {
+color: #c62828;
+}
 </style>
 </head>
 <body>
@@ -446,7 +557,7 @@ color: #667eea;
 
 <div class="container">
 <h1>🎬 Ad Pilot Video Generator</h1>
-<p class="subtitle">Drive Business, Boost Social Presence <span style="color: #999; font-size: 12px;">v2.5-dev</span> | <a href="guidance.html" target="_blank" style="color: #667eea; text-decoration: none;">📝 Guidance Rules</a></p>
+<p class="subtitle">Drive Business, Boost Social Presence <span style="color: #999; font-size: 12px;">v2.6-dev</span> | <a href="guidance.html" target="_blank" style="color: #667eea; text-decoration: none;">📝 Guidance Rules</a></p>
 
 <!-- FORM VIEW -->
 <form id="adForm">
@@ -741,6 +852,71 @@ color: #667eea;
     <div class="timing-estimate">
         <span class="icon">⏱️</span>
         <span class="text">Estimated duration: <span class="duration" id="estimatedDuration">~0 seconds</span></span>
+    </div>
+
+    <!-- PLATFORM COPY SECTION -->
+    <div id="copyEditorSection" class="copy-editor-section hidden">
+        <h3 style="margin: 24px 0 16px 0; padding-top: 20px; border-top: 1px solid #e0e0e0;">📋 Platform Copy</h3>
+
+        <!-- Meta Copy -->
+        <div id="metaCopySection" class="platform-copy-section hidden">
+            <div class="platform-copy-header">
+                <span class="platform-icon">📘</span> Meta (Facebook/Instagram)
+            </div>
+            <div class="copy-field">
+                <label for="editMetaPrimary">Primary Text</label>
+                <textarea id="editMetaPrimary" class="copy-textarea" placeholder="Primary text for Meta ads..."></textarea>
+                <div class="char-count"><span id="metaPrimaryCount">0</span> chars</div>
+            </div>
+            <div class="copy-field-row">
+                <div class="copy-field half">
+                    <label for="editMetaHeadline">Headline</label>
+                    <input type="text" id="editMetaHeadline" class="copy-input" placeholder="Headline (40 chars max)">
+                    <div class="char-count"><span id="metaHeadlineCount">0</span>/40</div>
+                </div>
+                <div class="copy-field half">
+                    <label for="editMetaDescription">Description</label>
+                    <input type="text" id="editMetaDescription" class="copy-input" placeholder="Description (30 chars max)">
+                    <div class="char-count"><span id="metaDescCount">0</span>/30</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TikTok Copy -->
+        <div id="tiktokCopySection" class="platform-copy-section hidden">
+            <div class="platform-copy-header">
+                <span class="platform-icon">🎵</span> TikTok
+            </div>
+            <div class="copy-field">
+                <label for="editTiktokCaption">Caption</label>
+                <textarea id="editTiktokCaption" class="copy-textarea short" placeholder="TikTok caption (150 chars max)..."></textarea>
+                <div class="char-count"><span id="tiktokCaptionCount">0</span>/150</div>
+            </div>
+            <div class="copy-field">
+                <label for="editTiktokHashtags">Hashtags</label>
+                <input type="text" id="editTiktokHashtags" class="copy-input" placeholder="#hashtag1 #hashtag2 ...">
+            </div>
+        </div>
+
+        <!-- YouTube Copy -->
+        <div id="youtubeCopySection" class="platform-copy-section hidden">
+            <div class="platform-copy-header">
+                <span class="platform-icon">▶️</span> YouTube
+            </div>
+            <div class="copy-field">
+                <label for="editYoutubeTitle">Title</label>
+                <input type="text" id="editYoutubeTitle" class="copy-input" placeholder="Video title (60 chars max)">
+                <div class="char-count"><span id="youtubeTitleCount">0</span>/60</div>
+            </div>
+            <div class="copy-field">
+                <label for="editYoutubeDescription">Description</label>
+                <textarea id="editYoutubeDescription" class="copy-textarea" placeholder="Video description..."></textarea>
+            </div>
+            <div class="copy-field">
+                <label for="editYoutubeTags">Tags</label>
+                <input type="text" id="editYoutubeTags" class="copy-input" placeholder="tag1, tag2, tag3...">
+            </div>
+        </div>
     </div>
 
     <div class="guidance-hint" style="text-align: right; margin: 12px 0 8px 0;">
@@ -1130,15 +1306,15 @@ async function previewScript() {
 
 function populateScriptEditor(config) {
     const script = config.script || {};
-    
+
     // Set meta info
     document.getElementById('metaTemplate').textContent = config.template_id || '-';
     document.getElementById('metaLength').textContent = config.script_length || '-';
     document.getElementById('metaPresenter').textContent = config.avatar_name || '-';
-    
+
     // Set script content
     document.getElementById('editHook').value = script.hook || '';
-    
+
     // Body could be segments array or full_script minus hook/cta
     let bodyText = '';
     if (script.segments && Array.isArray(script.segments)) {
@@ -1153,12 +1329,155 @@ function populateScriptEditor(config) {
             .trim();
     }
     document.getElementById('editBody').value = bodyText;
-    
+
     document.getElementById('editCta').value = script.cta || '';
-    
+
     // Update word counts
     updateWordCounts();
     updateDurationEstimate();
+
+    // Populate platform copy if present
+    populatePlatformCopy(config.generated_copy || []);
+}
+
+function populatePlatformCopy(generatedCopy) {
+    const copySection = document.getElementById('copyEditorSection');
+    const metaSection = document.getElementById('metaCopySection');
+    const tiktokSection = document.getElementById('tiktokCopySection');
+    const youtubeSection = document.getElementById('youtubeCopySection');
+
+    // Hide all sections initially
+    copySection.classList.add('hidden');
+    metaSection.classList.add('hidden');
+    tiktokSection.classList.add('hidden');
+    youtubeSection.classList.add('hidden');
+
+    if (!generatedCopy || generatedCopy.length === 0) {
+        return;
+    }
+
+    // Show the main copy section
+    copySection.classList.remove('hidden');
+
+    // Populate each platform's copy
+    generatedCopy.forEach(item => {
+        const platform = item.platform?.toLowerCase();
+        const copy = item.copy || {};
+
+        if (platform === 'meta') {
+            metaSection.classList.remove('hidden');
+            document.getElementById('editMetaPrimary').value = copy.primary_text || '';
+            document.getElementById('editMetaHeadline').value = copy.headline || '';
+            document.getElementById('editMetaDescription').value = copy.description || '';
+            updateCopyCharCount('metaPrimary', copy.primary_text || '');
+            updateCopyCharCount('metaHeadline', copy.headline || '', 40);
+            updateCopyCharCount('metaDesc', copy.description || '', 30);
+        } else if (platform === 'tiktok') {
+            tiktokSection.classList.remove('hidden');
+            document.getElementById('editTiktokCaption').value = copy.caption || '';
+            document.getElementById('editTiktokHashtags').value = copy.hashtags || '';
+            updateCopyCharCount('tiktokCaption', copy.caption || '', 150);
+        } else if (platform === 'youtube') {
+            youtubeSection.classList.remove('hidden');
+            document.getElementById('editYoutubeTitle').value = copy.title || '';
+            document.getElementById('editYoutubeDescription').value = copy.description || '';
+            document.getElementById('editYoutubeTags').value = copy.tags || '';
+            updateCopyCharCount('youtubeTitle', copy.title || '', 60);
+        }
+    });
+}
+
+function updateCopyCharCount(fieldId, value, maxChars = null) {
+    const countSpan = document.getElementById(fieldId + 'Count');
+    if (!countSpan) return;
+
+    const count = (value || '').length;
+    countSpan.textContent = count;
+
+    // Update styling based on limits
+    const countDiv = countSpan.parentElement;
+    if (maxChars) {
+        if (count > maxChars) {
+            countDiv.classList.add('error');
+            countDiv.classList.remove('warning');
+        } else if (count > maxChars * 0.9) {
+            countDiv.classList.add('warning');
+            countDiv.classList.remove('error');
+        } else {
+            countDiv.classList.remove('warning', 'error');
+        }
+    }
+}
+
+function collectEditedCopy() {
+    const editedCopy = [];
+
+    // Check if Meta section is visible and collect values
+    const metaSection = document.getElementById('metaCopySection');
+    if (!metaSection.classList.contains('hidden')) {
+        editedCopy.push({
+            platform: 'meta',
+            content_type: cachedWorkflowConfig?.generated_copy?.find(c => c.platform === 'meta')?.content_type || 'ad',
+            copy: {
+                primary_text: document.getElementById('editMetaPrimary').value.trim(),
+                headline: document.getElementById('editMetaHeadline').value.trim(),
+                description: document.getElementById('editMetaDescription').value.trim()
+            }
+        });
+    }
+
+    // Check if TikTok section is visible and collect values
+    const tiktokSection = document.getElementById('tiktokCopySection');
+    if (!tiktokSection.classList.contains('hidden')) {
+        editedCopy.push({
+            platform: 'tiktok',
+            content_type: cachedWorkflowConfig?.generated_copy?.find(c => c.platform === 'tiktok')?.content_type || 'ad',
+            copy: {
+                caption: document.getElementById('editTiktokCaption').value.trim(),
+                hashtags: document.getElementById('editTiktokHashtags').value.trim()
+            }
+        });
+    }
+
+    // Check if YouTube section is visible and collect values
+    const youtubeSection = document.getElementById('youtubeCopySection');
+    if (!youtubeSection.classList.contains('hidden')) {
+        editedCopy.push({
+            platform: 'youtube',
+            content_type: cachedWorkflowConfig?.generated_copy?.find(c => c.platform === 'youtube')?.content_type || 'ad',
+            copy: {
+                title: document.getElementById('editYoutubeTitle').value.trim(),
+                description: document.getElementById('editYoutubeDescription').value.trim(),
+                tags: document.getElementById('editYoutubeTags').value.trim()
+            }
+        });
+    }
+
+    return editedCopy;
+}
+
+// Add event listeners for copy field character counts
+function setupCopyCharCountListeners() {
+    // Meta fields
+    document.getElementById('editMetaPrimary').addEventListener('input', (e) => {
+        updateCopyCharCount('metaPrimary', e.target.value);
+    });
+    document.getElementById('editMetaHeadline').addEventListener('input', (e) => {
+        updateCopyCharCount('metaHeadline', e.target.value, 40);
+    });
+    document.getElementById('editMetaDescription').addEventListener('input', (e) => {
+        updateCopyCharCount('metaDesc', e.target.value, 30);
+    });
+
+    // TikTok fields
+    document.getElementById('editTiktokCaption').addEventListener('input', (e) => {
+        updateCopyCharCount('tiktokCaption', e.target.value, 150);
+    });
+
+    // YouTube fields
+    document.getElementById('editYoutubeTitle').addEventListener('input', (e) => {
+        updateCopyCharCount('youtubeTitle', e.target.value, 60);
+    });
 }
 
 function updateWordCounts() {
@@ -1207,11 +1526,21 @@ function resetForm() {
 }
 
 function lockEditor(locked) {
-    // Lock/unlock textareas
+    // Lock/unlock script textareas
     document.getElementById('editHook').disabled = locked;
     document.getElementById('editBody').disabled = locked;
     document.getElementById('editCta').disabled = locked;
-    
+
+    // Lock/unlock copy fields
+    document.getElementById('editMetaPrimary').disabled = locked;
+    document.getElementById('editMetaHeadline').disabled = locked;
+    document.getElementById('editMetaDescription').disabled = locked;
+    document.getElementById('editTiktokCaption').disabled = locked;
+    document.getElementById('editTiktokHashtags').disabled = locked;
+    document.getElementById('editYoutubeTitle').disabled = locked;
+    document.getElementById('editYoutubeDescription').disabled = locked;
+    document.getElementById('editYoutubeTags').disabled = locked;
+
     // Lock/unlock buttons
     document.querySelectorAll('.script-actions button').forEach(btn => btn.disabled = locked);
 }
@@ -1293,18 +1622,18 @@ async function approveAndGenerate() {
         showEditorStatus('No cached config found. Please regenerate the script.', 'error');
         return;
     }
-    
+
     // Lock the editor immediately
     lockEditor(true);
-    
+
     // Get the edited script values
     const editedHook = document.getElementById('editHook').value.trim();
     const editedBody = document.getElementById('editBody').value.trim();
     const editedCta = document.getElementById('editCta').value.trim();
-    
+
     // Update the cached config with edited script
     const cleanText = (text) => text.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
-    
+
     cachedWorkflowConfig.script = {
         ...cachedWorkflowConfig.script,
         hook: cleanText(editedHook),
@@ -1313,7 +1642,14 @@ async function approveAndGenerate() {
         segments: editedBody.split(/\n\n+/).map(s => cleanText(s)).filter(s => s),
         full_script: cleanText([editedHook, editedBody, editedCta].filter(s => s).join(' '))
     };
-    
+
+    // Collect edited platform copy
+    const editedCopy = collectEditedCopy();
+    if (editedCopy.length > 0) {
+        cachedWorkflowConfig.generated_copy = editedCopy;
+        cachedWorkflowConfig.copy_edited = true;
+    }
+
     cachedWorkflowConfig.script_edited = true;
     delete cachedWorkflowConfig.preview_mode;
     cachedWorkflowConfig.test_mode = originalTestMode;
@@ -2125,6 +2461,7 @@ loadInventory();
 loadAvatars();
 loadBackgrounds();
 loadMusic();
+setupCopyCharCountListeners();
 </script>
 </body>
 </html>
