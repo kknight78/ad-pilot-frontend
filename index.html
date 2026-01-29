@@ -1458,26 +1458,22 @@ function collectEditedCopy() {
 
 // Add event listeners for copy field character counts
 function setupCopyCharCountListeners() {
+    // Helper to safely add listener
+    const addListener = (id, callback) => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', callback);
+    };
+
     // Meta fields
-    document.getElementById('editMetaPrimary').addEventListener('input', (e) => {
-        updateCopyCharCount('metaPrimary', e.target.value);
-    });
-    document.getElementById('editMetaHeadline').addEventListener('input', (e) => {
-        updateCopyCharCount('metaHeadline', e.target.value, 40);
-    });
-    document.getElementById('editMetaDescription').addEventListener('input', (e) => {
-        updateCopyCharCount('metaDesc', e.target.value, 30);
-    });
+    addListener('editMetaPrimary', (e) => updateCopyCharCount('metaPrimary', e.target.value));
+    addListener('editMetaHeadline', (e) => updateCopyCharCount('metaHeadline', e.target.value, 40));
+    addListener('editMetaDescription', (e) => updateCopyCharCount('metaDesc', e.target.value, 30));
 
     // TikTok fields
-    document.getElementById('editTiktokCaption').addEventListener('input', (e) => {
-        updateCopyCharCount('tiktokCaption', e.target.value, 150);
-    });
+    addListener('editTiktokCaption', (e) => updateCopyCharCount('tiktokCaption', e.target.value, 150));
 
     // YouTube fields
-    document.getElementById('editYoutubeTitle').addEventListener('input', (e) => {
-        updateCopyCharCount('youtubeTitle', e.target.value, 60);
-    });
+    addListener('editYoutubeTitle', (e) => updateCopyCharCount('youtubeTitle', e.target.value, 60));
 }
 
 function updateWordCounts() {
