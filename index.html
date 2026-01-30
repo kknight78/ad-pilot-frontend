@@ -1269,6 +1269,7 @@ async function previewScript() {
                 ...payload,
                 avatar_name: avatarName,  // Add for UI display
                 script: statusResult.script_data,
+                generated_copy: statusResult.generated_copy,  // Platform ad copy
                 // Capture cached API responses for test mode
                 api_claude_script_generation: statusResult.api_claude_script_generation,
                 api_claude_categorize_photos: statusResult.api_claude_categorize_photos,
@@ -1587,6 +1588,7 @@ async function regenerateScript() {
                     ...payload,
                     avatar_name: avatarName,  // Add for UI display
                     script: statusResult.script_data,
+                    generated_copy: statusResult.generated_copy,  // Platform ad copy
                     api_claude_script_generation: statusResult.api_claude_script_generation,
                     api_claude_categorize_photos: statusResult.api_claude_categorize_photos,
                     api_claude_feature_identification: statusResult.api_claude_feature_identification
